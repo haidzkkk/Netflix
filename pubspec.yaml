@@ -47,7 +47,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_launcher_icons: ^0.13.1
-
+  video_player: ^2.9.1
+  chewie: ^1.8.3
+  cached_network_image: ^3.4.0
+  youtube_player_flutter: ^9.0.2
+  font_awesome_flutter: ^10.7.0
+  palette_generator: ^0.3.3+4
 
 dev_dependencies:
   flutter_test:
@@ -59,7 +64,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
-
+  build_runner: any
+  flutter_gen_runner: any
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -93,6 +99,16 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
+
+  fonts:
+    - family: SanFrancisco
+      fonts:
+        - asset: assets/fonts/sf_bold.otf
+          weight: 700
+        - asset: assets/fonts/sf_medium.otf
+          style: normal
+        - asset: assets/fonts/sf_light.otf
+          weight: 300
   # fonts:
   #   - family: Schyler
   #     fonts:

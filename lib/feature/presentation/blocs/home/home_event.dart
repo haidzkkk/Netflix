@@ -5,10 +5,11 @@ class InitHomeEvent extends HomeEvent{
 
 }
 
-class CountHomeEvent extends HomeEvent{
-
+class PageIndexHomeEvent extends HomeEvent{
+  int pageIndex;
+  PageIndexHomeEvent(this.pageIndex);
 }
 
-class GetListHomeEvent extends HomeEvent{
+class GetAllCategoryMovie extends HomeEvent{
 
 }
