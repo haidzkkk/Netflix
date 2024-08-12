@@ -2,10 +2,10 @@
 import 'pageutil.dart';
 
 ///define size for screen (width, height and sp for fonts)
-extension SizeExtension on num {
-  num get w => PageUtil().setWidth(this);
+extension SizeDExtension on num {
+  double get w => PageUtil().setWidth(this).toDouble();
 
-  num get h => PageUtil().setHeight(this);
+  double get h => PageUtil().setHeight(this).toDouble();
 
-  num get sp => PageUtil().setSp(this);
+  double get sp => PageUtil().setSp(this).toDouble();
 }

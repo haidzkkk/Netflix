@@ -9,3 +9,7 @@ change the info app
 change the icon app
 - change icon in: assets/img/app_icon.png
 - cmd: flutter pub run flutter_launcher_icons
+
+flutter gen asset
+- fluttergen -h
+- fluttergen -c example/pubspec.yaml

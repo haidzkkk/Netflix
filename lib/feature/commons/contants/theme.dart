@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 ThemeData lightTheme = ThemeData(
+  fontFamily: 'SanFrancisco',
   brightness: Brightness.light,
   useMaterial3: true,
+  splashColor: Colors.transparent,
+  highlightColor: Colors.transparent,
   textTheme: const TextTheme(
     displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
     bodyLarge: TextStyle(fontSize: 18, color: Colors.black87),
@@ -16,6 +19,9 @@ ThemeData lightTheme = ThemeData(
 
 
 ThemeData darkTheme = ThemeData(
+  fontFamily: 'SanFrancisco',
+  splashColor: Colors.transparent,
+  highlightColor: Colors.transparent,
   textTheme: const TextTheme(
     displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
     bodyLarge: TextStyle(fontSize: 18, color: Colors.white70),

@@ -1,17 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spotify/feature/commons/contants/app_constants.dart';
-import 'package:spotify/feature/commons/utility/locale_util.dart';
-import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/data/api/api_client.dart';
-import 'package:spotify/feature/presentation/blocs/home/home_event.dart';
-import 'package:spotify/feature/presentation/blocs/main/main_bloc_cubit.dart';
-import 'package:spotify/main.dart';
-
-import '../../../di/InjectionContainer.dart';
+import 'package:spotify/feature/commons/utility/size_extensions.dart';
+import 'package:spotify/feature/presentation/screen/home_screen/header_widget.dart';
+import 'package:spotify/feature/presentation/screen/home_screen/slide_widget.dart';
+import 'package:spotify/feature/presentation/screen/home_screen/widget/title_widget.dart';
 import '../../blocs/home/home_bloc.dart';
 import '../../blocs/home/home_state.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -20,92 +17,240 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMixin{
 
   late final homeBloc = context.read<HomeBloc>();
 
   @override
   void initState() {
-    homeBloc.add(InitHomeEvent());
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){
-          homeBloc.add(CountHomeEvent());
-        },
-        child: const Icon(Icons.add),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            BlocBuilder<HomeBloc, HomeState>(
+    super.build(context);
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const HeaderWidget(),
+          const SizedBox(height: 10,),
+          TitleWidget(
+              title: "Previews",
+              onTap: (){
+
+              }
+          ),
+          SizedBox(
+            height: 100,
+            child: BlocBuilder<HomeBloc, HomeState>(
               builder: (context, state) {
-                if(state.count != 0){
-                  return Text("${state.count}");
-                }
-                return Text(context.locale.know);
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: state.movies[CategoryMovie.listTvShow]?.length ?? 0,
+                    itemBuilder: (context, index) {
+                      var item = state.movies[CategoryMovie.listTvShow]![index];
+                      return Container(
+                          clipBehavior: Clip.antiAlias,
+                          decoration: const BoxDecoration(
+                              shape: BoxShape.circle
+                          ),
+                          child: CachedNetworkImage(imageUrl: item.getThumbUrl ?? "", width: 90, height: 90, fit: BoxFit.cover,));
+                    },
+                    separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                  ),
+                );
               },
             ),
-            const SizedBox(height: 20,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: LocaleHelper.getLocales().map((locale) {
-                return ElevatedButton(
-                    onPressed: (){
-                      context.read<MainBloc>().changeLocale(locale.languageCode);
+          ),
+          const SizedBox(height: 10,),
+          TitleWidget(
+              title: "Trending now",
+              onTap: (){
+
+              }
+          ),
+          SizedBox(
+            height: 140.w,
+            child: BlocBuilder<HomeBloc, HomeState>(
+              builder: (context, state) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: state.movies[CategoryMovie.movieNew]?.length ?? 0,
+                    itemBuilder: (context, index) {
+                      var item = state.movies[CategoryMovie.movieNew]![index];
+                      return Image.network(item.getPosterUrl ?? "", width: 120.w, fit: BoxFit.cover,);
                     },
-                    child: Text(locale.languageCode)
+                    separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                  ),
                 );
-              }).toList(),
+              },
             ),
-            const SizedBox(height: 20,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                    onPressed: (){
-                      context.read<MainBloc>().changeTheme(false);
+          ),
+          const SizedBox(height: 10,),
+          TitleWidget(
+            title: "Phim hay nhất",
+            onTap: (){
+
+            }
+          ),
+          BlocBuilder<HomeBloc, HomeState>(
+            builder: (context, state) {
+              return SlideWidget(
+                movies: state.movies[CategoryMovie.listEmotional] ?? [],
+              );
+            },
+          ),
+          const SizedBox(height: 10,),
+          TitleWidget(
+              title: "Phim lẻ",
+              onTap: (){
+
+              }
+          ),
+          SizedBox(
+            height: 140.w,
+            child: BlocBuilder<HomeBloc, HomeState>(
+              builder: (context, state) {
+                var items = state.movies[CategoryMovie.listMovieSingle] ?? [];
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      var item = items[index];
+                      return Image.network(item.getPosterUrl, width: 120.w, fit: BoxFit.cover,);
                     },
-                    child: const Text("Light")
-                ),
-                ElevatedButton(
-                    onPressed: (){
-                      context.read<MainBloc>().changeTheme(true);
+                    separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 10,),
+          TitleWidget(
+              title: "Phim hoạt hình",
+              onTap: (){
+
+              }
+          ),
+          SizedBox(
+            height: 140.w,
+            child: BlocBuilder<HomeBloc, HomeState>(
+              builder: (context, state) {
+                var items = state.movies[CategoryMovie.listCartoon] ?? [];
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      var item = items[index];
+                      return Image.network(item.getPosterUrl, width: 120.w, fit: BoxFit.cover,);
                     },
-                    child: const Text("Dark")
-                ),
-                ElevatedButton(
-                    onPressed: () async {
-                      homeBloc.add(GetListHomeEvent());
+                    separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 10,),
+          TitleWidget(
+              title: "Tv show",
+              onTap: (){
+
+              }
+          ),
+          SizedBox(
+            height: 140.w,
+            child: BlocBuilder<HomeBloc, HomeState>(
+              builder: (context, state) {
+                var items = state.movies[CategoryMovie.listTvShow] ?? [];
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      var item = items[index];
+                      return Image.network(item.getPosterUrl, width: 120.w, fit: BoxFit.cover,);
                     },
-                    child: const Text("Call")
-                ),
-              ],
+                    separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                  ),
+                );
+              },
             ),
-            Container(
-              width: double.infinity,
-              height: 10,
-              color: Colors.red,
+          ),
+          const SizedBox(height: 10,),
+          TitleWidget(
+              title: "Phim hành động",
+              onTap: (){
+
+              }
+          ),
+          SizedBox(
+            height: 140.w,
+            child: BlocBuilder<HomeBloc, HomeState>(
+              builder: (context, state) {
+                var items = state.movies[CategoryMovie.listMovieAction] ?? [];
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      var item = items[index];
+                      return Image.network(item.getPosterUrl, width: 120.w, fit: BoxFit.cover,);
+                    },
+                    separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                  ),
+                );
+              },
             ),
-            Expanded(
-              child: BlocBuilder<HomeBloc, HomeState>(
-                builder: (context, state) {
-                  return ListView(
-                    children: state.listData.map(
-                            (element) => Text(element.name ?? "")
-                    ).toList(),
-                  );
-                },
-              ),
+          ),
+          const SizedBox(height: 10,),
+          TitleWidget(
+              title: "Phim tình cảm",
+              onTap: (){
+
+              }
+          ),
+          SizedBox(
+            height: 140.w,
+            child: BlocBuilder<HomeBloc, HomeState>(
+              builder: (context, state) {
+                var items = state.movies[CategoryMovie.listEmotional] ?? [];
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      var item = items[index];
+                      return Image.network(item.getPosterUrl, width: 120.w, fit: BoxFit.cover,);
+                    },
+                    separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

@@ -1,67 +1,91 @@
-class MovieResponse {
-  bool? status;
-  List<Movie>? items;
-  Pagination? pagination;
+import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:palette_generator/palette_generator.dart';
+import 'package:spotify/feature/commons/contants/app_constants.dart';
 
-  MovieResponse({this.status, this.items, this.pagination});
+import '../../../commons/utility/utils.dart';
+import 'collection.dart';
+import 'country.dart';
+import 'modified.dart';
 
-  MovieResponse.fromJson(Map<String, dynamic> json) {
-    status = json['status'];
-    if (json['items'] != null) {
-      items = <Movie>[];
-      json['items'].forEach((v) {
-        items!.add(Movie.fromJson(v));
-      });
-    }
-    pagination = json['pagination'] != null
-        ? Pagination.fromJson(json['pagination'])
-        : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['status'] = status;
-    if (items != null) {
-      data['items'] = items!.map((v) => v.toJson()).toList();
-    }
-    if (pagination != null) {
-      data['pagination'] = pagination!.toJson();
-    }
-    return data;
-  }
-}
-
-class Movie {
+@immutable
+class Movie extends Equatable{
   Modified? modified;
-  String? sId;
+  String? id;
   String? name;
   String? slug;
   String? originName;
+  String? type;
   String? posterUrl;
   String? thumbUrl;
+  bool? subDocquyen;
+  bool? chieurap;
+  String? time;
+  String? episodeCurrent;
+  String? quality;
+  String? lang;
   int? year;
+  List<Category>? category;
+  List<Country>? country;
 
   Movie(
       {this.modified,
-        this.sId,
+        this.id,
         this.name,
         this.slug,
         this.originName,
+        this.type,
         this.posterUrl,
         this.thumbUrl,
-        this.year});
+        this.subDocquyen,
+        this.chieurap,
+        this.time,
+        this.episodeCurrent,
+        this.quality,
+        this.lang,
+        this.year,
+        this.category,
+        this.country
+      });
+
+  String get getThumbUrl => hasDomainUrl(thumbUrl ?? "")
+      ? "$thumbUrl"
+      : "${AppConstants.BASE_URL_IMAGE}/$thumbUrl" ;
+
+  String get getPosterUrl => hasDomainUrl(posterUrl ?? "")
+      ? "$posterUrl"
+      : "${AppConstants.BASE_URL_IMAGE}/$posterUrl" ;
 
   Movie.fromJson(Map<String, dynamic> json) {
     modified = json['modified'] != null
         ? Modified.fromJson(json['modified'])
         : null;
-    sId = json['_id'];
+    id = json['_id'];
     name = json['name'];
     slug = json['slug'];
     originName = json['origin_name'];
+    type = json['type'];
     posterUrl = json['poster_url'];
     thumbUrl = json['thumb_url'];
+    subDocquyen = json['sub_docquyen'];
+    chieurap = json['chieurap'];
+    time = json['time'];
+    episodeCurrent = json['episode_current'];
+    quality = json['quality'];
+    lang = json['lang'];
     year = json['year'];
+    if (json['category'] != null) {
+      category = <Category>[];
+      json['category'].forEach((v) {
+        category!.add(Category.fromJson(v));
+      });
+    }
+    if (json['country'] != null) {
+      country = <Country>[];
+      json['country'].forEach((v) {
+        country!.add(Country.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -69,58 +93,31 @@ class Movie {
     if (modified != null) {
       data['modified'] = modified!.toJson();
     }
-    data['_id'] = sId;
+    data['_id'] = id;
     data['name'] = name;
     data['slug'] = slug;
     data['origin_name'] = originName;
+    data['type'] = type;
     data['poster_url'] = posterUrl;
     data['thumb_url'] = thumbUrl;
-    data['year'] = year;
-    return data;
-  }
-}
-
-class Modified {
-  String? time;
-
-  Modified({this.time});
-
-  Modified.fromJson(Map<String, dynamic> json) {
-    time = json['time'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
+    data['sub_docquyen'] = subDocquyen;
+    data['chieurap'] = chieurap;
     data['time'] = time;
+    data['episode_current'] = episodeCurrent;
+    data['quality'] = quality;
+    data['lang'] = lang;
+    data['year'] = year;
+    if (category != null) {
+      data['category'] = category!.map((v) => v.toJson()).toList();
+    }
+    if (country != null) {
+      data['country'] = country!.map((v) => v.toJson()).toList();
+    }
     return data;
   }
+
+  @override
+  List<Object?> get props => [id];
 }
 
-class Pagination {
-  int? totalItems;
-  int? totalItemsPerPage;
-  int? currentPage;
-  int? totalPages;
 
-  Pagination(
-      {this.totalItems,
-        this.totalItemsPerPage,
-        this.currentPage,
-        this.totalPages});
-
-  Pagination.fromJson(Map<String, dynamic> json) {
-    totalItems = json['totalItems'];
-    totalItemsPerPage = json['totalItemsPerPage'];
-    currentPage = json['currentPage'];
-    totalPages = json['totalPages'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['totalItems'] = totalItems;
-    data['totalItemsPerPage'] = totalItemsPerPage;
-    data['currentPage'] = currentPage;
-    data['totalPages'] = totalPages;
-    return data;
-  }
-}

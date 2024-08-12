@@ -38,5 +38,5 @@ Future<void> init() async {
 
   ///[Repository]
   sl.registerFactory(() => AuthRepo(apiClient: sl(), sharedPreferences: sl()));
-  sl.registerFactory(() => HomeRepo(sl(), sl()));
+  sl.registerFactory(() => MovieRepo(sl(), sl()));
 }
