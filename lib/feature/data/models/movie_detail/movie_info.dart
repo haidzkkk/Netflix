@@ -1,51 +1,68 @@
-import 'package:equatable/equatable.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:spotify/feature/commons/contants/app_constants.dart';
 
+import '../../../commons/contants/app_constants.dart';
 import '../../../commons/utility/utils.dart';
-import '../movie_detail/movie_info.dart';
-import 'category.dart';
-import 'modified.dart';
+import '../response/category.dart';
+import '../response/modified.dart';
 
-@immutable
-class Movie extends Equatable{
+class MovieInfo {
+  Modified? created;
   Modified? modified;
-  String? id;
+  String? sId;
   String? name;
   String? slug;
   String? originName;
+  String? content;
   String? type;
+  String? status;
   String? posterUrl;
   String? thumbUrl;
+  bool? isCopyright;
   bool? subDocquyen;
   bool? chieurap;
+  String? trailerUrl;
   String? time;
   String? episodeCurrent;
+  String? episodeTotal;
   String? quality;
   String? lang;
+  String? notify;
+  String? showtimes;
   int? year;
+  int? view;
+  List<String>? actor;
+  List<String>? director;
   List<Category>? category;
   List<Category>? country;
 
-  Movie(
-      {this.modified,
-        this.id,
+  MovieInfo(
+      {this.created,
+        this.modified,
+        this.sId,
         this.name,
         this.slug,
         this.originName,
+        this.content,
         this.type,
+        this.status,
         this.posterUrl,
         this.thumbUrl,
+        this.isCopyright,
         this.subDocquyen,
         this.chieurap,
+        this.trailerUrl,
         this.time,
         this.episodeCurrent,
+        this.episodeTotal,
         this.quality,
         this.lang,
+        this.notify,
+        this.showtimes,
         this.year,
+        this.view,
+        this.actor,
+        this.director,
         this.category,
-        this.country
-      });
+        this.country});
 
   String get getThumbUrl => hasDomainUrl(thumbUrl ?? "")
       ? "$thumbUrl"
@@ -55,24 +72,37 @@ class Movie extends Equatable{
       ? "$posterUrl"
       : "${AppConstants.BASE_URL_IMAGE}/$posterUrl" ;
 
-  Movie.fromJson(Map<String, dynamic> json) {
+
+  MovieInfo.fromJson(Map<String, dynamic> json) {
+    created =
+    json['created'] != null ? Modified.fromJson(json['created']) : null;
     modified = json['modified'] != null
         ? Modified.fromJson(json['modified'])
         : null;
-    id = json['_id'];
+    sId = json['_id'];
     name = json['name'];
     slug = json['slug'];
     originName = json['origin_name'];
+    content = json['content'];
     type = json['type'];
+    status = json['status'];
     posterUrl = json['poster_url'];
     thumbUrl = json['thumb_url'];
+    isCopyright = json['is_copyright'];
     subDocquyen = json['sub_docquyen'];
     chieurap = json['chieurap'];
+    trailerUrl = json['trailer_url'];
     time = json['time'];
     episodeCurrent = json['episode_current'];
+    episodeTotal = json['episode_total'];
     quality = json['quality'];
     lang = json['lang'];
+    notify = json['notify'];
+    showtimes = json['showtimes'];
     year = json['year'];
+    view = json['view'];
+    actor = json['actor'].cast<String>();
+    director = json['director'].cast<String>();
     if (json['category'] != null) {
       category = <Category>[];
       json['category'].forEach((v) {
@@ -87,46 +117,38 @@ class Movie extends Equatable{
     }
   }
 
-  MovieInfo toMovieInfo(){
-    return MovieInfo(
-      modified: modified,
-      name: name,
-      slug: slug,
-      originName: originName,
-      type: type,
-      posterUrl: posterUrl,
-      thumbUrl: thumbUrl,
-      subDocquyen: subDocquyen,
-      chieurap: chieurap,
-      time: time,
-      episodeCurrent: episodeCurrent,
-      quality: quality,
-      lang: lang,
-      year: year,
-      category: category,
-      country: country,
-    );
-  }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
+    if (created != null) {
+      data['created'] = created!.toJson();
+    }
     if (modified != null) {
       data['modified'] = modified!.toJson();
     }
-    data['_id'] = id;
+    data['_id'] = sId;
     data['name'] = name;
     data['slug'] = slug;
     data['origin_name'] = originName;
+    data['content'] = content;
     data['type'] = type;
+    data['status'] = status;
     data['poster_url'] = posterUrl;
     data['thumb_url'] = thumbUrl;
+    data['is_copyright'] = isCopyright;
     data['sub_docquyen'] = subDocquyen;
     data['chieurap'] = chieurap;
+    data['trailer_url'] = trailerUrl;
     data['time'] = time;
     data['episode_current'] = episodeCurrent;
+    data['episode_total'] = episodeTotal;
     data['quality'] = quality;
     data['lang'] = lang;
+    data['notify'] = notify;
+    data['showtimes'] = showtimes;
     data['year'] = year;
+    data['view'] = view;
+    data['actor'] = actor;
+    data['director'] = director;
     if (category != null) {
       data['category'] = category!.map((v) => v.toJson()).toList();
     }
@@ -135,9 +157,4 @@ class Movie extends Equatable{
     }
     return data;
   }
-
-  @override
-  List<Object?> get props => [id];
 }
-
-

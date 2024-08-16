@@ -1,18 +1,19 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:spotify/feature/commons/utility/size_extensions.dart';
+
+import '../../../../commons/utility/style_util.dart';
 
 class TitleWidget extends StatelessWidget {
   const TitleWidget({
     super.key,
     required this.title,
-    required this.onTap,
+    this.onTap,
     this.padding,
   });
 
   final String title;
-  final Function() onTap;
+  final Function()? onTap;
   final EdgeInsetsGeometry? padding;
 
   @override
@@ -25,16 +26,14 @@ class TitleWidget extends StatelessWidget {
           children: [
             Expanded(
               child: Text(title,
-                style: TextStyle(fontSize: 24.sp,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600
-                ),
+                style: Style.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: 10,),
-            const Icon(Icons.keyboard_arrow_right_rounded, color: Colors.white,),
+            if(onTap != null)
+              const Icon(Icons.keyboard_arrow_right_rounded, color: Colors.white,),
           ],
         ),
       ),

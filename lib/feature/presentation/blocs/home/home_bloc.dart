@@ -1,10 +1,10 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spotify/feature/commons/contants/app_constants.dart';
-import 'package:spotify/feature/data/models/response/movie.dart';
+import 'dart:async';
 
-import '../../../data/models/response/collection.dart';
-import '../../../data/models/response/movie_response.dart';
-import '../../../data/repositories/home_repo.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spotify/feature/data/models/response/movie.dart';
+import '../../../data/models/category_movie.dart';
+import '../../../data/repositories/movie_repo.dart';
 import 'home_event.dart';
 import 'home_state.dart';
 
@@ -16,39 +16,42 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     required this.repo
   } ) : super(HomeState()) {
     listenEvent();
+    pageController = PageController(initialPage: state.currentPageIndex);
   }
 
+  late PageController pageController;
+
   void listenEvent(){
-    on<InitHomeEvent>((event, emit)  => emit.call(HomeState()));
-    on<PageIndexHomeEvent>((event, emit) => emit.call(state.copyWithPageIndex(event.pageIndex)));
+    on<PageIndexHomeEvent>(changePageIndex);
     on<GetAllCategoryMovie>(getMovie);
+  }
+
+  disposeHome(DisposeHomeEvent event, Emitter<HomeState> emit) async{
+    emit.call(HomeState());
+    pageController.jumpTo(0);
+  }
+
+  @override
+  Future<void> close() {
+    pageController.dispose();
+    return super.close();
+  }
+
+  changePageIndex(PageIndexHomeEvent event, Emitter<HomeState> emit) async{
+    emit.call(state.copyWithPageIndex(event.pageIndex));
+    pageController.animateToPage(event.pageIndex, duration: const Duration(milliseconds: 200), curve: Curves.ease);
   }
 
   Future<void> getMovie(GetAllCategoryMovie event, Emitter<HomeState> emit) async{
 
-    for (var category in CategoryMovie.values) {
+    for (var category in CategoryMovie.valuesCategory) {
       var response = await repo.getMovieCategory(
           pageIndex: 1,
           category: category
       );
 
       if (response.statusCode == 200) {
-        List<Movie> listData = [];
-
-        if (category.path == CategoryMovie.movieNew.path) {
-          var data = MovieResponse.fromJson(response.body);
-          listData = data.items ?? [];
-        } else if ([
-          CategoryMovie.listMovieSingle.path,
-          CategoryMovie.listCartoon.path,
-          CategoryMovie.listTvShow.path,
-          CategoryMovie.listMovieAction.path,
-          CategoryMovie.listEmotional.path
-        ].contains(category.path)) {
-          var data = Collection.fromJson(response.body[AppConstants.DATA]);
-          listData = data.items ?? [];
-        }
-
+        List<Movie> listData = category.itemDataFromJson(response.body).data ?? [];
         emit(state.copyWithMovie(
             category: category,
             data: listData
@@ -56,4 +59,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
     }
   }
+
+
 }

@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/contants/theme.dart';
 import 'package:spotify/feature/presentation/blocs/home/home_bloc.dart';
 import 'package:spotify/feature/presentation/blocs/main/main_bloc_cubit.dart';
+import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/presentation/blocs/search/search_bloc.dart';
 import 'package:spotify/feature/presentation/screen/main/main_screen.dart';
 import 'feature/commons/utility/pageutil.dart';
 import 'feature/di/InjectionContainer.dart';
@@ -33,6 +35,8 @@ class _MyAppState extends State<MyApp> {
       providers: [
         BlocProvider<MainBloc>(create: (context) => sl<MainBloc>()),
         BlocProvider<HomeBloc>(create: (context) => sl<HomeBloc>()),
+        BlocProvider<MovieBloc>(create: (context) => sl<MovieBloc>()),
+        BlocProvider<SearchBloc>(create: (context) => sl<SearchBloc>()),
       ],
       child: Builder(
         builder: (context) {
@@ -44,10 +48,7 @@ class _MyAppState extends State<MyApp> {
             builder: (context, state) {
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
-                theme: lightTheme,
-                darkTheme: darkTheme,
-                // themeMode: state.darkMode == true ? ThemeMode.dark : ThemeMode.light,
-                themeMode: ThemeMode.dark,
+                theme: darkTheme,
                 locale: state.locale,
                 localizationsDelegates: const [
                   AppLocalizations.delegate, // Add this line
