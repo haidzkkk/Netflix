@@ -1,15 +1,19 @@
 
 import 'dart:async';
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:palette_generator/palette_generator.dart';
+import 'package:spotify/feature/commons/utility/size_extensions.dart';
 
+import '../../../commons/utility/style_util.dart';
 import '../../../data/models/response/movie.dart';
+import '../overview_movie/widget/chip_banner.dart';
 
 class SlideWidget extends StatefulWidget {
-  const SlideWidget({super.key, required this.movies});
+  const SlideWidget({super.key, required this.movies, this.onTap});
   final List<Movie> movies;
+  final Function(Movie movie)? onTap;
 
   @override
   State<SlideWidget> createState() => _SlideWidgetState();
@@ -17,104 +21,101 @@ class SlideWidget extends StatefulWidget {
 
 class _SlideWidgetState extends State<SlideWidget> {
 
-  late PageController pageController;
-
-  int _currentPage = 0;
-  late Timer _timer;
-
-  @override
-  void initState() {
-    pageController = PageController(initialPage: _currentPage, viewportFraction: 0.8);
-    _timer = Timer.periodic(const Duration(seconds: 20), (Timer timer) {
-      if (_currentPage < widget.movies.length) {
-        _currentPage++;
-      } else {
-        _currentPage = 0;
-      }
-
-      pageController.animateToPage(
-        _currentPage,
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeIn,
-      );
-    });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    pageController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 400,
-      child: PageView.builder(
-        controller: pageController,
-        onPageChanged: (value){
-          _currentPage = value;
-        },
-        clipBehavior: Clip.none,
+      height: 200.h,
+      child: CarouselSlider.builder(
         itemCount: widget.movies.length,
-        itemBuilder: (context, index) {
-          return AnimatedBuilder(
-              animation: pageController,
-              builder: (context, child){
-                double pageOffset = 0;
-                if(pageController.position.haveDimensions){
-                  pageOffset = pageController.page! - index;
-                }
-
-                return Container(
-                  clipBehavior: Clip.hardEdge,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(5), top: Radius.circular(10)),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            offset: const Offset(8, 20),
-                            blurRadius: 24
+        options: CarouselOptions(
+            initialPage: 0,
+            height: double.infinity,
+            viewportFraction: 0.85,
+            autoPlay: true,
+            enableInfiniteScroll: false,
+            autoPlayInterval: const Duration(seconds: 20),
+            padEnds : false
+        ),
+        itemBuilder: (context, index, realIndex) {
+          var item = widget.movies[index];
+          return GestureDetector(
+            onTap: (){
+              if(widget.onTap != null) widget.onTap!(widget.movies[index]);
+            },
+            child: Container(
+              clipBehavior: Clip.hardEdge,
+              margin: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(5), top: Radius.circular(10)),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        offset: const Offset(8, 20),
+                        blurRadius: 24
+                    )
+                  ]
+              ),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Image.network(
+                      item.getPosterUrl,
+                      width: double.infinity,
+                      fit: BoxFit.fitWidth,
+                      errorBuilder: (context, object, stackTrace){
+                        return const Center(child: CircularProgressIndicator(),);
+                      },
+                    ),
+                  ),
+                  if(item.episodeCurrent != null)
+                    Positioned(
+                        left: 5,
+                        top: 5,
+                        child: ChipBanner(
+                          colors: const [
+                            Colors.brown,
+                            Colors.redAccent,
+                          ],
+                          child: Text(item.episodeCurrent!,
+                            style: Style.body,
+                          ),
                         )
-                      ]
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: Image.network(
-                          widget.movies[index].getPosterUrl,
-                          width: double.infinity,
-                          alignment: Alignment(-pageOffset.abs(), 0 ),
-                          fit: BoxFit.fitWidth,
-                          errorBuilder: (context, object, stackTrace){
-                            return const Center(child: CircularProgressIndicator(),);
-                          },
-                        ),
-                      ),
-                      Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            height: 40,
-                            color: Colors.black.withOpacity(0.8),
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                    child: Text(widget.movies[index].name ?? "", maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14,),)
-                                ),
-                                const SizedBox(width: 5,),
-                                const Text("Xem ngay", style: TextStyle(fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.bold),)
-                              ],
+                    ),
+                  if(item.quality != null || item.lang != null)
+                    Positioned(
+                        right: 5,
+                        top: 5,
+                        child: ChipBanner(
+                          colors: const [
+                            Colors.purple,
+                            Colors.pink,
+                          ],
+                          child: Text("${item.quality} ${item.lang}",
+                              style: Style.body
+                          ),
+                        )
+                    ),
+                  Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        height: 20.h,
+                        color: Colors.black.withOpacity(0.8),
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                                child: Text(item.name ?? "", maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 14,),)
                             ),
-                          )
+                            const SizedBox(width: 5,),
+                            const Text("Xem ngay", style: TextStyle(fontSize: 12, letterSpacing: 1.5, fontWeight: FontWeight.bold),)
+                          ],
+                        ),
                       )
-                    ],
-                  ),
-                );
-              }
+                  )
+                ],
+              ),
+            ),
           );
         },
       ),

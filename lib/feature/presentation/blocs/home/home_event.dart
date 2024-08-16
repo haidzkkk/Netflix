@@ -1,7 +1,6 @@
-
 sealed class HomeEvent {}
 
-class InitHomeEvent extends HomeEvent{
+class DisposeHomeEvent extends HomeEvent{
 
 }
 

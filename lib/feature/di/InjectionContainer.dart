@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
-import 'package:spotify/feature/data/repositories/home_repo.dart';
+import 'package:spotify/feature/data/repositories/movie_repo.dart';
 import 'package:spotify/feature/presentation/blocs/main/main_bloc_cubit.dart';
+import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 import '../commons/utility/locale_util.dart';
 import '../commons/utility/theme_ulti.dart';
 import '../data/api/api_client.dart';
@@ -8,6 +9,7 @@ import '../data/repositories/auth_repo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../presentation/blocs/home/home_bloc.dart';
+import '../presentation/blocs/search/search_bloc.dart';
 
 ///[NOTE] : input for [Global] data state
 final sl = GetIt.instance;
@@ -35,6 +37,8 @@ Future<void> init() async {
   ///
   sl.registerFactory(() => HomeBloc(repo: sl()));
   sl.registerFactory(() => MainBloc(sharedPreferences: sl(), localeHelper: sl(), themeHelper: sl()));
+  sl.registerFactory(() => MovieBloc(sl()));
+  sl.registerFactory(() => SearchBloc(repo: sl()));
 
   ///[Repository]
   sl.registerFactory(() => AuthRepo(apiClient: sl(), sharedPreferences: sl()));
