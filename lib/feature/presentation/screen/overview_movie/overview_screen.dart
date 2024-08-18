@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -7,6 +10,7 @@ import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
 import 'package:spotify/feature/data/models/status.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/widget/action_button.dart';
+import 'package:spotify/feature/presentation/screen/movie/movie_screen.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/overview_shimmer_widget.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/chip_text.dart';
 import 'package:spotify/feature/presentation/screen/widget/custom_bottom.dart';
@@ -63,7 +67,7 @@ class _OverViewScreenState extends State<OverViewScreen>{
             child: Stack(
               children: [
                 FutureBuilder(
-                    future: generateColorImageUrl(widget.movie.getThumbUrl),
+                    future: widget.movie.getColor(),
                     builder: (context, snapShot) {
                       return TweenAnimationBuilder<Color?>(
                         tween: ColorTween(
@@ -149,54 +153,58 @@ class _OverViewScreenState extends State<OverViewScreen>{
                               Text(state.movie.data?.name ?? "",
                                 style: Style.title.copyWith(fontSize: 20.sp),
                               ),
-                              Wrap(
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text("${state.movie.data?.view ?? 0} view",
-                                    style: Style.body.copyWith(color: Colors.green),
+                                  Expanded(
+                                    child: Wrap(
+                                        children: [
+                                          if(state.movie.data?.time != null)
+                                            Text(state.movie.data?.time ?? "", style: Style.body,),
+                                          if(state.movie.data?.time != null)
+                                            ...[
+                                              const SizedBox(width: 5,),
+                                              ChipText(
+                                                  child: Text(
+                                                      "${state.movie.data?.episodeCurrent}",
+                                                      style: Style.body.copyWith(fontSize: 10.sp)
+                                                  )
+                                              ),
+                                            ],
+                                          if(state.movie.data?.time != null)
+                                            ...[
+                                              const SizedBox(width: 5,),
+                                              ChipText(
+                                                  child: Text("${state.movie.data?.quality}",
+                                                      style: Style.body.copyWith(fontSize: 10.sp)
+                                                  )
+                                              ),
+                                            ],
+                                          if(state.movie.data?.year != null)
+                                            ...[
+                                              const SizedBox(width: 10,),
+                                              Text("${state.movie.data?.year}",
+                                                style: Style.body,
+                                              ),
+                                            ],
+                                          if(state.movie.data?.lang != null)
+                                            ...[
+                                              const SizedBox(width: 5,),
+                                              ChipText(
+                                                  child: Text(
+                                                      "${state.movie.data?.lang}",
+                                                      style: Style.body.copyWith(fontSize: 10.sp)
+                                                  )
+                                              ),
+                                            ],
+                                        ]
+                                    ),
                                   ),
-                                  if(state.movie.data?.year != null)
-                                    ...[
-                                      const SizedBox(width: 10,),
-                                      Text("${state.movie.data?.year}",
-                                        style: Style.body,
-                                      ),
-                                    ],
-                                  if(state.movie.data?.lang != null)
-                                    ...[
-                                      const SizedBox(width: 5,),
-                                      ChipText(
-                                          child: Text(
-                                              "${state.movie.data?.lang}",
-                                              style: Style.body.copyWith(fontSize: 10.sp)
-                                          )
-                                      ),
-                                    ],
-                                  if(state.movie.data?.time != null)
-                                    ...[
-                                      const SizedBox(width: 10,),
-                                      Text(state.movie.data?.time ?? "", style: Style.body,),
-                                    ],
-                                  if(state.movie.data?.time != null)
-                                    ...[
-                                      const SizedBox(width: 5,),
-                                      ChipText(
-                                          child: Text(
-                                              "${state.movie.data?.episodeCurrent}",
-                                              style: Style.body.copyWith(fontSize: 10.sp)
-                                          )
-                                      ),
-                                    ],
-                                  if(state.movie.data?.time != null)
-                                    ...[
-                                      const SizedBox(width: 5,),
-                                      ChipText(
-                                          child: Text("${state.movie.data?.quality}",
-                                              style: Style.body.copyWith(fontSize: 10.sp)
-                                          )
-                                      ),
-                                    ],
-                                  const SizedBox(width: 10,),
-                                ]
+                                  const SizedBox(width: 20,),
+                                  Text("${state.movie.data?.view?.format() ?? 0} views",
+                                    style: Style.body.copyWith(color: Colors.green),
+                                  )
+                                ],
                               ),
                               const SizedBox(height: 10,),
                               CustomButton(
@@ -214,7 +222,7 @@ class _OverViewScreenState extends State<OverViewScreen>{
                                   ],
                                 ),
                                 onPressed: (){
-
+                                  context.to(const MovieScreen());
                                 },
                               ),
                               CustomButton(
@@ -268,64 +276,90 @@ class _OverViewScreenState extends State<OverViewScreen>{
                                 ],
                               ),
                               const SizedBox(height: 15,),
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(text: "Category: ",
-                                      style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: CachedNetworkImage(
+                                      imageUrl: state.movie.data?.getPosterUrl ?? "",
+                                      fit: BoxFit.cover,
+                                    )
+                                  ),
+                                  const SizedBox(width: 8,),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        RichText(
+                                          text: TextSpan(
+                                              children: [
+                                                TextSpan(text: "Category: ",
+                                                    style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                                                ),
+                                                TextSpan(text: state.movie.data?.category?.map((category) => category.name).toList().join(", ") ?? "",
+                                                    style: Style.body
+                                                ),
+                                              ]
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5,),
+                                        RichText(
+                                          text: TextSpan(
+                                              children: [
+                                                TextSpan(text: "Country: ",
+                                                    style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                                                ),
+                                                TextSpan(text: state.movie.data?.country?.map((country) => country.name).toList().join(", ") ?? "",
+                                                    style: Style.body
+                                                ),
+                                              ]
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5,),
+                                        RichText(
+                                          text: TextSpan(
+                                              children: [
+                                                TextSpan(text: "Actor: ",
+                                                    style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                                                ),
+                                                TextSpan(text: state.movie.data?.actor?.join(", ") ?? "",
+                                                    style: Style.body
+                                                ),
+                                              ]
+                                          ),
+                                        ),
+                                        const SizedBox(height: 5,),
+                                        RichText(
+                                          text: TextSpan(
+                                              children: [
+                                                TextSpan(text: "Director: ",
+                                                    style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                                                ),
+                                                TextSpan(text: state.movie.data?.director?.join(", ") ?? "",
+                                                    style: Style.body
+                                                ),
+                                              ]
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    TextSpan(text: state.movie.data?.category?.map((category) => category.name).toList().join(", ") ?? "",
-                                      style: Style.body
-                                    ),
-                                  ]
-                                ),
-                              ),
+                                  ),
+                                ],),
                               const SizedBox(height: 5,),
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(text: "Country: ",
-                                      style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                    ),
-                                    TextSpan(text: state.movie.data?.country?.map((country) => country.name).toList().join(", ") ?? "",
-                                      style: Style.body
-                                    ),
-                                  ]
-                                ),
-                              ),
-                              const SizedBox(height: 5,),
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(text: "Actor: ",
-                                      style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                    ),
-                                    TextSpan(text: state.movie.data?.actor?.join(", ") ?? "",
-                                      style: Style.body
-                                    ),
-                                  ]
-                                ),
-                              ),
-                              const SizedBox(height: 5,),
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(text: "Director: ",
-                                      style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                    ),
-                                    TextSpan(text: state.movie.data?.director?.join(", ") ?? "",
-                                      style: Style.body
-                                    ),
-                                  ]
-                                ),
-                              ),
-                              const SizedBox(height: 5,),
-                              ReadMoreText(
-                                "${state.movie.data?.content ?? ""}  ",
-                                style: Style.body.copyWith(color: Colors.white.withOpacity(0.4)),
-                                trimLength: 250,
-                              ),
 
+                              if(state.movie.data?.content != null)
+                                ...[
+                                  const Text("Mô tả"),
+                                  ReadMoreText(
+                                    "${state.movie.data?.content ?? ""}  ",
+                                    style: Style.body.copyWith(color: Colors.white.withOpacity(0.4)),
+                                    trimLength: 250,
+                                  ),
+                                ],
                               BlocBuilder<HomeBloc, HomeState>(
                                 builder: (context, homeState) {
                                   return Column(

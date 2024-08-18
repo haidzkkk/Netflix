@@ -65,6 +65,7 @@ class _FilterScreenState extends State<FilterScreen>
                     title: Text(category.name,
                       textAlign: TextAlign.start,
                       style: Style.title2.copyWith(
+                        color: selected ? Colors.red : null,
                         shadows: selected ? [ const Shadow(color: Colors.red, blurRadius: 10)] : []
                       ),
                       maxLines: 1,

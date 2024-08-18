@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
 
@@ -33,6 +34,13 @@ Future<Color?> generateColorImageUrl(String url) async{
     return paletteGenerator.mutedColor!.color;
   }
   return Colors.transparent;
+}
+
+extension NumExt on num {
+  String format(){
+    final NumberFormat formatter = NumberFormat('#,###');
+    return formatter.format(this);
+  }
 }
 
 extension BuildContextExt on BuildContext{

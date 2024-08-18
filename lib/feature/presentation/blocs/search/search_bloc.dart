@@ -132,7 +132,8 @@ class SearchBloc extends Cubit<SearchState> {
   clearCategory([CategoryMovie? category]){
     if(category != null){
       emit(
-          state.copyWithSearchMovie(categoryMovie: category,
+          state.copyWithSearchMovie(
+            categoryMovie: category,
             pageIndex: 1,
             lastPage: false,
             searchMovie: Status.initial(),

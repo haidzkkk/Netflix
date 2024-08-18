@@ -27,6 +27,7 @@ class Movie extends Equatable{
   List<Category>? category;
   List<Category>? country;
 
+
   Movie(
       {this.modified,
         this.id,
@@ -54,6 +55,16 @@ class Movie extends Equatable{
   String get getPosterUrl => hasDomainUrl(posterUrl ?? "")
       ? "$posterUrl"
       : "${AppConstants.BASE_URL_IMAGE}/$posterUrl" ;
+
+  Color? _color;
+  set color(Color? colorData) => _color = colorData;
+  Future<Color?> getColor() async{
+    if(_color != null){
+      return _color;
+    }
+    _color = await generateColorImageUrl(getThumbUrl);
+    return _color;
+  }
 
   Movie.fromJson(Map<String, dynamic> json) {
     modified = json['modified'] != null
@@ -105,6 +116,7 @@ class Movie extends Equatable{
       year: year,
       category: category,
       country: country,
+      color: _color
     );
   }
 

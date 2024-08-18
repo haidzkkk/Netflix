@@ -13,6 +13,7 @@ enum CategoryMovie{
   listMovieSingle(name: "Phim lẻ", slug: "phim-le", path: AppConstants.GET_CATEGORY_1),
   listCartoon(name: "Hoạt hình", slug: "hoat-hinh", path: AppConstants.GET_CATEGORY_1),
   listTvShow(name: "Tv show", slug: "tv-shows", path: AppConstants.GET_CATEGORY_1),
+  listSeries(name: "Phim bộ", slug: "phim-bo", path: AppConstants.GET_CATEGORY_1),
   listMovieAction(name: "Hành động", slug: "hanh-dong", path: AppConstants.GET_CATEGORY_2),
   listEmotional(name: "Tình cảm", slug: "tinh-cam", path: AppConstants.GET_CATEGORY_2),
   ;

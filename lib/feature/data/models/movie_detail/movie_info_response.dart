@@ -4,7 +4,7 @@ class MovieInfoResponse {
   bool? status;
   String? msg;
   MovieInfo? movie;
-  List<Episodes>? episodes;
+  List<ServerData>? episodes;
 
   MovieInfoResponse({this.status, this.msg, this.movie, this.episodes});
 
@@ -13,11 +13,12 @@ class MovieInfoResponse {
     msg = json['msg'];
     movie = json['movie'] != null ? MovieInfo.fromJson(json['movie']) : null;
     if (json['episodes'] != null) {
-      episodes = <Episodes>[];
+      episodes = <ServerData>[];
       json['episodes'].forEach((v) {
-        episodes!.add(Episodes.fromJson(v));
+        episodes!.add(ServerData.fromJson(v));
       });
     }
+    movie?.episodes = episodes;
   }
 
   Map<String, dynamic> toJson() {
@@ -34,18 +35,18 @@ class MovieInfoResponse {
   }
 }
 
-class Episodes {
+class ServerData {
   String? serverName;
-  List<ServerData>? serverData;
+  List<Episode>? episode;
 
-  Episodes({this.serverName, this.serverData});
+  ServerData({this.serverName, this.episode});
 
-  Episodes.fromJson(Map<String, dynamic> json) {
+  ServerData.fromJson(Map<String, dynamic> json) {
     serverName = json['server_name'];
     if (json['server_data'] != null) {
-      serverData = <ServerData>[];
+      episode = <Episode>[];
       json['server_data'].forEach((v) {
-        serverData!.add(ServerData.fromJson(v));
+        episode!.add(Episode.fromJson(v));
       });
     }
   }
@@ -53,24 +54,24 @@ class Episodes {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['server_name'] = serverName;
-    if (serverData != null) {
-      data['server_data'] = serverData!.map((v) => v.toJson()).toList();
+    if (episode != null) {
+      data['server_data'] = episode!.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
-class ServerData {
+class Episode {
   String? name;
   String? slug;
   String? filename;
   String? linkEmbed;
   String? linkM3u8;
 
-  ServerData(
+  Episode(
       {this.name, this.slug, this.filename, this.linkEmbed, this.linkM3u8});
 
-  ServerData.fromJson(Map<String, dynamic> json) {
+  Episode.fromJson(Map<String, dynamic> json) {
     name = json['name'];
     slug = json['slug'];
     filename = json['filename'];
