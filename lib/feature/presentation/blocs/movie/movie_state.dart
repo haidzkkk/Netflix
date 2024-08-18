@@ -2,32 +2,34 @@ part of 'movie_bloc.dart';
 
 class MovieState extends Equatable{
   Status<MovieInfo> movie;
+  Episode? currentEpisode;
 
   MovieState({
-    Status<MovieInfo>? movie
+    Status<MovieInfo>? movie,
+    this.currentEpisode,
   }) : movie = movie ?? Status.initial();
 
   MovieState copyWith({
-    Status<MovieInfo>? movie
+    Status<MovieInfo>? movie,
+    Episode? episode,
   }){
     return MovieState(
       movie: movie ?? this.movie,
+      currentEpisode: episode ?? currentEpisode,
     );
   }
 
-  MovieState copyWithMovie({
-    Status<MovieInfo>? movie
+  MovieState copyWithEpisode({
+    Status<MovieInfo>? movie,
+    Episode? episode,
   }){
     return MovieState(
-        movie: movie ?? this.movie,
+      movie: movie ?? this.movie,
+      currentEpisode: episode,
     );
-  }
-
-  MovieState cleanState(){
-    return MovieState();
   }
 
   @override
-  List<Object?> get props => [movie,];
+  List<Object?> get props => [movie, currentEpisode];
 
 }

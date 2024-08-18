@@ -1,4 +1,9 @@
 
+import 'dart:math';
+import 'dart:ui';
+
+import '../movie_detail/movie_info_response.dart';
+
 import '../../../commons/contants/app_constants.dart';
 import '../../../commons/utility/utils.dart';
 import '../response/category.dart';
@@ -34,6 +39,8 @@ class MovieInfo {
   List<Category>? category;
   List<Category>? country;
 
+  List<ServerData>? episodes;
+
   MovieInfo(
       {this.created,
         this.modified,
@@ -62,7 +69,10 @@ class MovieInfo {
         this.actor,
         this.director,
         this.category,
-        this.country});
+        this.country,
+        this.episodes,
+        Color? color,
+      }) : _color = color;
 
   String get getThumbUrl => hasDomainUrl(thumbUrl ?? "")
       ? "$thumbUrl"
@@ -72,6 +82,15 @@ class MovieInfo {
       ? "$posterUrl"
       : "${AppConstants.BASE_URL_IMAGE}/$posterUrl" ;
 
+  Color? _color;
+  set color(Color? colorData) => _color = colorData;
+  Future<Color?> getColor() async{
+    if(_color != null){
+      return _color;
+    }
+    _color = await generateColorImageUrl(getThumbUrl);
+    return _color;
+  }
 
   MovieInfo.fromJson(Map<String, dynamic> json) {
     created =
@@ -101,6 +120,7 @@ class MovieInfo {
     showtimes = json['showtimes'];
     year = json['year'];
     view = json['view'];
+    view = Random().nextInt(10000000);
     actor = json['actor'].cast<String>();
     director = json['director'].cast<String>();
     if (json['category'] != null) {
