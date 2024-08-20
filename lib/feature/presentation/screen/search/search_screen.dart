@@ -25,22 +25,23 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin{
 
-  late SearchBloc searchViewModel = context.read<SearchBloc>();
+  late SearchBloc searchViewModel;
 
   FocusNode searchNode = FocusNode();
   TextEditingController searchTextCtrl = TextEditingController();
 
   @override
   void initState() {
+    searchViewModel = context.read<SearchBloc>();
     searchNode.requestFocus();
     super.initState();
   }
 
   @override
   void dispose() {
+    searchViewModel.clearCategory(CategoryMovie.search);
     searchNode.dispose();
     searchTextCtrl.dispose();
-    searchViewModel.clearCategory(CategoryMovie.search);
     super.dispose();
   }
 
@@ -155,7 +156,14 @@ class _SearchScreenState extends State<SearchScreen>
                               child: MovieItem(
                                 movie: item,
                                 onTap: () {
-                                  context.showBottomSheet(OverViewScreen(movie: item.toMovieInfo(),));
+                                  context.showDraggableBottomSheet(
+                                    builder: (context, controller){
+                                      return OverViewScreen(
+                                        movie: item.toMovieInfo(),
+                                        draggableScrollController: controller,
+                                      );
+                                    }
+                                  );
                                 },
                               ),
                             ),
@@ -208,6 +216,10 @@ class _SearchScreenState extends State<SearchScreen>
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: status == StatusEnum.loading ? 12 : items.length,
                               itemBuilder: (context, index){
+                                if(status == StatusEnum.loading){
+                                  return const ShimmerWidget(width: 0, height: 0);
+                                }
+
                                 Movie item = items[index];
                                 return Column(
                                   children: [
@@ -216,7 +228,14 @@ class _SearchScreenState extends State<SearchScreen>
                                       child: MovieItem(
                                         movie: item,
                                         onTap: () {
-                                          context.showBottomSheet(OverViewScreen(movie: item.toMovieInfo(),));
+                                          context.showDraggableBottomSheet(
+                                              builder: (context, controller){
+                                                return OverViewScreen(
+                                                  movie: item.toMovieInfo(),
+                                                  draggableScrollController: controller,
+                                                );
+                                              }
+                                          );
                                         },
                                       ),
                                     ),

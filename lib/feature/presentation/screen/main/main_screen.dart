@@ -4,10 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/home_screen.dart';
 import 'package:spotify/feature/presentation/screen/main/widget/item_bottom_bar.dart';
+import 'package:spotify/feature/presentation/screen/movie/movie_screen.dart';
 import 'package:spotify/feature/presentation/screen/widget/badge_widget.dart';
+import '../../../data/models/status.dart';
 import '../../blocs/home/home_bloc.dart';
 import '../../blocs/home/home_event.dart';
 import '../../blocs/home/home_state.dart';
+import '../../blocs/movie/movie_bloc.dart';
 import '../search/filter_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -21,6 +24,7 @@ class _MainScreenState extends State<MainScreen> {
   int currentIndex = 0;
 
   late final homeViewModel = context.read<HomeBloc>();
+  late final movieViewModel = context.read<MovieBloc>();
 
   List<Widget> screens = [
     const HomeScreen(),
@@ -53,48 +57,84 @@ class _MainScreenState extends State<MainScreen> {
       //     );
       //   },
       // ),
-      body: PageView(
-        controller: homeViewModel.pageController,
-        children: screens,
-      ),
-      bottomNavigationBar: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          return BottomNavigationBar(
-            enableFeedback: true,
-            type: BottomNavigationBarType.fixed,
-            iconSize: 18,
-            currentIndex: state.currentPageIndex,
-            onTap: (value) => homeViewModel.add(PageIndexHomeEvent(value)),
-            selectedItemColor: Colors.white,
-            selectedLabelStyle: const TextStyle(color: Colors.white),
-            unselectedIconTheme: IconThemeData(color: Colors.white.withOpacity(0.3)),
-            unselectedLabelStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
-            items: [
-              ItemBottomBar.withChildBadge(
-                icon: const Icon(FontAwesomeIcons.house),
-                label: "Home",
-              ),
-              ItemBottomBar.withChildBadge(
-                icon: const Icon(FontAwesomeIcons.magnifyingGlass),
-                label: "Search",
-              ),
-              ItemBottomBar.withChildBadge(
-                icon: const Icon(FontAwesomeIcons.tv),
-                label: "History",
-                badgeCount: 12,
-              ),
-              ItemBottomBar.withChildBadge(
-                icon: const Icon(FontAwesomeIcons.download),
-                label: "Download",
-                badgeCount: 6,
-              ),
-              ItemBottomBar.withChildBadge(
-                icon: const Icon(FontAwesomeIcons.bars),
-                label: "More",
-              ),
-            ],
-          );
-        },
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Column(
+              children: [
+                Expanded(
+                  child: PageView(
+                    controller: homeViewModel.pageController,
+                    children: screens,
+                  ),
+                ),
+                const SizedBox(height: 56,)
+              ],
+            ),
+          ),
+          Positioned.fill(
+            child: BlocBuilder<MovieBloc, MovieState>(
+              buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
+              builder: (context, state) {
+                if(state.currentMovie != null){
+                  return const MovieScreen();
+                }
+                return const SizedBox();
+              }
+            ),
+          ),
+          BlocBuilder<MovieBloc, MovieState>(
+            buildWhen: (previous, current) => previous.isExpandWatchMovie != current.isExpandWatchMovie,
+            builder: (context, state) {
+              bool isShowNav = !state.isExpandWatchMovie;
+              return AnimatedPositioned(
+                bottom: isShowNav ? 0 : -56,
+                left: 0,
+                right: 0,
+                duration: const Duration(milliseconds: 300),
+                child: BlocBuilder<HomeBloc, HomeState>(
+                  builder: (context, state) {
+                    return BottomNavigationBar(
+                      enableFeedback: true,
+                      type: BottomNavigationBarType.fixed,
+                      iconSize: 18,
+                      currentIndex: state.currentPageIndex,
+                      onTap: (value) => homeViewModel.add(PageIndexHomeEvent(value)),
+                      selectedItemColor: Colors.white,
+                      selectedLabelStyle: const TextStyle(color: Colors.white),
+                      unselectedIconTheme: IconThemeData(color: Colors.white.withOpacity(0.3)),
+                      unselectedLabelStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                      items: [
+                        ItemBottomBar.withChildBadge(
+                          icon: const Icon(FontAwesomeIcons.house),
+                          label: "Home",
+                        ),
+                        ItemBottomBar.withChildBadge(
+                          icon: const Icon(FontAwesomeIcons.magnifyingGlass),
+                          label: "Search",
+                        ),
+                        ItemBottomBar.withChildBadge(
+                          icon: const Icon(FontAwesomeIcons.tv),
+                          label: "History",
+                          badgeCount: 12,
+                        ),
+                        ItemBottomBar.withChildBadge(
+                          icon: const Icon(FontAwesomeIcons.download),
+                          label: "Download",
+                          badgeCount: 6,
+                        ),
+                        ItemBottomBar.withChildBadge(
+                          icon: const Icon(FontAwesomeIcons.bars),
+                          label: "More",
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              );
+            }
+          )
+        ],
       ),
     );
   }
