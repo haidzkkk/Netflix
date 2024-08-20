@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
@@ -18,10 +20,12 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
   }
 
   void listenEvent(){
-    on<InitMovieEvent>((event, emit) => emit.call(MovieState()));
-    on<CleanMovieEvent>((event, emit) => emit.call(MovieState()));
-    on<CleanWatchMovieEvent>((event, emit) => emit.call(state.copyWith(episode: null)));
+    on<InitMovieEvent>((event, emit) => emit(MovieState()));
     on<GetInfoMovieEvent>(getMovie);
+    on<CleanMovieEvent>((event, emit) => emit(state.copyWith(movie: Status.initial())));
+    on<InitWatchMovieEvent>(initWatchMovie);
+    on<CleanWatchMovieEvent>(cleanWatchMovieEvent);
+    on<ChangeExpandedMovieEvent>((event, emit) => emit(state.copyWith(isExpandWatchMovie: event.isExpand)));
     on<ChangeEpisodeMovieEvent>(changeEpisode);
   }
 
@@ -38,12 +42,24 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     }
   }
 
+  initWatchMovie(InitWatchMovieEvent event, Emitter<MovieState> emit) async{
+    emit(state.copyWith(
+      currentMovie: state.movie.data,
+      episode: state.movie.data?.episodes?.firstOrNull?.episode?.firstOrNull,
+      isExpandWatchMovie: true,
+    ));
+  }
+
+  Future<void> cleanWatchMovieEvent(CleanWatchMovieEvent event, Emitter<MovieState> emit) async{
+    emit(state.copyWithCurrentEpisode(movie: null, episode: null, isExpandedWatchMovie: false));
+  }
+
   Future<void> changeEpisode(ChangeEpisodeMovieEvent event, Emitter<MovieState> emit) async{
 
     if(event.episode == null) {
       /// fetch history episode local
     }
-    emit(state.copyWithEpisode(episode: event.episode));
+    emit(state.copyWith(episode: event.episode));
   }
 
 }

@@ -77,10 +77,13 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                     return MovieItem(
                       movie: item,
                       onTap: () {
-                        context.showBottomSheet(
-                            OverViewScreen(
-                              movie: item.toMovieInfo(),
-                            )
+                        context.showDraggableBottomSheet(
+                            builder: (context, controller){
+                              return OverViewScreen(
+                                movie: item.toMovieInfo(),
+                                draggableScrollController: controller,
+                              );
+                            }
                         );
                       },
                     );

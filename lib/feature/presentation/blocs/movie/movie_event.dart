@@ -6,18 +6,28 @@ class InitMovieEvent extends MovieEvent{
   InitMovieEvent();
 }
 
-class CleanMovieEvent extends MovieEvent{
-  CleanMovieEvent();
-}
-
-class CleanWatchMovieEvent extends MovieEvent{
-  CleanWatchMovieEvent();
-}
-
 class GetInfoMovieEvent extends MovieEvent{
   MovieInfo movie;
   GetInfoMovieEvent({required this.movie});
 }
+
+class CleanMovieEvent extends MovieEvent{
+  CleanMovieEvent();
+}
+
+class InitWatchMovieEvent extends MovieEvent{
+  MovieInfo movie;
+  InitWatchMovieEvent({required this.movie});
+}
+class CleanWatchMovieEvent extends MovieEvent{
+  CleanWatchMovieEvent();
+}
+
+class ChangeExpandedMovieEvent extends MovieEvent{
+  bool isExpand;
+  ChangeExpandedMovieEvent({required this.isExpand});
+}
+
 
 class ChangeEpisodeMovieEvent extends MovieEvent{
   Episode? episode;

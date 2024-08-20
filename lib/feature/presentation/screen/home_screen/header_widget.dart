@@ -131,7 +131,14 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                       ),
                       onPressed: (){
                         if(widget.movie != null){
-                          context.showBottomSheet(OverViewScreen(movie: widget.movie!.toMovieInfo(),));
+                          context.showDraggableBottomSheet(
+                              builder: (context, controller){
+                                return OverViewScreen(
+                                  movie: widget.movie!.toMovieInfo(),
+                                  draggableScrollController: controller,
+                                );
+                              }
+                          );
                         }else{
                           context.showSnackBar("Không tìm thấy phim");
                         }

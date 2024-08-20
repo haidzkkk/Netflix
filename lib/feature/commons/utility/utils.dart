@@ -54,15 +54,35 @@ extension BuildContextExt on BuildContext{
     Navigator.pushReplacement(this, MaterialPageRoute(builder: (context) => screen));
   }
 
-  void showBottomSheet(Widget screen){
-    showModalBottomSheet(
+  void showDraggableBottomSheet({
+    required Widget Function(BuildContext context, ScrollController scrollController) builder
+  }) async{
+    bool bottomSheetOpen = true;
+    await showModalBottomSheet(
         context: this,
         isScrollControlled: true,
-        // useSafeArea: true,
+        enableDrag: false,
         builder: (context){
-          return screen;
+          return NotificationListener<DraggableScrollableNotification>(
+              onNotification: (notification) {
+                if (notification.extent <= 0.1 && bottomSheetOpen == true) {
+                  context.back();
+                  return true;
+                }
+                return false;
+              },
+              child: DraggableScrollableSheet(
+                initialChildSize: 1,
+                maxChildSize: 1,
+                minChildSize: 0.0,
+                snap: true,
+                expand: false,
+                builder: builder,
+              )
+          );
         }
     );
+    bottomSheetOpen = false;
   }
 
   void showSnackBar(String content){

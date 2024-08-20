@@ -93,7 +93,14 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                     return MovieItem(
                         movie: item,
                         onTap: (){
-                          context.showBottomSheet(OverViewScreen(movie: item.toMovieInfo(),));
+                          context.showDraggableBottomSheet(
+                              builder: (context, controller){
+                                return OverViewScreen(
+                                  movie: item.toMovieInfo(),
+                                  draggableScrollController: controller,
+                                );
+                              }
+                          );
                         }
                     );
                   },
@@ -115,7 +122,14 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               return SlideWidget(
                 movies: state.movies[CategoryMovie.listEmotional] ?? [],
                 onTap: (Movie movie){
-                  context.showBottomSheet(OverViewScreen(movie: movie.toMovieInfo(),));
+                  context.showDraggableBottomSheet(
+                      builder: (context, controller){
+                        return OverViewScreen(
+                          movie: movie.toMovieInfo(),
+                          draggableScrollController: controller,
+                        );
+                      }
+                  );
                 }
               );
             },
@@ -149,7 +163,14 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             return MovieItem(
                                 movie: item,
                                 onTap: (){
-                                  context.showBottomSheet(OverViewScreen(movie: item.toMovieInfo(),));
+                                  context.showDraggableBottomSheet(
+                                      builder: (context, controller){
+                                        return OverViewScreen(
+                                          movie: item.toMovieInfo(),
+                                          draggableScrollController: controller,
+                                        );
+                                      }
+                                  );
                                 }
                             );
                           },
