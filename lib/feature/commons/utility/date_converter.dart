@@ -139,4 +139,22 @@ class DateConverter {
     return DateFormat('dd/MM/yyyy').format(isoString2ToLocalDate(data));
   }
 
+  static String dateStringToday(DateTime? dateTime) {
+    if (dateTime == null) {
+      return "";
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = DateTime(now.year, now.month, now.day - 1);
+    final dateOnly = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+    if (dateOnly == today) {
+      return "Today";
+    } else if (dateOnly == yesterday) {
+      return "Yesterday";
+    } else {
+      return DateFormat('dd/MM').format(dateTime);
+    }
+  }
 }

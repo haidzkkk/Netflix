@@ -7,6 +7,7 @@ import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/category_movie.dart';
 import 'package:spotify/feature/presentation/blocs/home/home_bloc.dart';
 import 'package:spotify/feature/presentation/blocs/home/home_event.dart';
+import 'package:spotify/feature/presentation/screen/search/widget/search_text_field.dart';
 import '../../../data/models/response/movie.dart';
 import '../../../data/models/status.dart';
 import '../../blocs/search/search_bloc.dart';
@@ -66,51 +67,25 @@ class _SearchScreenState extends State<SearchScreen>
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
                     ),
                     Expanded(
-                      child: Container(
+                      child: SearchTextField(
                         height: 20.h,
-                        alignment: Alignment.centerLeft,
-                        margin: const EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4),
-                        child: TextField(
-                          focusNode: searchNode,
-                          controller: searchTextCtrl,
-                          onEditingComplete: (){
-                            searchViewModel.fetchTextSearchMovies(searchTextCtrl.text);
-                            searchNode.unfocus();
-                          },
-
-                          textInputAction: TextInputAction.search,
-                          cursorColor: Colors.white.withOpacity(0.5),
-                          cursorHeight: 9.h,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            color: Colors.white
-                          ),
-                          decoration: InputDecoration(
-                              fillColor: Colors.black.withOpacity(0.7),
-                              filled: true,
-                              prefixIcon: GestureDetector(
-                                onTap: (){
-                                  searchNode.unfocus();
-                                },
-                                child: const Icon(Icons.search, color: Colors.white,)),
-                              suffixIcon: GestureDetector(
-                                onTap: (){
-                                  searchTextCtrl.text = "";
-                                  searchViewModel.fetchTextSearchMovies(searchTextCtrl.text);
-                                },
-                                child: Icon(Icons.clear, color: Colors.white.withOpacity(0.8))
-                              ),
-                              contentPadding: const EdgeInsets.only(left: 28, top: 0, bottom: 0),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                  borderSide: const BorderSide(width: 0, color: Colors.transparent,),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide: const BorderSide(width: 0, color: Colors.transparent,),
-                              ),
-                              hintText: "Tìm kiếm...",
-                              hintStyle: TextStyle(color: Colors.white.withOpacity(0.7))),
+                        focusNode: searchNode,
+                        controller: searchTextCtrl,
+                        onChange: (value){
+                          searchViewModel.fetchTextSearchMovies(searchTextCtrl.text);
+                          searchNode.unfocus();
+                        },
+                        prefixIcon: GestureDetector(
+                            onTap: (){
+                              searchNode.unfocus();
+                            },
+                            child: const Icon(Icons.search, color: Colors.white,)),
+                        suffixIcon: GestureDetector(
+                            onTap: (){
+                              searchTextCtrl.text = "";
+                              searchViewModel.fetchTextSearchMovies(searchTextCtrl.text);
+                            },
+                            child: Icon(Icons.clear, color: Colors.white.withOpacity(0.8))
                         ),
                       ),
                     ),

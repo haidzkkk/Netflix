@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:spotify/feature/data/models/db_local/movie_local.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
 import 'package:spotify/feature/data/models/status.dart';
+import 'package:spotify/feature/data/repositories/local_db_repository.dart';
 
 import '../../../commons/utility/utils.dart';
 import '../../../data/repositories/movie_repo.dart';
@@ -14,8 +16,9 @@ part 'movie_state.dart';
 
 class MovieBloc extends Bloc<MovieEvent, MovieState> {
   MovieRepo repo;
+  LocalDbRepository dbRepository;
 
-  MovieBloc(this.repo) : super(MovieState()) {
+  MovieBloc(this.repo, this.dbRepository) : super(MovieState()) {
     listenEvent();
   }
 
@@ -43,6 +46,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
   }
 
   initWatchMovie(InitWatchMovieEvent event, Emitter<MovieState> emit) async{
+    dbRepository.addMovieToHistory(MovieLocal.fromMovieInfo(event.movie));
     emit(state.copyWith(
       currentMovie: state.movie.data,
       episode: state.movie.data?.episodes?.firstOrNull?.episode?.firstOrNull,

@@ -5,9 +5,13 @@ import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 import '../commons/utility/locale_util.dart';
 import '../commons/utility/theme_ulti.dart';
 import '../data/api/api_client.dart';
+import '../data/local/database_helper.dart';
+import '../data/local/hive_manager.dart';
 import '../data/repositories/auth_repo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/repositories/local_db_repository.dart';
+import '../data/repositories/local_nosql_repository.dart';
 import '../presentation/blocs/home/home_bloc.dart';
 import '../presentation/blocs/search/search_bloc.dart';
 
@@ -23,6 +27,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ApiClient(sharedPreferences: sl()));
   sl.registerLazySingleton(() => LocaleHelper(sharedPreferences: sl()));
   sl.registerLazySingleton(() => ThemeHelper(sharedPreferences: sl()));
+  sl.registerLazySingleton(() => HiveManager());
+  sl.registerLazySingleton(() => DataBaseHelper.instance);
 
   ///[Core]
   ///
@@ -37,10 +43,12 @@ Future<void> init() async {
   ///
   sl.registerFactory(() => HomeBloc(repo: sl()));
   sl.registerFactory(() => MainBloc(sharedPreferences: sl(), localeHelper: sl(), themeHelper: sl()));
-  sl.registerFactory(() => MovieBloc(sl()));
+  sl.registerFactory(() => MovieBloc(sl(), sl()));
   sl.registerFactory(() => SearchBloc(repo: sl()));
 
   ///[Repository]
   sl.registerFactory(() => AuthRepo(apiClient: sl(), sharedPreferences: sl()));
   sl.registerFactory(() => MovieRepo(sl(), sl()));
+  sl.registerFactory(() => LocalDbRepository(sl()));
+  sl.registerFactory(() => LocalNosqlRepository(sl()));
 }

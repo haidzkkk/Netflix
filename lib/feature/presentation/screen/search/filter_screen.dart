@@ -4,6 +4,7 @@ import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/presentation/screen/search/category_widget.dart';
 import 'package:spotify/feature/presentation/screen/search/search_screen.dart';
+import 'package:spotify/feature/presentation/screen/search/widget/search_text_field.dart';
 import '../../../commons/utility/style_util.dart';
 import '../../blocs/search/search_bloc.dart';
 
@@ -84,39 +85,24 @@ class _FilterScreenState extends State<FilterScreen>
         ),
         body: Column(
           children: [
-            GestureDetector(
+            SearchTextField(
               onTap: (){
                 context.to(const SearchScreen());
               },
-              child: Container(
-                alignment: Alignment.centerLeft,
-                height: 20.h,
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
-                margin: const EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.4),
-                    borderRadius: const BorderRadiusDirectional.all(Radius.circular(15))
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.search),
-                    const SizedBox(width: 5,),
-                    const Text("Tìm kiếm..."),
-                    const Spacer(),
-                    Builder(
-                      builder: (context) {
-                        return IconButton(
-                            visualDensity: const VisualDensity(horizontal: -4),
-                            onPressed: (){
-                              Scaffold.of(context).openEndDrawer();
-                              // Scaffold.of(context).openDrawer();
-                            },
-                            icon: const Icon(Icons.filter_list_rounded)
-                        );
-                      }
-                    )
-                  ],
-                ),
+              height: 20.h,
+              onlyRead: true,
+              prefixIcon: const Icon(Icons.search, color: Colors.white,),
+              suffixIcon: Builder(
+                  builder: (context) {
+                    return IconButton(
+                        visualDensity: const VisualDensity(horizontal: -4),
+                        onPressed: (){
+                          Scaffold.of(context).openEndDrawer();
+                          // Scaffold.of(context).openDrawer();
+                        },
+                        icon: const Icon(Icons.filter_list_rounded, color: Colors.white)
+                    );
+                  }
               ),
             ),
             TabBar(

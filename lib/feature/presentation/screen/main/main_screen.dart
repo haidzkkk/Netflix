@@ -5,8 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/home_screen.dart';
 import 'package:spotify/feature/presentation/screen/main/widget/item_bottom_bar.dart';
 import 'package:spotify/feature/presentation/screen/movie/movie_screen.dart';
-import 'package:spotify/feature/presentation/screen/widget/badge_widget.dart';
-import '../../../data/models/status.dart';
+import 'package:spotify/feature/presentation/screen/watched/watched_screen.dart';
 import '../../blocs/home/home_bloc.dart';
 import '../../blocs/home/home_event.dart';
 import '../../blocs/home/home_state.dart';
@@ -29,7 +28,7 @@ class _MainScreenState extends State<MainScreen> {
   List<Widget> screens = [
     const HomeScreen(),
     const FilterScreen(),
-    const SizedBox(),
+    const WatchedScreen(),
     const SizedBox(),
     const SizedBox(),
   ];
@@ -115,7 +114,7 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                         ItemBottomBar.withChildBadge(
                           icon: const Icon(FontAwesomeIcons.tv),
-                          label: "History",
+                          label: "Watched",
                           badgeCount: 12,
                         ),
                         ItemBottomBar.withChildBadge(

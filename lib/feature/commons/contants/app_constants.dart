@@ -4,7 +4,6 @@ class AppConstants{
   static const String LANGUAGE_CODE = "sprf_language";
   static const String THEME_CODE = "sprf_theme";
 
-
   static const String BASE_URL = "https://phimapi.com";
   static const String BASE_URL_IMAGE = "https://phimimg.com";
 
@@ -20,4 +19,11 @@ class AppConstants{
   static const String DATA = "data";
   static const String ITEMS = "items";
   static const String PAGINATION = "pagination";
+
+  static const String dbName = "netflix.db.haidzkkk";
+  static const int dbVersion = 1;
+
+  static const String dbHive = "netflix.hive.haidzkkk";
+  static const String movieHistoryBoxName = 'MovieHistoryBox';
+  static const String searchBoxName = 'searchBox';
 }
