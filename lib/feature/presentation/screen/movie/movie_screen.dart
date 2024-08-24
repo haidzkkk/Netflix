@@ -55,15 +55,14 @@ class _MovieScreenState extends State<MovieScreen> {
   void initState() {
     videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(''));
     setChewieController(videoPlayerController);
-
     viewModel.stream.listen((state){
       final newUrl = state.currentEpisode?.linkM3u8 ?? '';
       if (newUrl.isNotEmpty && newUrl != previousUrl) {
         previousUrl = newUrl;
 
         if (videoPlayerController.value.isInitialized) {
-          videoPlayerController.dispose();
           chewieController.dispose();
+          videoPlayerController.dispose();
         }
 
         videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(newUrl));
@@ -77,6 +76,9 @@ class _MovieScreenState extends State<MovieScreen> {
 
   @override
   void dispose() {
+    videoPlayerController.position.then((value){
+      print("currentSecond: $value");
+    });
     videoPlayerController.dispose();
     chewieController.dispose();
     _controller.dispose();
