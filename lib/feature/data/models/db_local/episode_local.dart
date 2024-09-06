@@ -3,39 +3,49 @@ import '../movie_detail/movie_info_response.dart';
 
 class EpisodeLocalField{
 
-  static const String episodeTableName = 'episode';
+  static const String tableName = 'episode';
 
-  static const String episodeId = 'id';
+  static const String id = 'id';
   static const String movieId = 'movieId';
-  static const String episodeSlug = 'slug';
-  static const String episodeName = 'name';
-  static const String episodeCurrentSecond = 'currentSecond';
+  static const String slug = 'slug';
+  static const String name = 'name';
+  static const String currentSecond = 'currentSecond';
+  static const String lastTime = 'lastTime';
 
-  static final List<String> query = [episodeTableName, episodeId, movieId, episodeSlug, episodeName, episodeCurrentSecond,];
+  static final List<String> query = [tableName, id, movieId, slug, name, currentSecond,];
 }
 
 class EpisodeLocal{
-  int? id;
+  String? _id;
   String? movieId;
   String? slug;
   String? name;
   int? currentSecond;
+  int? lastTime;
 
   EpisodeLocal({
-    this.id,
+    String? id,
     this.movieId,
     this.slug,
     this.name,
     this.currentSecond,
-  });
+    this.lastTime,
+  }){
+    _id = id ?? getSetupId();
+  }
+
+  String getSetupId(){
+    return "${movieId}_$slug";
+  }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
+      'id': _id,
       'movieId': movieId,
       'slug': slug,
       'name': name,
       'currentSecond': currentSecond,
+      'lastTime': lastTime,
     };
   }
 
@@ -46,15 +56,22 @@ class EpisodeLocal{
       slug: json['slug'],
       name: json['name'],
       currentSecond: json['currentSecond'],
+      lastTime: json['lastTime'],
     );
   }
 
-  factory EpisodeLocal.fromEpisode({required String movieID, required Episode body, required int currentSecond}) {
+  factory EpisodeLocal.fromWhenWatched({
+    required String movieID,
+    required Episode body,
+    required int currentSecond,
+    required int lastTime,
+  }) {
     return EpisodeLocal(
       movieId: movieID,
       slug: body.slug,
       name: body.name,
       currentSecond: currentSecond,
+      lastTime: lastTime,
     );
   }
 }

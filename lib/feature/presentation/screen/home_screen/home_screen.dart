@@ -31,159 +31,171 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          BlocBuilder<HomeBloc, HomeState>(
+    return RefreshIndicator(
+      onRefresh: () async{
+        for (var category in CategoryMovie.values) {
+          homeViewModel.add(GetCategoryMovie(category));
+        }
+      },
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            BlocBuilder<HomeBloc, HomeState>(
+              buildWhen: (previous, current) => previous.movies[CategoryMovie.movieNew] != current.movies[CategoryMovie.movieNew],
               builder: (context, state) {
-              return HeaderWidget(movie: state.movies[CategoryMovie.movieNew]?.firstOrNull,);
-            }
-          ),
-          const SizedBox(height: 10,),
-          TitleWidget(
-              title: "Previews",
-              onTap: (){
-
+                return HeaderWidget(movie: state.movies[CategoryMovie.movieNew]?.firstOrNull,);
               }
-          ),
-          SizedBox(
-            height: 100,
-            child: BlocBuilder<HomeBloc, HomeState>(
-              builder: (context, state) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: state.movies[CategoryMovie.listTvShow]?.length ?? 0,
-                    itemBuilder: (context, index) {
-                      var item = state.movies[CategoryMovie.listTvShow]![index];
-                      return Container(
-                          clipBehavior: Clip.antiAlias,
-                          decoration: const BoxDecoration(
-                              shape: BoxShape.circle
-                          ),
-                          child: CachedNetworkImage(imageUrl: item.getThumbUrl, width: 90, height: 90, fit: BoxFit.cover,));
-                    },
-                    separatorBuilder: (context, index) => const SizedBox(width: 10,),
-                  ),
-                );
-              },
             ),
-          ),
-          const SizedBox(height: 10,),
-          TitleWidget(
-              title: "Trending now",
-              onTap: (){
+            const SizedBox(height: 10,),
+            TitleWidget(
+                title: "Previews",
+                onTap: (){
 
-              }
-          ),
-          SizedBox(
-            height: 180.w,
-            child: BlocBuilder<HomeBloc, HomeState>(
-              builder: (context, state) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: state.movies[CategoryMovie.movieNew]?.length ?? 0,
-                    itemBuilder: (context, index) {
-                    var item = state.movies[CategoryMovie.movieNew]![index];
-                    return MovieItem(
-                        movie: item,
-                        onTap: (){
-                          context.showDraggableBottomSheet(
-                              builder: (context, controller){
-                                return OverViewScreen(
-                                  movie: item.toMovieInfo(),
-                                  draggableScrollController: controller,
-                                );
-                              }
-                          );
-                        }
-                    );
-                  },
-                    separatorBuilder: (context, index) => const SizedBox(width: 10,),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 10,),
-          TitleWidget(
-            title: "Phim hay nhất",
-            onTap: (){
-
-            }
-          ),
-          BlocBuilder<HomeBloc, HomeState>(
-            builder: (context, state) {
-              return SlideWidget(
-                movies: state.movies[CategoryMovie.listEmotional] ?? [],
-                onTap: (Movie movie){
-                  context.showDraggableBottomSheet(
-                      builder: (context, controller){
-                        return OverViewScreen(
-                          movie: movie.toMovieInfo(),
-                          draggableScrollController: controller,
-                        );
-                      }
-                  );
                 }
-              );
-            },
-          ),
-          ...CategoryMovie.valuesCategory
-              .map((category){
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const SizedBox(height: 10,),
-                TitleWidget(
-                    title: category.name,
-                    onTap: (){
-                      homeViewModel.add(PageIndexHomeEvent(1));
-                      context.read<SearchBloc>().pageTabCategorySearch(category);
-                    }
-                ),
-                SizedBox(
-                  height: 180.w,
-                  child: BlocBuilder<HomeBloc, HomeState>(
-                    builder: (context, state) {
-                      var items = state.movies[category] ?? [];
+            ),
+            SizedBox(
+              height: 100,
+              child: BlocBuilder<HomeBloc, HomeState>(
+                buildWhen: (previous, current) => previous.movies[CategoryMovie.listTvShow] != current.movies[CategoryMovie.listTvShow],
+                builder: (context, state) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: state.movies[CategoryMovie.listTvShow]?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        var item = state.movies[CategoryMovie.listTvShow]![index];
+                        return Container(
+                            clipBehavior: Clip.antiAlias,
+                            decoration: const BoxDecoration(
+                                shape: BoxShape.circle
+                            ),
+                            child: CachedNetworkImage(imageUrl: item.getThumbUrl, width: 90, height: 90, fit: BoxFit.cover,));
+                      },
+                      separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 10,),
+            TitleWidget(
+                title: "Trending now",
+                onTap: (){
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: items.length,
-                          itemBuilder: (context, index) {
-                            var item = items[index];
-                            return MovieItem(
-                                movie: item,
-                                onTap: (){
-                                  context.showDraggableBottomSheet(
-                                      builder: (context, controller){
-                                        return OverViewScreen(
-                                          movie: item.toMovieInfo(),
-                                          draggableScrollController: controller,
-                                        );
-                                      }
+                }
+            ),
+            SizedBox(
+              height: 180.w,
+              child: BlocBuilder<HomeBloc, HomeState>(
+                buildWhen: (previous, current) => previous.movies[CategoryMovie.movieNew] != current.movies[CategoryMovie.movieNew],
+                builder: (context, state) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: state.movies[CategoryMovie.movieNew]?.length ?? 0,
+                      itemBuilder: (context, index) {
+                      var item = state.movies[CategoryMovie.movieNew]![index];
+                      return MovieItem(
+                          movie: item,
+                          onTap: (){
+                            context.showDraggableBottomSheet(
+                                builder: (context, controller){
+                                  return OverViewScreen(
+                                    movie: item.toMovieInfo(),
+                                    draggableScrollController: controller,
                                   );
                                 }
                             );
-                          },
-                          separatorBuilder: (context, index) => const SizedBox(width: 10,),
-                        ),
+                          }
                       );
                     },
+                      separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 10,),
+            TitleWidget(
+              title: "Phim hay nhất",
+              onTap: (){
+
+              }
+            ),
+            BlocBuilder<HomeBloc, HomeState>(
+              buildWhen: (previous, current) => previous.movies[CategoryMovie.listEmotional] != current.movies[CategoryMovie.listEmotional],
+              builder: (context, state) {
+                return SlideWidget(
+                  movies: state.movies[CategoryMovie.listEmotional] ?? [],
+                  onTap: (Movie movie){
+                    context.showDraggableBottomSheet(
+                        builder: (context, controller){
+                          return OverViewScreen(
+                            movie: movie.toMovieInfo(),
+                            draggableScrollController: controller,
+                          );
+                        }
+                    );
+                  }
+                );
+              },
+            ),
+            ...CategoryMovie.valuesCategory
+                .map((category){
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10,),
+                  TitleWidget(
+                      title: category.name,
+                      onTap: (){
+                        homeViewModel.add(PageIndexHomeEvent(1));
+                        context.read<SearchBloc>().pageTabCategorySearch(category);
+                      }
                   ),
-                ),
-              ],
-            );
-          }),
-        ],
+                  SizedBox(
+                    height: 180.w,
+                    child: BlocBuilder<HomeBloc, HomeState>(
+                      buildWhen: (previous, current) => previous.movies[category] != current.movies[category],
+                      builder: (context, state) {
+                        var items = state.movies[category] ?? [];
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: items.length,
+                            itemBuilder: (context, index) {
+                              var item = items[index];
+                              return MovieItem(
+                                  movie: item,
+                                  onTap: (){
+                                    context.showDraggableBottomSheet(
+                                        builder: (context, controller){
+                                          return OverViewScreen(
+                                            movie: item.toMovieInfo(),
+                                            draggableScrollController: controller,
+                                          );
+                                        }
+                                    );
+                                  }
+                              );
+                            },
+                            separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ],
+        ),
       ),
     );
   }

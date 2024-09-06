@@ -23,7 +23,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   void listenEvent(){
     on<PageIndexHomeEvent>(changePageIndex);
-    on<GetAllCategoryMovie>(getMovie);
+    on<GetCategoryMovie>(getMovieCategory);
   }
 
   disposeHome(DisposeHomeEvent event, Emitter<HomeState> emit) async{
@@ -42,22 +42,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     pageController.animateToPage(event.pageIndex, duration: const Duration(milliseconds: 200), curve: Curves.ease);
   }
 
-  Future<void> getMovie(GetAllCategoryMovie event, Emitter<HomeState> emit) async{
-
-    for (var category in CategoryMovie.valuesCategory) {
+  Future<void> getMovieCategory(GetCategoryMovie event, Emitter<HomeState> emit) async{
       var response = await repo.getMovieCategory(
           pageIndex: 1,
-          category: category
+          category: event.categoryMovie
       );
 
       if (response.statusCode == 200) {
-        List<Movie> listData = category.itemDataFromJson(response.body).data ?? [];
+        List<Movie> listData = event.categoryMovie.itemDataFromJson(response.body).data ?? [];
         emit(state.copyWithMovie(
-            category: category,
+            category: event.categoryMovie,
             data: listData
         ));
       }
-    }
   }
 
 

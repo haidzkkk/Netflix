@@ -28,8 +28,12 @@ class ChangeExpandedMovieEvent extends MovieEvent{
   ChangeExpandedMovieEvent({required this.isExpand});
 }
 
-
 class ChangeEpisodeMovieEvent extends MovieEvent{
   Episode? episode;
   ChangeEpisodeMovieEvent({this.episode});
+}
+
+class SaveEpisodeMovieWatchedToLocalEvent extends MovieEvent{
+  EpisodeLocal episode;
+  SaveEpisodeMovieWatchedToLocalEvent({required this.episode});
 }

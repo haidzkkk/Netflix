@@ -30,7 +30,7 @@ class _WatchedItemState extends State<WatchedItem> {
         if(widget.showDate == true)
           Text(
             DateConverter.dateStringToday(DateTime.fromMillisecondsSinceEpoch(widget.movieLocal.lastTime ?? 0)),
-            style: Style.title,
+            style: Style.title2,
           ),
         GestureDetector(
           behavior: HitTestBehavior.translucent,
@@ -45,7 +45,6 @@ class _WatchedItemState extends State<WatchedItem> {
             );
           },
           child: Container(
-            height: 40.h,
             margin: const EdgeInsetsDirectional.all(5),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,

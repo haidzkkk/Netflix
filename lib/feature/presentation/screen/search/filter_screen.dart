@@ -52,9 +52,10 @@ class _FilterScreenState extends State<FilterScreen>
         endDrawer: Drawer(
           width: MediaQuery.of(context).size.width * 0.4,
           child: BlocBuilder<SearchBloc, SearchState>(
-          builder: (context, state) {
-            var categories = searchViewModel.tabCategories;
-            return ListView.separated(
+            buildWhen: (previous, current) => previous.currentPageTab != current.currentPageTab,
+            builder: (context, state) {
+              var categories = searchViewModel.tabCategories;
+              return ListView.separated(
                 itemCount: categories.length,
                 itemBuilder: (context, index){
                   var category = categories[index];

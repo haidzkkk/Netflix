@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:spotify/feature/data/models/db_local/episode_local.dart';
 import 'package:spotify/feature/data/models/db_local/movie_local.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
+import 'package:spotify/feature/data/models/response/movie.dart';
 import 'package:spotify/feature/data/models/status.dart';
 import 'package:spotify/feature/data/repositories/local_db_repository.dart';
 
@@ -30,6 +32,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     on<CleanWatchMovieEvent>(cleanWatchMovieEvent);
     on<ChangeExpandedMovieEvent>((event, emit) => emit(state.copyWith(isExpandWatchMovie: event.isExpand)));
     on<ChangeEpisodeMovieEvent>(changeEpisode);
+    on<SaveEpisodeMovieWatchedToLocalEvent>(saveEpisodeMovieWatchedToLocal);
   }
 
   Future<void> getMovie(GetInfoMovieEvent event, Emitter<MovieState> emit) async{
@@ -46,10 +49,26 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
   }
 
   initWatchMovie(InitWatchMovieEvent event, Emitter<MovieState> emit) async{
-    dbRepository.addMovieToHistory(MovieLocal.fromMovieInfo(event.movie));
+    MovieInfo currentMovie = event.movie;
+
+    /// set movie watched to local
+    dbRepository.addMovieToHistory(MovieLocal.fromMovieInfo(currentMovie));
+    /// get episode watched from local
+    var responses = await dbRepository.getAllEpisodeFromMovie(currentMovie.sId ?? "");
+    Map<String, EpisodeLocal> episodeWatched = Map.fromEntries(responses.map((element){
+      var episodeLocal = EpisodeLocal.fromJson(element);
+      return MapEntry(episodeLocal.slug ?? "", episodeLocal);
+    }));
+
+    currentMovie.episodes?.forEach((server){
+      server.episode?.forEach((episode){
+        episode.episodeLocal = episodeWatched[episode.slug];
+      });
+    });
+
     emit(state.copyWith(
-      currentMovie: state.movie.data,
-      episode: state.movie.data?.episodes?.firstOrNull?.episode?.firstOrNull,
+      currentMovie: currentMovie,
+      episode: currentMovie.episodes?.firstOrNull?.episode?.firstOrNull,
       isExpandWatchMovie: true,
     ));
   }
@@ -59,11 +78,15 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
   }
 
   Future<void> changeEpisode(ChangeEpisodeMovieEvent event, Emitter<MovieState> emit) async{
-
     if(event.episode == null) {
       /// fetch history episode local
     }
     emit(state.copyWith(episode: event.episode));
   }
 
+
+  saveEpisodeMovieWatchedToLocal(SaveEpisodeMovieWatchedToLocalEvent event, Emitter<MovieState> emit) async{
+    int success = await dbRepository.addEpisodeToHistory(event.episode);
+    printData("save không sâu này ${event.episode.name} ${event.episode.currentSecond},thành công $success");
+  }
 }

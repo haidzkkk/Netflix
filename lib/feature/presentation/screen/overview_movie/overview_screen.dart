@@ -84,15 +84,11 @@ class _OverViewScreenState extends State<OverViewScreen>{
               }
           ),
           BlocBuilder<MovieBloc, MovieState>(
-            builder: (context, state){
-              if(state.movie.status == StatusEnum.initial
-                || state.movie.status == StatusEnum.loading
-                && state.movie.data == null
-              ){
-                return const OverviewShimmerWidget();
-              }else if(state.movie.status == StatusEnum.failed){
+            buildWhen: (previous, current) => current.movie.status == StatusEnum.failed,
+            builder: (context, state2){
+              if(state2.movie.status == StatusEnum.failed){
                 Future(() {
-                  context.showSnackBar("${state.movie.message}");
+                  context.showSnackBar("${state2.movie.message}");
                 });
               }
 
@@ -105,10 +101,15 @@ class _OverViewScreenState extends State<OverViewScreen>{
                     child: Stack(
                       children: [
                         Positioned.fill(
-                          child: TrailerWidget(
-                              thumbnail: state.movie.data?.getThumbUrl ?? "",
-                              // trailerUrl: state.movie.data?.trailerUrl ?? ""
-                              trailerUrl: "",
+                          child: BlocBuilder<MovieBloc, MovieState>(
+                            buildWhen: (previous, current) => previous.movie.data?.getThumbUrl != current.movie.data?.getThumbUrl,
+                            builder: (context, state){
+                              return TrailerWidget(
+                                  thumbnail: state.movie.data?.getThumbUrl ?? "",
+                                  // trailerUrl: state.movie.data?.trailerUrl ?? ""
+                                  trailerUrl: "",
+                              );
+                            }
                           ),
                         ),
                         Positioned(
@@ -141,61 +142,71 @@ class _OverViewScreenState extends State<OverViewScreen>{
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 10,),
-                        Text(state.movie.data?.name ?? "",
-                          style: Style.title.copyWith(fontSize: 20.sp),
+                        BlocBuilder<MovieBloc, MovieState>(
+                          buildWhen: (previous, current) => previous.movie.data?.name != current.movie.data?.name,
+                          builder: (context, state){
+                            return Text(state.movie.data?.name ?? "",
+                              style: Style.title.copyWith(fontSize: 20.sp),
+                            );
+                          }
                         ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Wrap(
-                                  children: [
-                                    if(state.movie.data?.time != null)
-                                      Text(state.movie.data?.time ?? "", style: Style.body,),
-                                    if(state.movie.data?.time != null)
-                                      ...[
-                                        const SizedBox(width: 5,),
-                                        ChipText(
-                                            child: Text(
-                                                "${state.movie.data?.episodeCurrent}",
-                                                style: Style.body.copyWith(fontSize: 10.sp)
-                                            )
-                                        ),
-                                      ],
-                                    if(state.movie.data?.time != null)
-                                      ...[
-                                        const SizedBox(width: 5,),
-                                        ChipText(
-                                            child: Text("${state.movie.data?.quality}",
-                                                style: Style.body.copyWith(fontSize: 10.sp)
-                                            )
-                                        ),
-                                      ],
-                                    if(state.movie.data?.year != null)
-                                      ...[
-                                        const SizedBox(width: 10,),
-                                        Text("${state.movie.data?.year}",
-                                          style: Style.body,
-                                        ),
-                                      ],
-                                    if(state.movie.data?.lang != null)
-                                      ...[
-                                        const SizedBox(width: 5,),
-                                        ChipText(
-                                            child: Text(
-                                                "${state.movie.data?.lang}",
-                                                style: Style.body.copyWith(fontSize: 10.sp)
-                                            )
-                                        ),
-                                      ],
-                                  ]
-                              ),
-                            ),
-                            const SizedBox(width: 20,),
-                            Text("${state.movie.data?.view?.format() ?? 0} views",
-                              style: Style.body.copyWith(color: Colors.green),
-                            )
-                          ],
+                        BlocBuilder<MovieBloc, MovieState>(
+                          buildWhen: (previous, current) => previous.movie.data != current.movie.data,
+                          builder: (context, state){
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Wrap(
+                                      children: [
+                                        if(state.movie.data?.time != null)
+                                          Text(state.movie.data?.time ?? "", style: Style.body,),
+                                        if(state.movie.data?.time != null)
+                                          ...[
+                                            const SizedBox(width: 5,),
+                                            ChipText(
+                                                child: Text(
+                                                    "${state.movie.data?.episodeCurrent}",
+                                                    style: Style.body.copyWith(fontSize: 10.sp)
+                                                )
+                                            ),
+                                          ],
+                                        if(state.movie.data?.time != null)
+                                          ...[
+                                            const SizedBox(width: 5,),
+                                            ChipText(
+                                                child: Text("${state.movie.data?.quality}",
+                                                    style: Style.body.copyWith(fontSize: 10.sp)
+                                                )
+                                            ),
+                                          ],
+                                        if(state.movie.data?.year != null)
+                                          ...[
+                                            const SizedBox(width: 10,),
+                                            Text("${state.movie.data?.year}",
+                                              style: Style.body,
+                                            ),
+                                          ],
+                                        if(state.movie.data?.lang != null)
+                                          ...[
+                                            const SizedBox(width: 5,),
+                                            ChipText(
+                                                child: Text(
+                                                    "${state.movie.data?.lang}",
+                                                    style: Style.body.copyWith(fontSize: 10.sp)
+                                                )
+                                            ),
+                                          ],
+                                      ]
+                                  ),
+                                ),
+                                const SizedBox(width: 20,),
+                                Text("${state.movie.data?.view?.format() ?? 0} views",
+                                  style: Style.body.copyWith(color: Colors.green),
+                                )
+                              ],
+                            );
+                          }
                         ),
                         const SizedBox(height: 10,),
                         CustomButton(
@@ -213,8 +224,8 @@ class _OverViewScreenState extends State<OverViewScreen>{
                             ],
                           ),
                           onPressed: (){
-                            if(state.movie.data != null && state.movie.data?.episodes != null){
-                              viewModel.add(InitWatchMovieEvent(movie: state.movie.data!));
+                            if(viewModel.state.movie.data != null && viewModel.state.movie.data?.episodes != null){
+                              viewModel.add(InitWatchMovieEvent(movie: viewModel.state.movie.data!));
                               context.back();
                             }else{
                               context.showSnackBar("Không tìm thấy phim");
@@ -277,127 +288,153 @@ class _OverViewScreenState extends State<OverViewScreen>{
                           children: [
                             Expanded(
                               flex: 2,
-                              child: CachedNetworkImage(
-                                imageUrl: state.movie.data?.getPosterUrl ?? "",
-                                fit: BoxFit.cover,
+                              child: BlocBuilder<MovieBloc, MovieState>(
+                                buildWhen: (previous, current) => previous.movie.data?.getPosterUrl != current.movie.data?.getPosterUrl,
+                                builder: (context, state){
+                                  if(state.movie.data?.getPosterUrl.isNotEmpty != true){
+                                    return const SizedBox();
+                                  }
+                                  return CachedNetworkImage(
+                                    imageUrl: state.movie.data?.getPosterUrl ?? "",
+                                    fit: BoxFit.cover,
+                                  );
+                                }
                               )
                             ),
                             const SizedBox(width: 8,),
-                            Expanded(
-                              flex: 3,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  RichText(
-                                    text: TextSpan(
-                                        children: [
-                                          TextSpan(text: "Category: ",
-                                              style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                          ),
-                                          TextSpan(text: state.movie.data?.category?.map((category) => category.name).toList().join(", ") ?? "",
-                                              style: Style.body
-                                          ),
-                                        ]
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5,),
-                                  RichText(
-                                    text: TextSpan(
-                                        children: [
-                                          TextSpan(text: "Country: ",
-                                              style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                          ),
-                                          TextSpan(text: state.movie.data?.country?.map((country) => country.name).toList().join(", ") ?? "",
-                                              style: Style.body
-                                          ),
-                                        ]
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5,),
-                                  RichText(
-                                    text: TextSpan(
-                                        children: [
-                                          TextSpan(text: "Actor: ",
-                                              style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                          ),
-                                          TextSpan(text: state.movie.data?.actor?.join(", ") ?? "",
-                                              style: Style.body
-                                          ),
-                                        ]
-                                    ),
-                                  ),
-                                  const SizedBox(height: 5,),
-                                  RichText(
-                                    text: TextSpan(
-                                        children: [
-                                          TextSpan(text: "Director: ",
-                                              style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                          ),
-                                          TextSpan(text: state.movie.data?.director?.join(", ") ?? "",
-                                              style: Style.body
-                                          ),
-                                        ]
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],),
-                        const SizedBox(height: 5,),
-
-                        if(state.movie.data?.content != null)
-                          ...[
-                            const Text("Mô tả"),
-                            ReadMoreText(
-                              "${state.movie.data?.content ?? ""}  ",
-                              style: Style.body.copyWith(color: Colors.white.withOpacity(0.4)),
-                              trimLength: 250,
-                            ),
-                          ],
-                        BlocBuilder<HomeBloc, HomeState>(
-                          builder: (context, homeState) {
-                            return Column(
-                              children: state.movie.data?.category?.map((category){
-                                List<Movie>? movies = homeState.movies[CategoryMovie.getCategoryMovie(category.slug)];
-
-                                if(movies == null) return const SizedBox();
-                                return Column(
-                                  children: [
-                                    const SizedBox(height: 10,),
-                                    TitleWidget(
-                                        title: category.name ?? "",
-                                        onTap: (){
-
-                                        }
-                                    ),
-                                    SizedBox(
-                                      height: 140.w,
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                                        child: ListView.separated(
-                                          scrollDirection: Axis.horizontal,
-                                          itemCount: movies.length,
-                                          itemBuilder: (context, index) {
-                                            var item = movies[index];
-                                            return MovieItem(
-                                                movie: item,
-                                                onTap: (){
-                                                  viewModel.add(GetInfoMovieEvent(movie: item.toMovieInfo()));
-                                                  widget.draggableScrollController.animateTo(0, duration: const Duration(milliseconds: 200), curve: Curves.bounceIn);
-                                                }
-                                            );
-                                          },
-                                          separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                            BlocBuilder<MovieBloc, MovieState>(
+                              buildWhen: (previous, current) => previous.movie.data != current.movie.data,
+                              builder: (context, state){
+                                return Expanded(
+                                  flex: 3,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      RichText(
+                                        text: TextSpan(
+                                            children: [
+                                              TextSpan(text: "Category: ",
+                                                  style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                                              ),
+                                              TextSpan(text: state.movie.data?.category?.map((category) => category.name).toList().join(", ") ?? "",
+                                                  style: Style.body
+                                              ),
+                                            ]
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(height: 5,),
+                                      RichText(
+                                        text: TextSpan(
+                                            children: [
+                                              TextSpan(text: "Country: ",
+                                                  style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                                              ),
+                                              TextSpan(text: state.movie.data?.country?.map((country) => country.name).toList().join(", ") ?? "",
+                                                  style: Style.body
+                                              ),
+                                            ]
+                                        ),
+                                      ),
+                                      const SizedBox(height: 5,),
+                                      RichText(
+                                        text: TextSpan(
+                                            children: [
+                                              TextSpan(text: "Actor: ",
+                                                  style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                                              ),
+                                              TextSpan(text: state.movie.data?.actor?.join(", ") ?? "",
+                                                  style: Style.body
+                                              ),
+                                            ]
+                                        ),
+                                      ),
+                                      const SizedBox(height: 5,),
+                                      RichText(
+                                        text: TextSpan(
+                                            children: [
+                                              TextSpan(text: "Director: ",
+                                                  style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                                              ),
+                                              TextSpan(text: state.movie.data?.director?.join(", ") ?? "",
+                                                  style: Style.body
+                                              ),
+                                            ]
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 );
-                              }).toList() ?? [],
+                              }
+                            ),
+                          ],),
+                        BlocBuilder<MovieBloc, MovieState>(
+                            buildWhen: (previous, current) => previous.movie.data != current.movie.data,
+                            builder: (context, state){
+                              if(state.movie.data?.content == null){
+                                return const SizedBox(height: 5,);
+                              }
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("Mô tả"),
+                                  ReadMoreText(
+                                    "${state.movie.data?.content ?? ""}  ",
+                                    style: Style.body.copyWith(color: Colors.white.withOpacity(0.4)),
+                                    trimLength: 250,
+                                  ),
+                                ],
+                              );
+                          }
+                        ),
+                        BlocBuilder<MovieBloc, MovieState>(
+                          buildWhen: (previous, current) => previous.movie.data != current.movie.data,
+                          builder: (context, state){
+                            return BlocBuilder<HomeBloc, HomeState>(
+                              builder: (context, homeState) {
+                                return Column(
+                                  children: state.movie.data?.category?.map((category){
+                                    List<Movie>? movies = homeState.movies[CategoryMovie.getCategoryMovie(category.slug)];
+
+                                    if(movies == null) return const SizedBox();
+                                    return Column(
+                                      children: [
+                                        const SizedBox(height: 10,),
+                                        TitleWidget(
+                                            title: category.name ?? "",
+                                            onTap: (){
+                                            }
+                                        ),
+                                        SizedBox(
+                                          height: 140.w,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                                            child: ListView.separated(
+                                              scrollDirection: Axis.horizontal,
+                                              itemCount: movies.length,
+                                              itemBuilder: (context, index) {
+                                                var item = movies[index];
+                                                return MovieItem(
+                                                    movie: item,
+                                                    onTap: (){
+                                                      viewModel.add(GetInfoMovieEvent(movie: item.toMovieInfo()));
+                                                      widget.draggableScrollController.animateTo(0, duration: const Duration(milliseconds: 200), curve: Curves.bounceIn);
+                                                    }
+                                                );
+                                              },
+                                              separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }).toList() ?? [],
+                                );
+                              },
                             );
-                          },
+                          }
                         ),
                         const SizedBox(height: 20,),
                       ],
