@@ -1,21 +1,24 @@
 
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:chewie/chewie.dart';
 import 'package:spotify/feature/commons/utility/pageutil.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/data/models/db_local/episode_local.dart';
+import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/chip_banner.dart';
-import 'package:video_player/video_player.dart';
 
 import '../../../commons/utility/style_util.dart';
 import '../../blocs/movie/movie_bloc.dart';
 import '../home_screen/widget/action_button.dart';
 import '../overview_movie/widget/chip_text.dart';
 import '../widget/read_more_widget.dart';
+import 'package:better_player/better_player.dart';
 
 class MovieScreen extends StatefulWidget {
   const MovieScreen({super.key});
@@ -27,68 +30,111 @@ class MovieScreen extends StatefulWidget {
 class _MovieScreenState extends State<MovieScreen> {
 
   late MovieBloc viewModel = context.read<MovieBloc>();
+  final DraggableScrollableController _dragController = DraggableScrollableController();
 
-  late VideoPlayerController videoPlayerController;
-  late ChewieController chewieController;
-
-  setChewieController(VideoPlayerController videoPlayerController) {
-    chewieController = ChewieController(
-      videoPlayerController: videoPlayerController,
-      autoPlay: true,
+  BetterPlayerController? _betterPlayerController;
+  setVideoController(String url){
+    _betterPlayerController?.dispose();
+    BetterPlayerConfiguration betterPlayerConfiguration = BetterPlayerConfiguration(
       aspectRatio: 16 / 9,
-      errorBuilder: (context, errorMessage) {
-        return Center(
-          child: IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: (){
-              viewModel.add(ChangeEpisodeMovieEvent(episode: viewModel.state.currentMovie?.episodes?.firstOrNull?.episode?.firstOrNull));
-            },
-          ),
-        );
-      },
+      fit: BoxFit.contain,
+      autoPlay: true,
+      eventListener: _onPlayerEvent,
     );
+    BetterPlayerDataSource dataSource = BetterPlayerDataSource(
+      BetterPlayerDataSourceType.network, url,
+      useAsmsSubtitles: true
+    );
+
+    _betterPlayerController = BetterPlayerController(betterPlayerConfiguration,);
+    _betterPlayerController?.setupDataSource(dataSource);
   }
 
-  final DraggableScrollableController _controller = DraggableScrollableController();
+  _onPlayerEvent(BetterPlayerEvent event){
+
+    /// get current time watch episode
+    Duration? myProgress = event.parameters?['progress'];
+    if(myProgress?.inSeconds != null){
+      currentTime = myProgress!.inSeconds;
+    }
+
+    /// check when player play
+    /// check time watched end show snackBar to watch continue
+    if (event.betterPlayerEventType == BetterPlayerEventType.play
+        && isPlayed == false) {
+      isPlayed = true;
+      int minSecond = 10;
+      var currentEpisode = viewModel.state.currentEpisode;
+      if(currentEpisode?.episodeLocal != null
+          && (currentEpisode?.episodeLocal?.currentSecond ?? 0) > minSecond
+      ){
+        showSnackBarContinueEpisode(currentEpisode?.episodeLocal?.currentSecond ?? 0);
+      }
+    }
+  }
+
   String? previousUrl;
+  handleSelectEpisode(String newUrl){
+    if (newUrl.isNotEmpty && newUrl != previousUrl) {
+      var currentEpisode = viewModel.state.currentEpisode;
+      saveEpisodePreviousToLocal();
+      episodeWillSave = currentEpisode;
+      isPlayed = false;
+      previousUrl = newUrl;
+      setVideoController(newUrl);
+    }
+  }
+
+  StreamSubscription? listenViewModelSubscription;
+
   @override
   void initState() {
-    videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(''));
-    setChewieController(videoPlayerController);
-    viewModel.stream.listen((state){
-      final newUrl = state.currentEpisode?.linkM3u8 ?? '';
-      if (newUrl.isNotEmpty && newUrl != previousUrl) {
-        previousUrl = newUrl;
-
-        if (videoPlayerController.value.isInitialized) {
-          chewieController.dispose();
-          videoPlayerController.dispose();
-        }
-
-        videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(newUrl));
-        setChewieController(videoPlayerController);
-      }
+    setVideoController(viewModel.state.currentEpisode?.linkM3u8 ?? 'link_empty');
+    listenViewModelSubscription = viewModel.stream.listen((state){
+      handleSelectEpisode(state.currentEpisode?.linkM3u8 ?? '');
     });
-
-
     super.initState();
   }
 
   @override
   void dispose() {
-    videoPlayerController.position.then((value){
-      print("currentSecond: $value");
-    });
-    videoPlayerController.dispose();
-    chewieController.dispose();
-    _controller.dispose();
-    viewModel.add(CleanWatchMovieEvent());
+    disposeScreen();
     super.dispose();
   }
 
+  bool isDispose = false;
+  disposeScreen(){
+    if(isDispose) return;
+    listenViewModelSubscription?.cancel();
+    listenViewModelSubscription = null;
+    _betterPlayerController?.dispose();
+    _dragController.dispose();
+    saveEpisodePreviousToLocal();
+    viewModel.add(CleanWatchMovieEvent());
+    isDispose = true;
+  }
+
+  int currentTime = 0;
+  bool isPlayed = false;
+  Episode? episodeWillSave;
+  saveEpisodePreviousToLocal(){
+    printData("save không ${episodeWillSave?.name}");
+    if(episodeWillSave == null) return;
+
+    var episodeLocal = EpisodeLocal.fromWhenWatched(
+        movieID: viewModel.state.currentMovie?.sId ?? "",
+        body: episodeWillSave!,
+        currentSecond: currentTime,
+        lastTime: DateTime.now().millisecondsSinceEpoch
+    );
+    episodeWillSave!.episodeLocal = episodeLocal;
+    viewModel.add(SaveEpisodeMovieWatchedToLocalEvent(episode: episodeLocal));
+  }
+
+  Color? backgroundColor;
+
   double heightBottomNav = 56;
   double heightMovieCollapse = 56;
-
   late double maxSize = 1;
   late double minSize = (heightMovieCollapse + heightBottomNav) / PageUtil.screenHeight;
 
@@ -97,11 +143,12 @@ class _MovieScreenState extends State<MovieScreen> {
     return BlocListener<MovieBloc, MovieState>(
         listenWhen: (previous, current) => current.isExpandWatchMovie && current.currentMovie != null,
         listener: (context, state){
-          _controller.animateTo(
+          _dragController.animateTo(
             maxSize,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           );
+          // context.showSnackBar(content)
         },
         child: NotificationListener<DraggableScrollableNotification>(
           onNotification: (notification) {
@@ -113,7 +160,7 @@ class _MovieScreenState extends State<MovieScreen> {
             return true;
           },
           child: DraggableScrollableSheet(
-              controller: _controller,
+              controller: _dragController,
               initialChildSize: maxSize,
               maxChildSize: maxSize,
               minChildSize: minSize,
@@ -126,309 +173,354 @@ class _MovieScreenState extends State<MovieScreen> {
                     controller: scrollController,
                     child: Stack(
                       children: [
-                        FutureBuilder(
-                            future: viewModel.state.currentMovie?.getColor(),
-                            builder: (context, snapShot) {
-                              return Container(
-                                height: 700,
-                                decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                        begin: const Alignment(1, 1),
-                                        colors: [
-                                          Colors.transparent,
-                                          snapShot.data?.withOpacity(0.5) ?? Colors.transparent,
-                                        ]
-                                    )
-                                ),
-                              );
-                            }
-                        ),
                         BlocBuilder<MovieBloc, MovieState>(
-                            builder: (context, state){
-                              chewieController = chewieController.copyWith(
-                                showControls: state.isExpandWatchMovie ? true : false,
-                              );
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  GestureDetector(
-                                    onTap: state.isExpandWatchMovie ? null : (){
-                                      viewModel.add(ChangeExpandedMovieEvent(isExpand: true));
-                                    },
-                                    behavior: HitTestBehavior.opaque,
-                                    child: Row(
-                                      children: [
-                                        AnimatedContainer(
-                                          height: state.isExpandWatchMovie ? PageUtil.screenWidth / 16 * 9 : heightMovieCollapse,
-                                          width: state.isExpandWatchMovie ? PageUtil.screenWidth : heightMovieCollapse / 9 * 21,
-                                          duration: const Duration(milliseconds: 200),
-                                          child: AspectRatio(
-                                            aspectRatio: state.isExpandWatchMovie ? 16/9 : 21/9,
-                                            child: Chewie(
-                                              controller: chewieController,
-                                            ),
+                          buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
+                          builder: (context, state){
+                            return FutureBuilder(
+                                future: viewModel.state.currentMovie?.getColor(),
+                                builder: (context, snapShot) {
+                                  backgroundColor = snapShot.data;
+                                  return Container(
+                                    height: 700,
+                                    decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                            begin: const Alignment(1, 1),
+                                            colors: [
+                                              Colors.transparent,
+                                              snapShot.data?.withOpacity(0.5) ?? Colors.transparent,
+                                            ]
+                                        )
+                                    ),
+                                  );
+                                }
+                            );
+                          }
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            BlocBuilder<MovieBloc, MovieState>(
+                              builder: (context, state){
+                                _betterPlayerController?.setControlsEnabled(state.isExpandWatchMovie ? true : false);
+                                return GestureDetector(
+                                  onTap: state.isExpandWatchMovie ? null : (){
+                                    viewModel.add(ChangeExpandedMovieEvent(isExpand: true));
+                                  },
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Row(
+                                    children: [
+                                      AnimatedContainer(
+                                        height: state.isExpandWatchMovie ? PageUtil.screenWidth / 16 * 9 : heightMovieCollapse,
+                                        width: state.isExpandWatchMovie ? PageUtil.screenWidth : heightMovieCollapse / 9 * 21,
+                                        duration: const Duration(milliseconds: 200),
+                                        child: AspectRatio(
+                                          aspectRatio: state.isExpandWatchMovie ? 16/9 : 21/9,
+                                          child: BetterPlayer(
+                                            controller: _betterPlayerController!,
                                           ),
                                         ),
-                                        if(!state.isExpandWatchMovie)
-                                          Expanded(
-                                            child: Row(
-                                              children: [
-                                                const Spacer(flex: 1,),
-                                                Expanded(
-                                                  flex: 13,
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(state.currentMovie?.name ?? "", style: Style.title2, maxLines: 1, overflow: TextOverflow.ellipsis,),
-                                                      Text(state.currentEpisode?.name ?? "", style: Style.body, maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                      ),
+                                      if(!state.isExpandWatchMovie)
+                                        Expanded(
+                                          child: Row(
+                                            children: [
+                                              const Spacer(flex: 1,),
+                                              Expanded(
+                                                flex: 13,
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(state.currentMovie?.name ?? "", style: Style.title2, maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                                    Text(state.currentEpisode?.name ?? "", style: Style.body, maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                                  ],
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 4,
+                                                child: IconButton(
+                                                  onPressed: (){
+                                                    if(_betterPlayerController?.isPlaying() == true){
+                                                      _betterPlayerController?.pause();
+                                                    }else{
+                                                      _betterPlayerController?.play();
+                                                    }
+                                                  },
+                                                  icon: const Icon(Icons.play_circle_outlined)
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 4,
+                                                child: IconButton(
+                                                  onPressed: (){
+                                                    disposeScreen();
+                                                  },
+                                                  icon: const Icon(Icons.clear)
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                    ],
+                                  ),
+                                );
+                              }
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  const SizedBox(height: 10,),
+                                  BlocBuilder<MovieBloc, MovieState>(
+                                    buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
+                                    builder: (context, state){
+                                      return Text(state.currentMovie?.name ?? "",
+                                        style: Style.title.copyWith(fontSize: 20.sp),
+                                      );
+                                    }
+                                  ),
+                                  const SizedBox(height: 5,),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                        child: BlocBuilder<MovieBloc, MovieState>(
+                                          buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
+                                          builder: (context, state){
+                                            return Wrap(
+                                                children: [
+                                                  if(state.currentMovie?.time != null)
+                                                    Text(state.currentMovie?.time ?? "", style: Style.body,),
+                                                  if(state.currentMovie?.time != null)
+                                                    ...[
+                                                      const SizedBox(width: 5,),
+                                                      ChipText(
+                                                          child: Text(
+                                                              "${state.currentMovie?.episodeCurrent}",
+                                                              style: Style.body.copyWith(fontSize: 10.sp)
+                                                          )
+                                                      ),
                                                     ],
+                                                  if(state.currentMovie?.time != null)
+                                                    ...[
+                                                      const SizedBox(width: 5,),
+                                                      ChipText(
+                                                          child: Text("${state.currentMovie?.quality}",
+                                                              style: Style.body.copyWith(fontSize: 10.sp)
+                                                          )
+                                                      ),
+                                                    ],
+                                                  if(state.currentMovie?.year != null)
+                                                    ...[
+                                                      const SizedBox(width: 10,),
+                                                      Text("${state.currentMovie?.year}",
+                                                        style: Style.body,
+                                                      ),
+                                                    ],
+                                                  if(state.currentMovie?.lang != null)
+                                                    ...[
+                                                      const SizedBox(width: 5,),
+                                                      ChipText(
+                                                          child: Text(
+                                                              "${state.currentMovie?.lang}",
+                                                              style: Style.body.copyWith(fontSize: 10.sp)
+                                                          )
+                                                      ),
+                                                    ],
+                                                ]
+                                            );
+                                          }
+                                        ),
+                                      ),
+                                      const SizedBox(width: 20,),
+                                      BlocBuilder<MovieBloc, MovieState>(
+                                        buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
+                                        builder: (context, state){
+                                          return Text("${state.currentMovie?.view?.format() ?? 0} views",
+                                            style: Style.body.copyWith(color: Colors.green),
+                                          );
+                                        }
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10,),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: ActionButton(
+                                          title: const Text("My List"),
+                                          icon: const Icon(FontAwesomeIcons.plus),
+                                          onTap: (){
+
+                                          },
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: ActionButton(
+                                          title: const Text("Download"),
+                                          icon: const Icon(FontAwesomeIcons.download),
+                                          onTap: (){
+
+                                          },
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: ActionButton(
+                                          title: const Text("Share"),
+                                          icon: const Icon(FontAwesomeIcons.paperPlane),
+                                          onTap: (){
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  BlocBuilder<MovieBloc, MovieState>(
+                                    buildWhen: (previous, current) => previous.currentMovie != current.currentMovie || previous.currentEpisode != current.currentEpisode,
+                                    builder: (context, state){
+                                      if((state.currentMovie?.episodes?.firstOrNull?.episode?.length ?? 0) <= 1){
+                                        return const SizedBox();
+                                      }
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(height: 15,),
+                                          Wrap(
+                                            children: state.currentMovie?.episodes?.firstOrNull?.episode?.map((episode){
+                                              String name = episode.name ?? "";
+                                              String content = name.substring(name.indexOf(" ") + 1, name.length);
+
+                                              bool isSelect = episode.slug == state.currentEpisode?.slug;
+                                              bool watched = episode.episodeLocal != null;
+                                              return Container(
+                                                padding: const EdgeInsets.all(4),
+                                                child: GestureDetector(
+                                                  onTap: (){
+                                                    viewModel.add(ChangeEpisodeMovieEvent(episode: episode));
+                                                  },
+                                                  child: ChipBanner(
+                                                      colors: isSelect || watched
+                                                          ? const [Colors.white12, Colors.white12]
+                                                          : const [Colors.white38, Colors.white38],
+                                                      child: Padding(
+                                                          padding: const EdgeInsets.all(4),
+                                                          child: Text(content, style: Style.body.copyWith(
+                                                            color: isSelect ? Colors.red : null,
+                                                          ),)
+                                                      )
                                                   ),
                                                 ),
-                                                Expanded(
-                                                  flex: 4,
-                                                  child: IconButton(
-                                                    onPressed: (){
-                                                      if(chewieController.isPlaying){
-                                                        chewieController.pause();
-                                                      }else{
-                                                        chewieController.play();
-                                                      }
-                                                    },
-                                                    icon: const Icon(Icons.play_circle_outlined)
+                                              );
+                                            }).toList() ?? [],
+                                          )],
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(height: 15,),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(
+                                          flex: 2,
+                                          child: BlocBuilder<MovieBloc, MovieState>(
+                                            buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
+                                            builder: (context, state){
+                                              return CachedNetworkImage(
+                                                imageUrl: state.currentMovie?.getPosterUrl ?? "",
+                                                fit: BoxFit.cover,
+                                              );
+                                            }
+                                          )
+                                      ),
+                                      const SizedBox(width: 8,),
+                                      Expanded(
+                                        flex: 3,
+                                        child: BlocBuilder<MovieBloc, MovieState>(
+                                          buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
+                                          builder: (context, state){
+                                            return Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              children: [
+                                                RichText(
+                                                  text: TextSpan(
+                                                      children: [
+                                                        TextSpan(text: "Category: ",
+                                                            style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                                                        ),
+                                                        TextSpan(text: state.currentMovie?.category?.map((category) => category.name).toList().join(", ") ?? "",
+                                                            style: Style.body
+                                                        ),
+                                                      ]
                                                   ),
                                                 ),
-                                                Expanded(
-                                                  flex: 4,
-                                                  child: IconButton(
-                                                    onPressed: (){
-                                                      viewModel.add(CleanWatchMovieEvent());
-                                                    },
-                                                    icon: const Icon(Icons.clear)
+                                                const SizedBox(height: 5,),
+                                                RichText(
+                                                  text: TextSpan(
+                                                      children: [
+                                                        TextSpan(text: "Country: ",
+                                                            style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                                                        ),
+                                                        TextSpan(text: state.currentMovie?.country?.map((country) => country.name).toList().join(", ") ?? "",
+                                                            style: Style.body
+                                                        ),
+                                                      ]
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 5,),
+                                                RichText(
+                                                  text: TextSpan(
+                                                      children: [
+                                                        TextSpan(text: "Actor: ",
+                                                            style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                                                        ),
+                                                        TextSpan(text: state.currentMovie?.actor?.join(", ") ?? "",
+                                                            style: Style.body
+                                                        ),
+                                                      ]
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 5,),
+                                                RichText(
+                                                  text: TextSpan(
+                                                      children: [
+                                                        TextSpan(text: "Director: ",
+                                                            style: Style.body.copyWith(fontWeight: FontWeight.w700)
+                                                        ),
+                                                        TextSpan(text: state.currentMovie?.director?.join(", ") ?? "",
+                                                            style: Style.body
+                                                        ),
+                                                      ]
                                                   ),
                                                 ),
                                               ],
-                                            ),
+                                            );
+                                          }
+                                        ),
+                                      ),
+                                    ],),
+                                  const SizedBox(height: 5,),
+                                  BlocBuilder<MovieBloc, MovieState>(
+                                    buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
+                                    builder: (context, state){
+                                      return Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text("Mô tả"),
+                                          ReadMoreText(
+                                            "${state.currentMovie?.content ?? ""}  ",
+                                            style: Style.body.copyWith(color: Colors.white.withOpacity(0.4)),
+                                            trimLength: 250,
                                           )
-                                      ],
-                                    ),
+                                        ],
+                                      );
+                                    }
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(height: 10,),
-                                        Text(state.currentMovie?.name ?? "",
-                                          style: Style.title.copyWith(fontSize: 20.sp),
-                                        ),
-                                        const SizedBox(height: 5,),
-                                        Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Expanded(
-                                              child: Wrap(
-                                                  children: [
-                                                    if(state.currentMovie?.time != null)
-                                                      Text(state.currentMovie?.time ?? "", style: Style.body,),
-                                                    if(state.currentMovie?.time != null)
-                                                      ...[
-                                                        const SizedBox(width: 5,),
-                                                        ChipText(
-                                                            child: Text(
-                                                                "${state.currentMovie?.episodeCurrent}",
-                                                                style: Style.body.copyWith(fontSize: 10.sp)
-                                                            )
-                                                        ),
-                                                      ],
-                                                    if(state.currentMovie?.time != null)
-                                                      ...[
-                                                        const SizedBox(width: 5,),
-                                                        ChipText(
-                                                            child: Text("${state.currentMovie?.quality}",
-                                                                style: Style.body.copyWith(fontSize: 10.sp)
-                                                            )
-                                                        ),
-                                                      ],
-                                                    if(state.currentMovie?.year != null)
-                                                      ...[
-                                                        const SizedBox(width: 10,),
-                                                        Text("${state.currentMovie?.year}",
-                                                          style: Style.body,
-                                                        ),
-                                                      ],
-                                                    if(state.currentMovie?.lang != null)
-                                                      ...[
-                                                        const SizedBox(width: 5,),
-                                                        ChipText(
-                                                            child: Text(
-                                                                "${state.currentMovie?.lang}",
-                                                                style: Style.body.copyWith(fontSize: 10.sp)
-                                                            )
-                                                        ),
-                                                      ],
-                                                  ]
-                                              ),
-                                            ),
-                                            const SizedBox(width: 20,),
-                                            Text("${state.currentMovie?.view?.format() ?? 0} views",
-                                              style: Style.body.copyWith(color: Colors.green),
-                                            )
-                                          ],
-                                        ),
-                                        const SizedBox(height: 10,),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: ActionButton(
-                                                title: const Text("My List"),
-                                                icon: const Icon(FontAwesomeIcons.plus),
-                                                onTap: (){
-
-                                                },
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: ActionButton(
-                                                title: const Text("Download"),
-                                                icon: const Icon(FontAwesomeIcons.download),
-                                                onTap: (){
-
-                                                },
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: ActionButton(
-                                                title: const Text("Share"),
-                                                icon: const Icon(FontAwesomeIcons.paperPlane),
-                                                onTap: (){
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        if((state.currentMovie?.episodes?.firstOrNull?.episode?.length ?? 0) > 1)
-                                          ...[
-
-                                            const SizedBox(height: 15,),
-                                            Wrap(
-                                              children: state.currentMovie?.episodes?.firstOrNull?.episode?.map((episode){
-                                                String name = episode.name ?? "";
-                                                String content = name.substring(name.indexOf(" ") + 1, name.length);
-                                                bool watched = false;
-                                                bool isSelect = episode.slug == state.currentEpisode?.slug;
-                                                return Container(
-                                                  padding: const EdgeInsets.all(4),
-                                                  child: GestureDetector(
-                                                    onTap: (){
-                                                      viewModel.add(ChangeEpisodeMovieEvent(episode: episode));
-                                                    },
-                                                    child: ChipBanner(
-                                                        colors: isSelect || watched
-                                                            ? const [Colors.white12, Colors.white12]
-                                                            : const [Colors.white38, Colors.white38],
-                                                        child: Padding(
-                                                            padding: const EdgeInsets.all(4),
-                                                            child: Text(content, style: Style.body.copyWith(
-                                                              color: isSelect ? Colors.red : null,
-                                                            ),)
-                                                        )
-                                                    ),
-                                                  ),
-                                                );
-                                              }).toList() ?? [],
-                                            ),
-                                          ],
-                                        const SizedBox(height: 15,),
-                                        Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Expanded(
-                                                flex: 2,
-                                                child: CachedNetworkImage(
-                                                  imageUrl: state.currentMovie?.getPosterUrl ?? "",
-                                                  fit: BoxFit.cover,
-                                                )
-                                            ),
-                                            const SizedBox(width: 8,),
-                                            Expanded(
-                                              flex: 3,
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                children: [
-                                                  RichText(
-                                                    text: TextSpan(
-                                                        children: [
-                                                          TextSpan(text: "Category: ",
-                                                              style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                                          ),
-                                                          TextSpan(text: state.currentMovie?.category?.map((category) => category.name).toList().join(", ") ?? "",
-                                                              style: Style.body
-                                                          ),
-                                                        ]
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 5,),
-                                                  RichText(
-                                                    text: TextSpan(
-                                                        children: [
-                                                          TextSpan(text: "Country: ",
-                                                              style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                                          ),
-                                                          TextSpan(text: state.currentMovie?.country?.map((country) => country.name).toList().join(", ") ?? "",
-                                                              style: Style.body
-                                                          ),
-                                                        ]
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 5,),
-                                                  RichText(
-                                                    text: TextSpan(
-                                                        children: [
-                                                          TextSpan(text: "Actor: ",
-                                                              style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                                          ),
-                                                          TextSpan(text: state.currentMovie?.actor?.join(", ") ?? "",
-                                                              style: Style.body
-                                                          ),
-                                                        ]
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 5,),
-                                                  RichText(
-                                                    text: TextSpan(
-                                                        children: [
-                                                          TextSpan(text: "Director: ",
-                                                              style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                                          ),
-                                                          TextSpan(text: state.currentMovie?.director?.join(", ") ?? "",
-                                                              style: Style.body
-                                                          ),
-                                                        ]
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],),
-                                        const SizedBox(height: 5,),
-                                        if(state.currentMovie?.content != null)
-                                          ...[
-                                            const Text("Mô tả"),
-                                            ReadMoreText(
-                                              "${state.currentMovie?.content ?? ""}  ",
-                                              style: Style.body.copyWith(color: Colors.white.withOpacity(0.4)),
-                                              trimLength: 250,
-                                            ),
-                                          ],
-                                        const SizedBox(height: 20,),
-                                      ],
-                                    ),
-                                  ),
+                                  const SizedBox(height: 20,),
                                 ],
-                              );
-                            }
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -439,4 +531,32 @@ class _MovieScreenState extends State<MovieScreen> {
         )
     );
   }
+
+  showSnackBarContinueEpisode(int seconds){
+    var minuteSeconds = seconds / 60;
+    var minute = minuteSeconds.truncate();
+    var second = ((double.parse(minuteSeconds.toStringAsFixed(2)) - minute) * 60).toInt();
+
+    context.showSnackBarWidget(
+        child: Row(
+          children: [
+            Expanded(child: Text("Bạn đã xem đến $minute phút $second giây", style: Style.body.copyWith(color: Colors.white),)),
+            const SizedBox(width: 10,),
+            GestureDetector(
+              onTap: (){
+                _betterPlayerController?.seekTo(Duration(seconds: seconds));
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+              child: Text("Xem",
+                  style: Style.title2.copyWith(color: Colors.white)
+              ),
+            ),
+          ],
+        ),
+        seconds: 5,
+        backgroundColor: backgroundColor
+    );
+
+  }
+
 }

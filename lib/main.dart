@@ -6,6 +6,7 @@ import 'package:spotify/feature/presentation/blocs/home/home_bloc.dart';
 import 'package:spotify/feature/presentation/blocs/main/main_bloc_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/blocs/search/search_bloc.dart';
+import 'package:spotify/feature/presentation/blocs/watched/watched_cubit.dart';
 import 'package:spotify/feature/presentation/screen/main/main_screen.dart';
 import 'feature/commons/utility/pageutil.dart';
 import 'feature/data/local/hive_manager.dart';
@@ -50,6 +51,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<HomeBloc>(create: (context) => sl<HomeBloc>()),
         BlocProvider<MovieBloc>(create: (context) => sl<MovieBloc>()),
         BlocProvider<SearchBloc>(create: (context) => sl<SearchBloc>()),
+        BlocProvider<WatchedCubit>(create: (context) => sl<WatchedCubit>()),
       ],
       child: Builder(
         builder: (context) {

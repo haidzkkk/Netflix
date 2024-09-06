@@ -1,3 +1,5 @@
+import 'package:spotify/feature/data/models/db_local/episode_local.dart';
+
 import 'movie_info.dart';
 
 class MovieInfoResponse {
@@ -68,8 +70,10 @@ class Episode {
   String? linkEmbed;
   String? linkM3u8;
 
+  EpisodeLocal? episodeLocal;
+
   Episode(
-      {this.name, this.slug, this.filename, this.linkEmbed, this.linkM3u8});
+      {this.name, this.slug, this.filename, this.linkEmbed, this.linkM3u8, this.episodeLocal});
 
   Episode.fromJson(Map<String, dynamic> json) {
     name = json['name'];

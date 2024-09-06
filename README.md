@@ -12,4 +12,4 @@ change the icon app
 
 flutter gen asset
 - fluttergen -h
-- fluttergen -c example/pubspec.yaml
+- fluttergen -c pubspec.yaml

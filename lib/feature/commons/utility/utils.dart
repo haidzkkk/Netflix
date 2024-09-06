@@ -86,12 +86,24 @@ extension BuildContextExt on BuildContext{
   }
 
   void showSnackBar(String content){
-    var snackbar = SnackBar(
+    ScaffoldMessenger.of(this).hideCurrentSnackBar();
+    var snackBar = SnackBar(
       content: Text(content, style: Style.body.copyWith(color: Colors.white),),
-      backgroundColor: Colors.purple,
+      backgroundColor: Colors.brown,
     );
 
-    ScaffoldMessenger.of(this).showSnackBar(snackbar);
+    ScaffoldMessenger.of(this).showSnackBar(snackBar);
+  }
+
+  void showSnackBarWidget({required Widget child, int? seconds, Color? backgroundColor}){
+    ScaffoldMessenger.of(this).hideCurrentSnackBar();
+    SnackBar snackBar = SnackBar(
+      content: child,
+      backgroundColor: backgroundColor ?? Colors.brown,
+      duration: Duration(seconds: seconds ?? 2),
+    );
+
+    ScaffoldMessenger.of(this).showSnackBar(snackBar);
   }
 }
 

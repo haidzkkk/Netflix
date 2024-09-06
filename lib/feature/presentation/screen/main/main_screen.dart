@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:spotify/feature/data/models/category_movie.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/home_screen.dart';
 import 'package:spotify/feature/presentation/screen/main/widget/item_bottom_bar.dart';
 import 'package:spotify/feature/presentation/screen/movie/movie_screen.dart';
@@ -35,7 +36,9 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
-    homeViewModel.add(GetAllCategoryMovie());
+    for (var category in CategoryMovie.values) {
+      homeViewModel.add(GetCategoryMovie(category));
+    }
     super.initState();
   }
 
@@ -48,14 +51,6 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // body: BlocBuilder<HomeBloc, HomeState>(
-      //   builder: (context, state) {
-      //     return IndexedStack(
-      //       index: state.currentPageIndex,
-      //       children: screens,
-      //     );
-      //   },
-      // ),
       body: Stack(
         children: [
           Positioned.fill(
@@ -92,12 +87,14 @@ class _MainScreenState extends State<MainScreen> {
                 right: 0,
                 duration: const Duration(milliseconds: 300),
                 child: BlocBuilder<HomeBloc, HomeState>(
+                    buildWhen: (previous, current) => previous.currentPageIndex != current.currentPageIndex,
                   builder: (context, state) {
                     return BottomNavigationBar(
                       enableFeedback: true,
                       type: BottomNavigationBarType.fixed,
                       iconSize: 18,
                       currentIndex: state.currentPageIndex,
+                      backgroundColor: Colors.black,
                       onTap: (value) => homeViewModel.add(PageIndexHomeEvent(value)),
                       selectedItemColor: Colors.white,
                       selectedLabelStyle: const TextStyle(color: Colors.white),

@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:spotify/feature/data/repositories/movie_repo.dart';
 import 'package:spotify/feature/presentation/blocs/main/main_bloc_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/presentation/blocs/watched/watched_cubit.dart';
 import '../commons/utility/locale_util.dart';
 import '../commons/utility/theme_ulti.dart';
 import '../data/api/api_client.dart';
@@ -45,6 +46,7 @@ Future<void> init() async {
   sl.registerFactory(() => MainBloc(sharedPreferences: sl(), localeHelper: sl(), themeHelper: sl()));
   sl.registerFactory(() => MovieBloc(sl(), sl()));
   sl.registerFactory(() => SearchBloc(repo: sl()));
+  sl.registerFactory(() => WatchedCubit(localRepo: sl()));
 
   ///[Repository]
   sl.registerFactory(() => AuthRepo(apiClient: sl(), sharedPreferences: sl()));

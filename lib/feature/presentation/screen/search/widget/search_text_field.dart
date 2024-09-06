@@ -58,6 +58,9 @@ class _SearchTextFieldState extends State<SearchTextField> {
         },
         focusNode: focusNode,
         controller: textCtrl,
+        onTapOutside: (PointerDownEvent event){
+          focusNode.unfocus();
+        },
         onEditingComplete: (){
           if(widget.onChange != null) widget.onChange!(textCtrl.text);
           focusNode.unfocus();

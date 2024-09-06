@@ -35,11 +35,13 @@ class DataBaseHelper{
       ${MovieLocalField.movieLastTime} INTEGER
       )''');
 
-    await db.execute('''CREATE TABLE ${EpisodeLocalField.episodeTableName}(
-      ${EpisodeLocalField.episodeId} INTEGER PRIMARY KEY AUTOINCREMENT,
+    await db.execute('''CREATE TABLE ${EpisodeLocalField.tableName}(
+      ${EpisodeLocalField.id} TEXT PRIMARY KEY,
       ${EpisodeLocalField.movieId} TEXT,
-      ${EpisodeLocalField.episodeSlug} TEXT,
-      ${EpisodeLocalField.episodeName} TEXT
+      ${EpisodeLocalField.slug} TEXT,
+      ${EpisodeLocalField.name} TEXT,
+      ${EpisodeLocalField.lastTime} INTEGER,
+      ${EpisodeLocalField.currentSecond} INTEGER
       )''');
 
     await db.execute('''CREATE TABLE ${HistoryLocalField.historyTableName}(
@@ -50,12 +52,21 @@ class DataBaseHelper{
   }
   Future<List<Map<String, dynamic>>> getAll({
     required String tableName,
-    String? orderBy
+    Map<String, dynamic>? whereParams,
+    MapEntry<bool, String>? arrange,
+    int? pageSize,
+    int? pageIndex,
   }) async{
+    var offset = pageIndex == null || pageSize == null || pageIndex <= 1 ? 0 : ((pageIndex - 1) * pageSize);
+
     final db = await instance.database;
     return await db.query(
       tableName,
-      orderBy: orderBy
+      orderBy: "${arrange?.value} ${arrange?.key == false ? "ASC" : "DESC"}",
+      where: whereParams?.keys.map(((key) => "$key = ?")).toList().join(" and "),
+      whereArgs: whereParams?.values.toList(),
+      limit: pageSize,
+      offset: offset,
     );
   }
 

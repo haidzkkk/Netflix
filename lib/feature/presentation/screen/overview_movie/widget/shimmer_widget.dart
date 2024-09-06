@@ -18,7 +18,7 @@ class ShimmerWidget extends StatelessWidget {
         child: Container(
           height: height,
           width: width,
-          color: Colors.white,
+          color: Colors.white.withOpacity(0.5),
         )
     );
   }
