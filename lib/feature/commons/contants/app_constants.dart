@@ -26,4 +26,8 @@ class AppConstants{
   static const String dbHive = "netflix.hive.haidzkkk";
   static const String movieHistoryBoxName = 'MovieHistoryBox';
   static const String searchBoxName = 'searchBox';
+
+  static const String methodChanelDownload = 'com.example.method_chanel/download';
+  static const String downloadStartDownload = 'startService';
+  static const String downloadStopDownload = 'stopService';
 }
