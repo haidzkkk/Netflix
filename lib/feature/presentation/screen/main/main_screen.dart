@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/data/models/category_movie.dart';
+import 'package:spotify/feature/presentation/screen/download/download_screen.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/home_screen.dart';
 import 'package:spotify/feature/presentation/screen/main/widget/item_bottom_bar.dart';
 import 'package:spotify/feature/presentation/screen/movie/movie_screen.dart';
@@ -30,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
     const HomeScreen(),
     const FilterScreen(),
     const WatchedScreen(),
-    const SizedBox(),
+    const DownloadScreen(),
     const SizedBox(),
   ];
 

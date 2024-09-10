@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/services.dart';
 import 'package:spotify/feature/commons/contants/app_constants.dart';
+import 'package:spotify/feature/commons/utility/file_util.dart';
 import 'package:spotify/feature/data/models/db_local/episode_local.dart';
 import 'package:spotify/feature/data/models/db_local/movie_local.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
@@ -100,10 +101,14 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       Emitter<MovieState> emit
   ) async{
 
-    var localPath = await getLocalPathVideo(
+    var localPath = await FileUtil.getLocalPathToDownloadVideo(
         movieName: event.movie.slug!,
         episodeName: event.episode.slug!
     );
+
+    if(localPath == null){
+      return;
+    }
 
     var data = {
       "movie_name": "${event.movie.name} - ${event.episode.name}",

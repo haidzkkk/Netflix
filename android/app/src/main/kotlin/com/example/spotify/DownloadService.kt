@@ -1,80 +1,74 @@
 package com.example.spotify
 
-import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.media.MediaPlayer
-import android.net.Uri
 import android.os.IBinder
-import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.arthenica.mobileffmpeg.Config
-import com.arthenica.mobileffmpeg.Config.RETURN_CODE_CANCEL
-import com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS
-import com.arthenica.mobileffmpeg.FFmpeg
-import com.example.spotify.AppConstants
 import com.example.spotify.data.model.MovieEpisode
+import com.example.spotify.data.model.StatusEnum
+import com.example.spotify.data.viewmodel.DownloadViewModel
+import com.example.spotify.data.viewmodel.IEventListener
 
 
 class DownloadService : Service() {
+    lateinit var viewMode: DownloadViewModel
+
     override fun onBind(p0: Intent?): IBinder? = null
 
     override fun onCreate() {
+        viewMode = DownloadViewModel(object: IEventListener{
+            override fun onDownload(currentMovieEpisode: MovieEpisode) {
+                when(currentMovieEpisode.status.status){
+                    StatusEnum.LOADING -> {
+                        showNotifyForeground(
+                            title = "${currentMovieEpisode.status.data} (${currentMovieEpisode.getExecuteProcessDownload()}%)",
+                            message = currentMovieEpisode.name ?: ""
+                        )
+                    }
+                    StatusEnum.SUCCESS -> {
+                        showNotify(
+                            title = currentMovieEpisode.status.data ?: "",
+                            message = currentMovieEpisode.name ?: ""
+                        )
+                    }
+                    StatusEnum.ERROR -> {
+                        showNotify(
+                            title = currentMovieEpisode.status.data ?: "",
+                            message = currentMovieEpisode.name ?: ""
+                        )
+                    }
+                    else -> {
+                        showNotifyForeground()
+                    }
+                }
+            }
+
+            override fun onDownloaded() {
+                stopSelf()
+            }
+        })
         super.onCreate()
     }
 
-    var movieName: String = "";
-
-    @SuppressLint("NewApi")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val data = intent?.getSerializableExtra(AppConstants.DOWNLOAD_SERVICE_DATA)
-        val movieEpisode: MovieEpisode? = if(data != null) (data as MovieEpisode?) else null;
+        val movieEpisode: MovieEpisode? = if(data != null) (data as MovieEpisode?) else null
 
-        val url: String = movieEpisode?.url ?: ""
-        val localPath: String = movieEpisode?.localPath ?: ""
-        movieName = movieEpisode?.name ?: ""
-
-        showNotifiForeground(0)
-        downloadM3u8(url = url, localPath = localPath)
+        if(movieEpisode != null){
+            viewMode.setData(applicationContext, movieEpisode)
+        }
+        showNotifyForeground()
         return START_STICKY
     }
 
-    private fun downloadM3u8(url: String, localPath: String){
-        val executionId = FFmpeg.executeAsync(
-            "-i $url -c:v mpeg4 -y $localPath"
-        ) { _, returnCode ->
-            if (returnCode == RETURN_CODE_SUCCESS) {
-                showNotifi(title = "Download successfully", message = "Đã tải phim thành công")
-            } else if (returnCode == RETURN_CODE_CANCEL) {
-                showNotifi(title = "Download cancel", message = "Bạn đã hủy tải phim")
-            } else {
-                showNotifi(title = "Download failed", message = "Tải phim thất bại")
-            }
-
-            stopSelf()
-        }
-        val videoLength: Int = MediaPlayer.create(applicationContext, Uri.parse(url)).duration
-        listenExecuteProcess(videoLength)
-    }
-
-    private fun listenExecuteProcess(videoLength: Int){
-        Config.enableStatisticsCallback { newStatistics ->
-            val frame = newStatistics.videoFrameNumber
-            val processTime = newStatistics.time
-            val executeProcess: Int = ((processTime.toDouble() / videoLength.toDouble()) * 100).toInt()
-            Log.e("progress", "frame: ${frame}, current: $processTime, total: $videoLength - process: $executeProcess")
-            showNotifiForeground(executeProcess)
-        }
-    }
-
-    fun showNotifi(title: String, message: String){
+    fun showNotify(title: String, message: String){
         val notification: Notification = NotificationCompat.Builder(this, AppConstants.CHANNEL_ID)
-            .setSmallIcon(R.drawable.launch_background)
+            .setSmallIcon(R.mipmap.app_icon)
             .setContentTitle(title)
-            .setContentText("$movieName")
+            .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .build()
 
@@ -82,11 +76,14 @@ class DownloadService : Service() {
             .notify(0, notification)
     }
 
-    fun showNotifiForeground(executeProcess: Int){
+    fun showNotifyForeground(
+        title: String = "Đang chạy dịch vụ download",
+        message: String = "Không có phim để tải"
+    ){
         val notification: Notification = NotificationCompat.Builder(this, AppConstants.CHANNEL_ID)
-            .setSmallIcon(R.drawable.launch_background)
-            .setContentTitle("Downloading ($executeProcess%)")
-            .setContentText("$movieName")
+            .setSmallIcon(R.mipmap.app_icon)
+            .setContentTitle(title)
+            .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .build()
 
