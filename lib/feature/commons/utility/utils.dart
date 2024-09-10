@@ -15,6 +15,10 @@ void printData(String? content){
   }
 }
 
+double bytesToMb(double bytes){
+  return bytes / (1024 * 1024);
+}
+
 double calculateHeightItemGirdView(BuildContext context, double height, int columnCount){
   double widgetItem = MediaQuery.of(context).size.width / columnCount;
   return widgetItem / height;
