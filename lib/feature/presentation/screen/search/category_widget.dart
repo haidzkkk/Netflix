@@ -1,11 +1,9 @@
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/data/models/status.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/shimmer_widget.dart';
-import 'package:spotify/feature/presentation/screen/widget/custom_refresh.dart';
 
 import '../../../commons/utility/utils.dart';
 import '../../../data/models/category_movie.dart';
@@ -26,8 +24,6 @@ class CategoryWidget extends StatefulWidget {
 class _CategoryWidgetState extends State<CategoryWidget> {
   late SearchBloc searchViewModel = context.read<SearchBloc>();
   ScrollController scrollController = ScrollController();
-  RefreshController refreshController = RefreshController();
-
 
   @override
   void initState() {
@@ -44,7 +40,6 @@ class _CategoryWidgetState extends State<CategoryWidget> {
   @override
   void dispose() {
     scrollController.dispose();
-    refreshController.dispose();
     super.dispose();
   }
 
@@ -57,9 +52,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
         children: [
           const SizedBox(height: 1,),
           Expanded(
-            child: CustomRefresh(
-              controller: refreshController,
-              scrollController: scrollController,
+            child: RefreshIndicator(
               onRefresh: () async{
                 searchViewModel.fetchMoviesCategory(widget.categoryMovie, true);
                 await searchViewModel.stream.firstWhere(
@@ -74,8 +67,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                   var heightItem = calculateHeightItemGirdView(context, 80.h, itemCount);
 
                   return GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                    controller: scrollController,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: itemCount,
                         mainAxisSpacing: 10,

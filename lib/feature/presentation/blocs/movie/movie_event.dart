@@ -37,3 +37,15 @@ class SaveEpisodeMovieWatchedToLocalEvent extends MovieEvent{
   EpisodeLocal episode;
   SaveEpisodeMovieWatchedToLocalEvent({required this.episode});
 }
+
+class StartDownloadEpisodeMovieEvent extends MovieEvent{
+  MovieInfo movie;
+  Episode episode;
+  StartDownloadEpisodeMovieEvent({required this.movie, required this.episode});
+}
+
+class CancelDownloadEpisodeMovieEvent extends MovieEvent{
+  MovieInfo movie;
+  Episode episode;
+  CancelDownloadEpisodeMovieEvent({required this.movie, required this.episode});
+}

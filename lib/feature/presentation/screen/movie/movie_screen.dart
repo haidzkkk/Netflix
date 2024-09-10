@@ -4,8 +4,10 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:spotify/feature/commons/contants/app_constants.dart';
 import 'package:spotify/feature/commons/utility/pageutil.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
@@ -73,14 +75,14 @@ class _MovieScreenState extends State<MovieScreen> {
     }
   }
 
-  String? previousUrl;
+  String? currentUrl;
   handleSelectEpisode(String newUrl){
-    if (newUrl.isNotEmpty && newUrl != previousUrl) {
+    if (newUrl.isNotEmpty && newUrl != currentUrl) {
       var currentEpisode = viewModel.state.currentEpisode;
       saveEpisodePreviousToLocal();
       episodeWillSave = currentEpisode;
       isPlayed = false;
-      previousUrl = newUrl;
+      currentUrl = newUrl;
       setVideoController(newUrl);
     }
   }
@@ -359,8 +361,18 @@ class _MovieScreenState extends State<MovieScreen> {
                                         child: ActionButton(
                                           title: const Text("Download"),
                                           icon: const Icon(FontAwesomeIcons.download),
-                                          onTap: (){
+                                          onTap: () async{
+                                            if(currentUrl?.isNotEmpty != true) {
+                                              context.showSnackBar("Không tìm thấy url phim hiện tại");
+                                            }else if(viewModel.state.currentMovie?.slug?.isNotEmpty != true
+                                              || viewModel.state.currentEpisode?.slug?.isNotEmpty != true){
+                                              context.showSnackBar("Không tìm tên, tập phim để lưu vào local");
+                                            }
 
+                                            viewModel.add(StartDownloadEpisodeMovieEvent(
+                                                movie: viewModel.state.currentMovie!,
+                                                episode: viewModel.state.currentEpisode!
+                                            ));
                                           },
                                         ),
                                       ),
@@ -369,6 +381,16 @@ class _MovieScreenState extends State<MovieScreen> {
                                           title: const Text("Share"),
                                           icon: const Icon(FontAwesomeIcons.paperPlane),
                                           onTap: (){
+                                            if(currentUrl?.isNotEmpty != true) {
+                                              context.showSnackBar("Không tìm thấy url phim hiện tại");
+                                            }else if(viewModel.state.currentMovie?.slug?.isNotEmpty != true
+                                                || viewModel.state.currentEpisode?.slug?.isNotEmpty != true){
+                                              context.showSnackBar("Không tìm tên, tập phim để lưu vào local");
+                                            }
+                                            viewModel.add(StartDownloadEpisodeMovieEvent(
+                                                movie: viewModel.state.currentMovie!,
+                                                episode: viewModel.state.currentEpisode!
+                                            ));
                                           },
                                         ),
                                       ),
