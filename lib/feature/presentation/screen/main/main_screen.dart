@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/data/models/category_movie.dart';
+import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
+import 'package:spotify/feature/presentation/blocs/download/download_state.dart';
 import 'package:spotify/feature/presentation/screen/download/download_screen.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/home_screen.dart';
 import 'package:spotify/feature/presentation/screen/main/widget/item_bottom_bar.dart';
@@ -113,12 +115,18 @@ class _MainScreenState extends State<MainScreen> {
                         ItemBottomBar.withChildBadge(
                           icon: const Icon(FontAwesomeIcons.tv),
                           label: "Watched",
-                          badgeCount: 12,
                         ),
                         ItemBottomBar.withChildBadge(
-                          icon: const Icon(FontAwesomeIcons.download),
+                          icon: BlocBuilder<DownloadCubit, DownloadState>(
+                            buildWhen: (previous, current) => previous.moviesDownloading.length != current.moviesDownloading.length,
+                            builder: (context, state) {
+                              return ItemBottomBar.iconBadge(
+                                  count: state.moviesDownloading.length,
+                                  icon: const Icon(FontAwesomeIcons.download)
+                              );
+                            }
+                          ),
                           label: "Download",
-                          badgeCount: 6,
                         ),
                         ItemBottomBar.withChildBadge(
                           icon: const Icon(FontAwesomeIcons.bars),

@@ -19,7 +19,7 @@ class WatchedScreen extends StatefulWidget {
   State<WatchedScreen> createState() => _WatchedScreenState();
 }
 
-class _WatchedScreenState extends State<WatchedScreen> {
+class _WatchedScreenState extends State<WatchedScreen> with AutomaticKeepAliveClientMixin{
 
   late WatchedCubit watchedViewModel = context.read<WatchedCubit>();
   ScrollController scrollController = ScrollController();
@@ -40,6 +40,7 @@ class _WatchedScreenState extends State<WatchedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -101,4 +102,7 @@ class _WatchedScreenState extends State<WatchedScreen> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

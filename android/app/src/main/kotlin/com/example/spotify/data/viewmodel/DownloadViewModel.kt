@@ -1,14 +1,18 @@
 package com.example.spotify.data.viewmodel
 
 import android.content.Context
+import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
 import com.arthenica.mobileffmpeg.Config
 import com.arthenica.mobileffmpeg.FFmpeg
+import com.example.spotify.AppConstants
 import com.example.spotify.data.model.MovieEpisode
 import com.example.spotify.data.model.Status
+import com.google.gson.Gson
 import java.util.*
+import kotlin.collections.ArrayList
 
 interface IEventListener{
     fun onDownload(currentMovieEpisode: MovieEpisode)
@@ -18,12 +22,12 @@ interface IEventListener{
 class DownloadViewModel(private val listener: IEventListener
 ) {
 
-    private val listMovie: Queue<MovieEpisode> = LinkedList()
+    private val moviesWaiting: Queue<MovieEpisode> = LinkedList()
     private var currentMovie: MovieEpisode? = null
 
     fun setData(applicationContext: Context, movie: MovieEpisode){
         calculateTimeDownloadMovie(applicationContext, movie)
-        listMovie.add(movie)
+        moviesWaiting.add(movie)
         if(currentMovie != null) return     /// if downloading -> return
 
         startDownload()
@@ -34,7 +38,7 @@ class DownloadViewModel(private val listener: IEventListener
     }
 
     private fun startDownload(){
-        currentMovie = listMovie.poll()
+        currentMovie = moviesWaiting.poll()
         if(currentMovie == null) {
             listener.onDownloaded()
             return
@@ -53,8 +57,8 @@ class DownloadViewModel(private val listener: IEventListener
                 listener.onDownload(
                     currentMovie!!.apply {
                         status = if (returnCode == Config.RETURN_CODE_CANCEL)
-                                    Status.Success("Download canceled")
-                                else Status.Success("Download failed")
+                                    Status.Error("Download canceled", "")
+                                else Status.Error("Download failed", "")
                     }
                 )
             }
@@ -77,12 +81,23 @@ class DownloadViewModel(private val listener: IEventListener
             if(currentMovie == null) return@enableStatisticsCallback
 
             currentMovie!!.currentSecondTime = newStatistics.time
-            Log.e("progress", "current: ${currentMovie!!.currentSecondTime}, total: $${currentMovie!!.totalSecondTime} - process: $${currentMovie!!.getExecuteProcessDownload()}")
+            Log.e("progress", "current: ${currentMovie!!.currentSecondTime}, total: $${currentMovie!!.totalSecondTime} - process: $${currentMovie!!.executeProcess}")
             listener.onDownload(
                 currentMovie!!.apply {
                     status = Status.Loading("Downloading")
                 }
             )
         }
+    }
+
+
+    fun sendActionToActivity(applicationContext: Context, event: MovieEpisode) {
+        val intent = Intent(AppConstants.ACTION_COMMUNICATE)
+        val arrayProcess = ArrayList<MovieEpisode>();
+        arrayProcess.add(event)
+        arrayProcess.addAll(moviesWaiting)
+        val jsonData: String = Gson().toJson(arrayProcess)
+        intent.putExtra(AppConstants.DOWNLOAD_SERVICE_DATA, jsonData)
+        applicationContext.sendBroadcast(intent)
     }
 }

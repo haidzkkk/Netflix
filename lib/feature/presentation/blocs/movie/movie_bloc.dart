@@ -2,18 +2,13 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/services.dart';
-import 'package:spotify/feature/commons/contants/app_constants.dart';
-import 'package:spotify/feature/commons/utility/file_util.dart';
 import 'package:spotify/feature/data/models/db_local/episode_local.dart';
 import 'package:spotify/feature/data/models/db_local/movie_local.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
-import 'package:spotify/feature/data/models/response/movie.dart';
 import 'package:spotify/feature/data/models/status.dart';
 import 'package:spotify/feature/data/repositories/local_db_repository.dart';
 
-import '../../../commons/utility/utils.dart';
 import '../../../data/repositories/movie_repo.dart';
 
 part 'movie_event.dart';
@@ -33,12 +28,21 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     on<CleanMovieEvent>((event, emit) => emit(state.copyWith(movie: Status.initial())));
     on<InitWatchMovieEvent>(initWatchMovie);
     on<CleanWatchMovieEvent>(cleanWatchMovieEvent);
-    on<ChangeExpandedMovieEvent>((event, emit) => emit(state.copyWith(isExpandWatchMovie: event.isExpand)));
+    on<ChangeExpandedMovieEvent>(changeExpanded);
     on<ChangeEpisodeMovieEvent>(changeEpisode);
 
     on<SaveEpisodeMovieWatchedToLocalEvent>(saveEpisodeMovieWatchedToLocal);
-    on<StartDownloadEpisodeMovieEvent>(startDownloadEpisode);
-    on<CancelDownloadEpisodeMovieEvent>(cancelDownloadEpisode);
+  }
+
+  var durationScroll = const Duration(milliseconds: 300);
+  bool blockScrollListen = false;
+
+  Future<void> changeExpanded(ChangeExpandedMovieEvent event, Emitter<MovieState> emit) async{
+    blockScrollListen = true;
+    emit(state.copyWith(isExpandWatchMovie: event.isExpand));
+    Timer(durationScroll, (){
+      blockScrollListen = false;
+    });
   }
 
   Future<void> getMovie(GetInfoMovieEvent event, Emitter<MovieState> emit) async{
@@ -93,36 +97,6 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
 
   saveEpisodeMovieWatchedToLocal(SaveEpisodeMovieWatchedToLocalEvent event, Emitter<MovieState> emit) async{
     int success = await dbRepository.addEpisodeToHistory(event.episode);
-    printData("save không sâu này ${event.episode.name} ${event.episode.currentSecond},thành công $success");
   }
 
-  startDownloadEpisode(
-      StartDownloadEpisodeMovieEvent event,
-      Emitter<MovieState> emit
-  ) async{
-
-    var localPath = await FileUtil.getLocalPathToDownloadVideo(
-        movieName: event.movie.slug!,
-        episodeName: event.episode.slug!
-    );
-
-    if(localPath == null){
-      return;
-    }
-
-    var data = {
-      "movie_name": "${event.movie.name} - ${event.episode.name}",
-      "url": "https://flipfit-cdn.akamaized.net/flip_hls/661f570aab9d840019942b80-473e0b/video_h1.m3u8",
-      // "url": event.episode.linkM3u8,
-      "local_path": localPath,
-    };
-
-    const MethodChannel(AppConstants.methodChanelDownload)
-        .invokeMethod(AppConstants.downloadStartDownload, data);
-  }
-
-  cancelDownloadEpisode(CancelDownloadEpisodeMovieEvent event, Emitter<MovieState> emit) {
-    const MethodChannel(AppConstants.downloadStartDownload)
-        .invokeMethod(AppConstants.downloadStopDownload);
-  }
 }

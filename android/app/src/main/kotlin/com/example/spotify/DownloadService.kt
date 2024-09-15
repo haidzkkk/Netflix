@@ -21,23 +21,24 @@ class DownloadService : Service() {
     override fun onCreate() {
         viewMode = DownloadViewModel(object: IEventListener{
             override fun onDownload(currentMovieEpisode: MovieEpisode) {
+                viewMode.sendActionToActivity(applicationContext, currentMovieEpisode)
                 when(currentMovieEpisode.status.status){
                     StatusEnum.LOADING -> {
                         showNotifyForeground(
-                            title = "${currentMovieEpisode.status.data} (${currentMovieEpisode.getExecuteProcessDownload()}%)",
-                            message = currentMovieEpisode.name ?: ""
+                            title = "${currentMovieEpisode.status.data} (${currentMovieEpisode.executeProcess}%)",
+                            message = currentMovieEpisode.movieName ?: ""
                         )
                     }
                     StatusEnum.SUCCESS -> {
                         showNotify(
                             title = currentMovieEpisode.status.data ?: "",
-                            message = currentMovieEpisode.name ?: ""
+                            message = currentMovieEpisode.movieName ?: ""
                         )
                     }
                     StatusEnum.ERROR -> {
                         showNotify(
                             title = currentMovieEpisode.status.data ?: "",
-                            message = currentMovieEpisode.name ?: ""
+                            message = currentMovieEpisode.movieName ?: ""
                         )
                     }
                     else -> {

@@ -2,13 +2,18 @@ package com.example.spotify
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
-import android.os.Bundle
+import android.util.Log
 import com.example.spotify.data.model.MovieEpisode
 import com.example.spotify.data.model.Status
+import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
@@ -21,19 +26,54 @@ class MainActivity: FlutterActivity() {
             flutterEngine.dartExecutor.binaryMessenger,
             AppConstants.METHOD_CHANNEL_DOWNLOAD
         ).setMethodCallHandler(handleMethodDownload)
+
+        registerChannelEvent()
+    }
+    override fun onResume() {
+        super.onResume()
+        context.registerReceiver(broadcastRegister, IntentFilter(AppConstants.ACTION_COMMUNICATE))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(broadcastRegister)
+    }
+    override fun onDestroy() {
+        unregisterReceiver(broadcastRegister)
+        super.onDestroy()
+    }
+
+    private var broadcastRegister = object : BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val jsonData = intent?.getStringExtra(AppConstants.DOWNLOAD_SERVICE_DATA)
+
+            if (jsonData != null && eventSink != null){
+                eventSink?.success(jsonData)
+            }
+        }
+    }
+    private var eventSink: EventChannel.EventSink? = null
+    private fun registerChannelEvent(){
+        EventChannel(flutterEngine?.dartExecutor?.binaryMessenger, AppConstants.METHOD_EVENT_DOWNLOAD).setStreamHandler(
+            object : EventChannel.StreamHandler {
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    eventSink = events
+                }
+
+                override fun onCancel(arguments: Any?) {
+                    eventSink = null
+                }
+            }
+        )
     }
 
     private var handleMethodDownload: MethodChannel.MethodCallHandler =
         MethodChannel.MethodCallHandler{ call, result ->
             when(call.method){
                 AppConstants.METHOD_CHANNEL_START_SERVICE -> {
-                    val movie: MovieEpisode = MovieEpisode(
-                        id = call.argument(AppConstants.METHOD_CHANNEL_ARGUMENT_ID),
-                        name = call.argument(AppConstants.METHOD_CHANNEL_ARGUMENT_MOVIE_NAME),
-                        url = call.argument(AppConstants.METHOD_CHANNEL_ARGUMENT_URL),
-                        localPath = call.argument(AppConstants.METHOD_CHANNEL_ARGUMENT_LOCAL_PATH),
-                        status = Status.Initialization(),
-                    )
+                    val movie = Gson().fromJson(call.arguments as String, MovieEpisode::class.java).apply {
+                        this.status = Status.Initialization()
+                    }
                     sendActionToDownloadService(data = movie)
 
                     return@MethodCallHandler

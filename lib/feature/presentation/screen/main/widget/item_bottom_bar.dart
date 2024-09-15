@@ -10,18 +10,21 @@ class ItemBottomBar extends BottomNavigationBarItem{
   factory ItemBottomBar.withChildBadge({
     required String label,
     required Widget icon,
-    int? badgeCount,
 }){
     return ItemBottomBar(
-      icon: SizedBox(
-        width: 40,
-        child: BadgeWidget(
-            count: badgeCount,
-            size: 14,
-            child: icon
-        ),
-      ),
+      icon: icon,
       label: label,
+    );
+  }
+
+  static Widget iconBadge({required int count, required Widget icon}){
+    return SizedBox(
+      width: 40,
+      child: BadgeWidget(
+          count: count,
+          size: 14,
+          child: icon
+      ),
     );
   }
 }

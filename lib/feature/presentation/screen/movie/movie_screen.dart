@@ -13,6 +13,9 @@ import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/db_local/episode_local.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
+import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
+import 'package:spotify/feature/presentation/blocs/home/home_bloc.dart';
+import 'package:spotify/feature/presentation/blocs/home/home_event.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/chip_banner.dart';
 
 import '../../../commons/utility/style_util.dart';
@@ -140,20 +143,21 @@ class _MovieScreenState extends State<MovieScreen> {
   late double maxSize = 1;
   late double minSize = (heightMovieCollapse + heightBottomNav) / PageUtil.screenHeight;
 
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<MovieBloc, MovieState>(
-        listenWhen: (previous, current) => current.isExpandWatchMovie && current.currentMovie != null,
+        listenWhen: (previous, current) => previous.isExpandWatchMovie != current.isExpandWatchMovie && current.currentMovie != null,
         listener: (context, state){
           _dragController.animateTo(
-            maxSize,
-            duration: const Duration(milliseconds: 300),
+            state.isExpandWatchMovie ? maxSize : minSize,
+            duration: viewModel.durationScroll,
             curve: Curves.easeInOut,
           );
-          // context.showSnackBar(content)
         },
         child: NotificationListener<DraggableScrollableNotification>(
           onNotification: (notification) {
+            if(viewModel.blockScrollListen) return true;
             if (notification.extent > 0.5 && viewModel.state.isExpandWatchMovie == false) {
               viewModel.add(ChangeExpandedMovieEvent(isExpand: true));
             } else if (notification.extent < 0.5 && viewModel.state.isExpandWatchMovie) {
@@ -362,17 +366,7 @@ class _MovieScreenState extends State<MovieScreen> {
                                           title: const Text("Download"),
                                           icon: const Icon(FontAwesomeIcons.download),
                                           onTap: () async{
-                                            if(currentUrl?.isNotEmpty != true) {
-                                              context.showSnackBar("Không tìm thấy url phim hiện tại");
-                                            }else if(viewModel.state.currentMovie?.slug?.isNotEmpty != true
-                                              || viewModel.state.currentEpisode?.slug?.isNotEmpty != true){
-                                              context.showSnackBar("Không tìm tên, tập phim để lưu vào local");
-                                            }
-
-                                            viewModel.add(StartDownloadEpisodeMovieEvent(
-                                                movie: viewModel.state.currentMovie!,
-                                                episode: viewModel.state.currentEpisode!
-                                            ));
+                                            handleDownloadEpisode();
                                           },
                                         ),
                                       ),
@@ -387,10 +381,11 @@ class _MovieScreenState extends State<MovieScreen> {
                                                 || viewModel.state.currentEpisode?.slug?.isNotEmpty != true){
                                               context.showSnackBar("Không tìm tên, tập phim để lưu vào local");
                                             }
-                                            viewModel.add(StartDownloadEpisodeMovieEvent(
+                                            context.read<DownloadCubit>()
+                                                .stopDownloadEpisode(
                                                 movie: viewModel.state.currentMovie!,
                                                 episode: viewModel.state.currentEpisode!
-                                            ));
+                                            );
                                           },
                                         ),
                                       ),
@@ -578,7 +573,38 @@ class _MovieScreenState extends State<MovieScreen> {
         seconds: 5,
         backgroundColor: backgroundColor
     );
+  }
 
+  void handleDownloadEpisode() {
+    context.read<DownloadCubit>().startDownloadEpisode(
+        movie: viewModel.state.currentMovie!,
+        episode: viewModel.state.currentEpisode!
+    ).then((value){
+      if(!value.key){
+        context.showSnackBar(value.value);
+        return;
+      }
+
+      context.showSnackBarWidget(
+          child: Row(
+            children: [
+              Expanded(child: Text("Đang tải tập phim", style: Style.body.copyWith(color: Colors.white),)),
+              const SizedBox(width: 10,),
+              GestureDetector(
+                onTap: (){
+                  viewModel.add(ChangeExpandedMovieEvent(isExpand: false));
+                  context.read<HomeBloc>().add(PageIndexHomeEvent(3));
+                },
+                child: Text("Xem",
+                    style: Style.title2.copyWith(color: Colors.white)
+                ),
+              ),
+            ],
+          ),
+          seconds: 5,
+          backgroundColor: backgroundColor
+      );
+    });
   }
 
 }
