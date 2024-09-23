@@ -63,14 +63,14 @@ class EpisodeLocal{
   factory EpisodeLocal.fromWhenWatched({
     required String movieID,
     required Episode body,
-    required int currentSecond,
+    required int? currentSecond,
     required int lastTime,
   }) {
     return EpisodeLocal(
       movieId: movieID,
       slug: body.slug,
       name: body.name,
-      currentSecond: currentSecond,
+      currentSecond: currentSecond ?? 0,
       lastTime: lastTime,
     );
   }

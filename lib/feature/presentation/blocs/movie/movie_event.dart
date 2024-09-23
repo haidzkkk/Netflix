@@ -30,10 +30,16 @@ class ChangeExpandedMovieEvent extends MovieEvent{
 
 class ChangeEpisodeMovieEvent extends MovieEvent{
   Episode? episode;
-  ChangeEpisodeMovieEvent({this.episode});
+  EpisodeDownload? episodeDownload;
+  ChangeEpisodeMovieEvent({this.episode, this.episodeDownload});
 }
 
-class SaveEpisodeMovieWatchedToLocalEvent extends MovieEvent{
-  EpisodeLocal episode;
-  SaveEpisodeMovieWatchedToLocalEvent({required this.episode});
+class ListenerBetterPlayerEvent extends MovieEvent{
+  BetterPlayerEvent event;
+  ListenerBetterPlayerEvent({required this.event});
+}
+
+class UpdateDownloadEpisodeMovieEvent extends MovieEvent{
+  List<MovieStatusDownload> episodesDownload;
+  UpdateDownloadEpisodeMovieEvent({required this.episodesDownload});
 }

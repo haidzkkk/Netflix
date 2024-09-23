@@ -63,7 +63,7 @@ class LocalDbRepository{
     );
   }
 
-  Future<List<Map<String, dynamic>>> getAllMovieDownload() async{
+  Future<List<Map<String, dynamic>>> getMovieDownload({String? movieId}) async{
     var jsonData = await dataBaseHelper.query(
       query: '''SELECT 
         movie.${MovieLocalField.movieId} AS movieId,
@@ -81,8 +81,10 @@ class LocalDbRepository{
       FROM ${MovieLocalField.movieDownloadTableName} AS movie
       LEFT JOIN ${EpisodeDownloadField.tableName} AS episode
       ON movie.${MovieLocalField.movieId} = episode.${EpisodeDownloadField.movieId}
+      ${movieId != null ? 'WHERE movie.${MovieLocalField.movieId} = ?' : ""}
       ORDER BY movie.${MovieLocalField.movieLastTime} DESC
-      '''
+      ''',
+      arguments: movieId != null ? [movieId] : null
     );
     return _formatMovieAndEpisodes(jsonData);
   }

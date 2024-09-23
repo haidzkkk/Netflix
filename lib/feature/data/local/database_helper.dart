@@ -149,8 +149,9 @@ class DataBaseHelper{
 
   Future<List<Map<String, dynamic>>> query({
     required String query,
+    List<Object?>? arguments
   }) async{
     final db = await instance.database;
-    return await db.rawQuery(query);
+    return await db.rawQuery(query, arguments);
   }
 }

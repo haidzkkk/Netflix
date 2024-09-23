@@ -184,7 +184,7 @@ class _SearchScreenState extends State<SearchScreen>
                                   title: "Phim mới nhất",
                                   padding: const EdgeInsetsDirectional.symmetric(vertical: 4),
                                   onTap: (){
-                                    context.read<HomeBloc>().add(PageIndexHomeEvent(1));
+                                    context.read<HomeBloc>().add(ChangePageIndexHomeEvent(1));
                                     searchViewModel.pageTabCategorySearch(category);
                                     context.back();
                                   },

@@ -13,6 +13,7 @@ import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
 import 'package:spotify/feature/data/repositories/local_db_repository.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_state.dart';
+import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 
 class DownloadCubit extends Cubit<DownloadState>{
   LocalDbRepository dbRepository;
@@ -29,7 +30,11 @@ class DownloadCubit extends Cubit<DownloadState>{
       if(jsonData == null) return;
 
       Map<String, MovieLocal> movies = Map.from(state.movies);
-      List<MovieStatusDownload> moviesDownloading = List.from(jsonDecode(jsonData).map((json) => MovieStatusDownload.fromJson(json)));
+      List<MovieStatusDownload> moviesDownloading = List.from(jsonDecode(jsonData).map((json) {
+        var  asdasd = MovieStatusDownload.fromJson(json);
+        print("aaaaa ${asdasd.movieSlug} - ${asdasd.slug} - ${asdasd.status?.status} - ${asdasd.executeProcess}");
+        return asdasd;
+      }));
       emit(state.copyWith(moviesDownloading: moviesDownloading));
 
       for (var episodeDownload in state.moviesDownloading) {
@@ -49,13 +54,12 @@ class DownloadCubit extends Cubit<DownloadState>{
             ..status = movieEpisodeDownload.status;
         }
       }
-
       emit(state.copyWith(movies: movies));
 
       /// when the download is completed, cancel the EventChannel, periodicTimer
       if(state.moviesDownloading.length <= 1
-          && state.moviesDownloading.firstOrNull?.status?.status != Status.INITIALIZATION
-          && state.moviesDownloading.firstOrNull?.status?.status != Status.LOADING
+          && state.moviesDownloading.firstOrNull?.status?.status != StatusDownload.INITIALIZATION
+          && state.moviesDownloading.firstOrNull?.status?.status != StatusDownload.LOADING
       ){
         _saveEpisodeToLocalDownload();
         _stopListener();
@@ -106,7 +110,7 @@ class DownloadCubit extends Cubit<DownloadState>{
     }
 
     var movieRequestDownload = MovieStatusDownload(
-      id: EpisodeDownload.getSetupId(movie.sId ?? "", episode.slug ?? ""),
+      id: EpisodeDownload.getSetupId(movieId: movie.sId ?? "", slug: episode.slug ?? ""),
       slug: episode.slug,
       name: episode.name,
       movieId: movie.sId,
@@ -139,12 +143,12 @@ class DownloadCubit extends Cubit<DownloadState>{
         .invokeMethod(AppConstants.downloadStopDownload);
   }
 
-  getMovieDownload({bool? isRefresh}) async{
+  getMoviesDownload({bool? isRefresh}) async{
     if(isRefresh == true){
       emit(state.copyWith(movies: {}));
     }
 
-    var jsonData = await dbRepository.getAllMovieDownload();
+    var jsonData = await dbRepository.getMovieDownload();
     Map<String, MovieLocal> histories = Map.fromEntries(jsonData.map((json) {
       var item = MovieLocal.fromJson(json);
       return MapEntry(item.movieId ?? "", item);

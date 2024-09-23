@@ -5,7 +5,7 @@ class MovieStatusDownload {
   String? movieSlug;
   String? name;
   String? slug;
-  Status? status;
+  StatusDownload? status;
   String? localPath;
   String? url;
   int? totalSecondTime;
@@ -36,7 +36,7 @@ class MovieStatusDownload {
     movieSlug = json['movieSlug'];
     slug = json['slug'];
     id = json['id'];
-    status = json['status'] != null ? Status.fromJson(json['status']) : null;
+    status = json['status'] != null ? StatusDownload.fromJson(json['status']) : null;
     totalSecondTime = json['totalSecondTime'];
     url = json['url'];
   }
@@ -61,7 +61,7 @@ class MovieStatusDownload {
   }
 }
 
-class Status {
+class StatusDownload {
   static const String INITIALIZATION = "INITIALIZATION";
   static const String SUCCESS = "SUCCESS";
   static const String ERROR = "ERROR";
@@ -70,9 +70,9 @@ class Status {
   String? data;
   String? status;
 
-  Status({this.data, this.status});
+  StatusDownload({this.data, this.status});
 
-  Status.fromJson(Map<String, dynamic> json) {
+  StatusDownload.fromJson(Map<String, dynamic> json) {
     data = json['data'];
     status = json['status'];
   }

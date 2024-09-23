@@ -6,9 +6,14 @@ class DisposeHomeEvent extends HomeEvent{
 
 }
 
-class PageIndexHomeEvent extends HomeEvent{
+class ChangePageIndexHomeEvent extends HomeEvent{
   int pageIndex;
-  PageIndexHomeEvent(this.pageIndex);
+  ChangePageIndexHomeEvent(this.pageIndex);
+}
+
+class ListenNetworkConnectHomeEvent extends HomeEvent{
+  bool isConnect;
+  ListenNetworkConnectHomeEvent(this.isConnect);
 }
 
 class GetCategoryMovie extends HomeEvent{

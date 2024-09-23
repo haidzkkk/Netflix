@@ -1,6 +1,7 @@
 
 import 'package:spotify/feature/data/models/db_local/episode_download.dart';
 import 'package:spotify/feature/data/models/db_local/movie_status_download.dart';
+import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
 
 import '../movie_detail/movie_info.dart';
 import 'episode_local.dart';
@@ -74,6 +75,7 @@ class MovieLocal{
       name: name,
       posterUrl: poster,
       thumbUrl: thumb,
+      episodes: [ServerData.fromEpisodeLocal(episodesDownload)]
     );
   }
 

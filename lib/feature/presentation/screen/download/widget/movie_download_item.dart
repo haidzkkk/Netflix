@@ -67,7 +67,7 @@ class _MovieDownloadItemState extends State<MovieDownloadItem> {
                       Builder(
                         builder: (context) {
                           EpisodeDownload? item = widget.movieLocal.episodesDownload?.values.firstWhereOrNull((e) {
-                            return e.status == Status.LOADING;
+                            return e.status == StatusDownload.LOADING;
                           });
 
                           if(item == null) return const SizedBox();
@@ -129,13 +129,13 @@ class _MovieDownloadItemState extends State<MovieDownloadItem> {
                             }
                             var downloadStr = "";
                             if(item.executeProcess != null
-                                && item.status == Status.LOADING
+                                && item.status == StatusDownload.LOADING
                                 && item.executeProcess! < 100
                                 && item.executeProcess! >= 0
                             ){
                               downloadStr = " (${item.executeProcess}%)";
                             }else if(item.executeProcess != null
-                                && item.status == Status.INITIALIZATION
+                                && item.status == StatusDownload.INITIALIZATION
                             ){
                               downloadStr = " (đang trờ)";
                             }

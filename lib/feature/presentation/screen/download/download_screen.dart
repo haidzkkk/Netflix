@@ -6,6 +6,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_state.dart';
+import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/download/widget/movie_download_item.dart';
 import 'package:spotify/feature/presentation/screen/search/widget/search_text_field.dart';
 import 'package:spotify/feature/presentation/screen/widget/custom_refresh.dart';
@@ -20,12 +21,13 @@ class DownloadScreen extends StatefulWidget {
 class _DownloadScreenState extends State<DownloadScreen> with AutomaticKeepAliveClientMixin{
 
   late DownloadCubit viewModel = context.read<DownloadCubit>();
+  late MovieBloc movieViewModel = context.read<MovieBloc>();
   ScrollController scrollController = ScrollController();
   RefreshController refreshController = RefreshController();
 
   @override
   void initState() {
-    viewModel.getMovieDownload();
+    viewModel.getMoviesDownload();
     super.initState();
   }
 
@@ -84,12 +86,11 @@ class _DownloadScreenState extends State<DownloadScreen> with AutomaticKeepAlive
                 refreshController.loadNoData();
               },
               onRefresh: () async{
-                await viewModel.getMovieDownload(isRefresh: true);
+                await viewModel.getMoviesDownload(isRefresh: true);
               },
                 child: BlocBuilder<DownloadCubit, DownloadState>(
                   buildWhen: (previous, current) => previous.movies.hashCode != current.movies.hashCode,
                   builder: (context, state){
-                    print("build21321312");
                     var items = state.movies.values.toList();
 
                     if(items.isEmpty){

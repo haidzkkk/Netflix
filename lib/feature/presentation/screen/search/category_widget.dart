@@ -30,7 +30,7 @@ class _CategoryWidgetState extends State<CategoryWidget> {
     searchViewModel.fetchMoviesCategory(widget.categoryMovie, true);
 
     scrollController.addListener((){
-      if(scrollController.offset >= (scrollController.position.maxScrollExtent - 80.h)){
+      if(scrollController.offset >= (scrollController.position.maxScrollExtent - 150.h)){
         searchViewModel.fetchMoviesCategory(widget.categoryMovie);
       }
     });

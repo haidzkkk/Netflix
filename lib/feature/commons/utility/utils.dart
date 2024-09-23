@@ -4,10 +4,21 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
+
+void showToast(String content){
+  Fluttertoast.showToast(
+      msg: content,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.white.withOpacity(0.1),
+      textColor: Colors.white,
+  );
+}
 
 void printData(String? content){
   if (kDebugMode) {

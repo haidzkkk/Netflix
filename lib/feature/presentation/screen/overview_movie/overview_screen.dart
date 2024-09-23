@@ -58,7 +58,7 @@ class _OverViewScreenState extends State<OverViewScreen>{
       child: Stack(
         children: [
           FutureBuilder(
-              future: widget.movie.getColor(),
+              future: widget.movie.fetchColor(),
               builder: (context, snapShot) {
                 return TweenAnimationBuilder<Color?>(
                   tween: ColorTween(
@@ -145,7 +145,7 @@ class _OverViewScreenState extends State<OverViewScreen>{
                         BlocBuilder<MovieBloc, MovieState>(
                           buildWhen: (previous, current) => previous.movie.data?.name != current.movie.data?.name,
                           builder: (context, state){
-                            return Text(state.movie.data?.name ?? "",
+                            return Text(state.movie.data?.name ?? " _ _",
                               style: Style.title.copyWith(fontSize: 20.sp),
                             );
                           }
@@ -224,11 +224,11 @@ class _OverViewScreenState extends State<OverViewScreen>{
                             ],
                           ),
                           onPressed: (){
-                            if(viewModel.state.movie.data != null && viewModel.state.movie.data?.episodes != null){
-                              viewModel.add(InitWatchMovieEvent(movie: viewModel.state.movie.data!));
+                            if(viewModel.state.movie.status == StatusEnum.successfully){
                               context.back();
+                              viewModel.add(InitWatchMovieEvent(movie: viewModel.state.movie.data!));
                             }else{
-                              context.showSnackBar("Không tìm thấy phim");
+                              context.showSnackBar("Không tìm thấy tập phim");
                             }
                           },
                         ),
@@ -318,7 +318,7 @@ class _OverViewScreenState extends State<OverViewScreen>{
                                               TextSpan(text: "Category: ",
                                                   style: Style.body.copyWith(fontWeight: FontWeight.w700)
                                               ),
-                                              TextSpan(text: state.movie.data?.category?.map((category) => category.name).toList().join(", ") ?? "",
+                                              TextSpan(text: state.movie.data?.category?.map((category) => category.name).toList().join(", ") ?? " _ _",
                                                   style: Style.body
                                               ),
                                             ]
@@ -331,7 +331,7 @@ class _OverViewScreenState extends State<OverViewScreen>{
                                               TextSpan(text: "Country: ",
                                                   style: Style.body.copyWith(fontWeight: FontWeight.w700)
                                               ),
-                                              TextSpan(text: state.movie.data?.country?.map((country) => country.name).toList().join(", ") ?? "",
+                                              TextSpan(text: state.movie.data?.country?.map((country) => country.name).toList().join(", ") ?? " _ _",
                                                   style: Style.body
                                               ),
                                             ]
@@ -344,7 +344,7 @@ class _OverViewScreenState extends State<OverViewScreen>{
                                               TextSpan(text: "Actor: ",
                                                   style: Style.body.copyWith(fontWeight: FontWeight.w700)
                                               ),
-                                              TextSpan(text: state.movie.data?.actor?.join(", ") ?? "",
+                                              TextSpan(text: state.movie.data?.actor?.join(", ") ?? " _ _",
                                                   style: Style.body
                                               ),
                                             ]
@@ -357,7 +357,7 @@ class _OverViewScreenState extends State<OverViewScreen>{
                                               TextSpan(text: "Director: ",
                                                   style: Style.body.copyWith(fontWeight: FontWeight.w700)
                                               ),
-                                              TextSpan(text: state.movie.data?.director?.join(", ") ?? "",
+                                              TextSpan(text: state.movie.data?.director?.join(", ") ?? " _ _",
                                                   style: Style.body
                                               ),
                                             ]
@@ -381,7 +381,7 @@ class _OverViewScreenState extends State<OverViewScreen>{
                                 children: [
                                   const Text("Mô tả"),
                                   ReadMoreText(
-                                    "${state.movie.data?.content ?? ""}  ",
+                                    "${state.movie.data?.content ?? " _ _"}  ",
                                     style: Style.body.copyWith(color: Colors.white.withOpacity(0.4)),
                                     trimLength: 250,
                                   ),

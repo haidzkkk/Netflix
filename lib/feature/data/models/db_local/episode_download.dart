@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:spotify/feature/data/models/db_local/movie_status_download.dart';
+import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
 
 class EpisodeDownloadField{
 
@@ -36,13 +37,13 @@ class EpisodeDownload extends Equatable{
     this.status,
     this.totalSecondTime,
   }){
-    _id = id ?? getSetupId(movieId ?? "", slug ?? "");
+    _id = id ?? getSetupId(movieId: movieId ?? "", slug: slug ?? "");
   }
 
   String? get id => _id;
 
-  static String getSetupId(String movieId, String episodeSlug){
-    return "${movieId}_$episodeSlug";
+  static String getSetupId({required String movieId, required String slug}){
+    return "${movieId}_$slug";
   }
 
   Map<String, dynamic> toJson() {
@@ -55,6 +56,14 @@ class EpisodeDownload extends Equatable{
       'status': status,
       'totalSecondTime': totalSecondTime,
     };
+  }
+
+  Episode toEpisode() {
+    return Episode(
+      slug: slug,
+      name: name,
+      filename: path,
+    );
   }
 
   factory EpisodeDownload.fromJson(Map<String, dynamic> json) {
