@@ -1,6 +1,7 @@
 
 import 'package:path/path.dart';
 import 'package:spotify/feature/commons/contants/app_constants.dart';
+import 'package:spotify/feature/data/models/db_local/episode_download.dart';
 import 'package:spotify/feature/data/models/db_local/episode_local.dart';
 import 'package:spotify/feature/data/models/db_local/history_local.dart';
 import 'package:sqflite/sqflite.dart';
@@ -49,7 +50,29 @@ class DataBaseHelper{
       ${HistoryLocalField.historyContent} TEXT,
       ${HistoryLocalField.historyTime} INTEGER
       )''');
+
+    await db.execute('''CREATE TABLE ${MovieLocalField.movieDownloadTableName}(
+      ${MovieLocalField.movieId} TEXT PRIMARY KEY,
+      ${MovieLocalField.movieSlug} TEXT,
+      ${MovieLocalField.movieName} TEXT,
+      ${MovieLocalField.moviePoster} TEXT,
+      ${MovieLocalField.movieThumb} TEXT,
+      ${MovieLocalField.movieLastTime} INTEGER
+      )''');
+
+    await db.execute('''CREATE TABLE ${EpisodeDownloadField.tableName}(
+      ${EpisodeDownloadField.id} TEXT PRIMARY KEY,
+      ${EpisodeDownloadField.movieId} TEXT,
+      ${EpisodeDownloadField.slug} TEXT,
+      ${EpisodeDownloadField.name} TEXT,
+      ${EpisodeDownloadField.path} TEXT,
+      ${EpisodeDownloadField.status} TEXT,
+      ${EpisodeDownloadField.totalSecondTime} INTEGER,
+      FOREIGN KEY(${EpisodeDownloadField.movieId}) 
+      REFERENCES ${MovieLocalField.movieDownloadTableName}(${MovieLocalField.movieId})
+      )''');
   }
+
   Future<List<Map<String, dynamic>>> getAll({
     required String tableName,
     Map<String, dynamic>? whereParams,
@@ -124,5 +147,11 @@ class DataBaseHelper{
     );
   }
 
-
+  Future<List<Map<String, dynamic>>> query({
+    required String query,
+    List<Object?>? arguments
+  }) async{
+    final db = await instance.database;
+    return await db.rawQuery(query, arguments);
+  }
 }

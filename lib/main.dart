@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 import 'package:spotify/feature/commons/contants/theme.dart';
+import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/home/home_bloc.dart';
 import 'package:spotify/feature/presentation/blocs/main/main_bloc_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
@@ -52,6 +53,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<MovieBloc>(create: (context) => sl<MovieBloc>()),
         BlocProvider<SearchBloc>(create: (context) => sl<SearchBloc>()),
         BlocProvider<WatchedCubit>(create: (context) => sl<WatchedCubit>()),
+        BlocProvider<DownloadCubit>(create: (context) => sl<DownloadCubit>()),
       ],
       child: Builder(
         builder: (context) {

@@ -1,3 +1,4 @@
+import 'package:spotify/feature/data/models/db_local/episode_download.dart';
 import 'package:spotify/feature/data/models/db_local/episode_local.dart';
 
 import 'movie_info.dart';
@@ -38,6 +39,8 @@ class MovieInfoResponse {
 }
 
 class ServerData {
+  static const String SERVER_NAME_LOCAL = "local";
+
   String? serverName;
   List<Episode>? episode;
 
@@ -51,6 +54,13 @@ class ServerData {
         episode!.add(Episode.fromJson(v));
       });
     }
+  }
+
+  ServerData.fromEpisodeLocal(Map<String, EpisodeDownload>? episodesDownload) {
+    serverName = SERVER_NAME_LOCAL;
+    episode = episodesDownload?.values.toList().map((episodeDownload){
+      return episodeDownload.toEpisode()..episodesDownload = episodeDownload;
+    }).toList();
   }
 
   Map<String, dynamic> toJson() {
@@ -71,6 +81,7 @@ class Episode {
   String? linkM3u8;
 
   EpisodeLocal? episodeLocal;
+  EpisodeDownload? episodesDownload;
 
   Episode(
       {this.name, this.slug, this.filename, this.linkEmbed, this.linkM3u8, this.episodeLocal});

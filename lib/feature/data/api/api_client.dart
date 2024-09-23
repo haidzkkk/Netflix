@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:spotify/feature/commons/contants/app_constants.dart';
+import 'package:spotify/feature/commons/utility/connect_util.dart';
 
 import '../../commons/utility/utils.dart';
 import '../models/response.dart' as model;
@@ -19,6 +20,11 @@ class ApiClient {
     Map<String, String>? headers,
     String? baseUrl,
   }) async{
+    if(await ConnectUtil.getStateNetwork() == false){
+    // if(true){
+      return model.Response(statusCode: 1, statusText: "noInternetMessage", body: {});
+    }
+
     if(query != null ){
       printData("====> API Call: ${Uri.parse((baseUrl ?? AppConstants.BASE_URL) + uri)
           .replace(queryParameters: query)}"
@@ -46,6 +52,9 @@ class ApiClient {
     Map<String, String>? headers,
     String? baseUrl
   }) async {
+    if(await ConnectUtil.getStateNetwork() == false){
+      return model.Response(statusCode: 1, statusText: "noInternetMessage", body: {});
+    }
     try {
       printData('====> API Call: ${baseUrl ?? AppConstants.BASE_URL}$uri\nHeader: $headers');
       printData('====> API Body: $body');
@@ -68,6 +77,9 @@ class ApiClient {
     Map<String, String>? headers,
     String? baseUrl
   }) async {
+    if(await ConnectUtil.getStateNetwork() == false){
+      return model.Response(statusCode: 1, statusText: "noInternetMessage", body: {});
+    }
     try {
       printData('====> API Call: ${baseUrl ?? AppConstants.BASE_URL}$uri\nHeader: $headers');
       printData('====> API Body: $body');
@@ -88,6 +100,9 @@ class ApiClient {
     Map<String, String>? headers,
     String? baseUrl
   }) async {
+    if(await ConnectUtil.getStateNetwork() == false){
+      return model.Response(statusCode: 1, statusText: "noInternetMessage", body: {});
+    }
     try {
       printData('====> API Call: ${AppConstants.BASE_URL}$uri\nHeader: $headers');
 
@@ -108,6 +123,9 @@ class ApiClient {
     Map<String, String>? headers,
     String? baseUrl
   }) async {
+    if(await ConnectUtil.getStateNetwork() == false){
+      return model.Response(statusCode: 1, statusText: "noInternetMessage", body: {});
+    }
     try {
       printData('====> API Call: ${ baseUrl ?? AppConstants.BASE_URL}$uri\nHeader: $headers');
 

@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/data/models/response/movie.dart';
-import '../../../data/models/category_movie.dart';
 import '../../../data/repositories/movie_repo.dart';
 import 'home_event.dart';
 import 'home_state.dart';
@@ -22,7 +22,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   late PageController pageController;
 
   void listenEvent(){
-    on<PageIndexHomeEvent>(changePageIndex);
+    on<ChangePageIndexHomeEvent>(changePageIndex);
+    on<ListenNetworkConnectHomeEvent>(listenConnectNetwork);
     on<GetCategoryMovie>(getMovieCategory);
   }
 
@@ -37,7 +38,11 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     return super.close();
   }
 
-  changePageIndex(PageIndexHomeEvent event, Emitter<HomeState> emit) async{
+  void listenConnectNetwork(ListenNetworkConnectHomeEvent event, Emitter<HomeState> emit){
+    emit(state.copyWith(isConnect: event.isConnect));
+  }
+
+  changePageIndex(ChangePageIndexHomeEvent event, Emitter<HomeState> emit) async{
     emit.call(state.copyWithPageIndex(event.pageIndex));
     pageController.animateToPage(event.pageIndex, duration: const Duration(milliseconds: 200), curve: Curves.ease);
   }

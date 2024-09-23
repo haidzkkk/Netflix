@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   TitleWidget(
                       title: category.name,
                       onTap: (){
-                        homeViewModel.add(PageIndexHomeEvent(1));
+                        homeViewModel.add(ChangePageIndexHomeEvent(1));
                         context.read<SearchBloc>().pageTabCategorySearch(category);
                       }
                   ),

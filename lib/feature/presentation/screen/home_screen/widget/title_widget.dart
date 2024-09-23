@@ -1,6 +1,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:spotify/feature/commons/utility/size_extensions.dart';
 
 import '../../../../commons/utility/style_util.dart';
 
@@ -33,7 +34,7 @@ class TitleWidget extends StatelessWidget {
             ),
             const SizedBox(width: 10,),
             if(onTap != null)
-              const Icon(Icons.keyboard_arrow_right_rounded, color: Colors.white,),
+              Icon(Icons.keyboard_arrow_right_rounded, color: Colors.white, size: 30.w,),
           ],
         ),
       ),

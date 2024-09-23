@@ -2,6 +2,9 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:equatable/equatable.dart';
+import 'package:spotify/feature/data/models/db_local/episode_download.dart';
+
 import '../movie_detail/movie_info_response.dart';
 
 import '../../../commons/contants/app_constants.dart';
@@ -71,8 +74,8 @@ class MovieInfo {
         this.category,
         this.country,
         this.episodes,
-        Color? color,
-      }) : _color = color;
+        this.color,
+      });
 
   String get getThumbUrl => hasDomainUrl(thumbUrl ?? "")
       ? "$thumbUrl"
@@ -82,14 +85,13 @@ class MovieInfo {
       ? "$posterUrl"
       : "${AppConstants.BASE_URL_IMAGE}/$posterUrl" ;
 
-  Color? _color;
-  set color(Color? colorData) => _color = colorData;
-  Future<Color?> getColor() async{
-    if(_color != null){
-      return _color;
+  Color? color;
+  Future<Color?> fetchColor() async{
+    if(color != null){
+      return color;
     }
-    _color = await generateColorImageUrl(getThumbUrl);
-    return _color;
+    color = await generateColorImageUrl(getThumbUrl);
+    return color;
   }
 
   MovieInfo.fromJson(Map<String, dynamic> json) {
@@ -177,4 +179,38 @@ class MovieInfo {
     }
     return data;
   }
+
+  MovieInfo copy() {
+    return MovieInfo(
+      sId: sId,
+      name: name,
+      slug: slug,
+      originName: originName,
+      content: content,
+      type: type,
+      status: status,
+      posterUrl: posterUrl,
+      thumbUrl: thumbUrl,
+      isCopyright: isCopyright,
+      subDocquyen: subDocquyen,
+      chieurap: chieurap,
+      trailerUrl: trailerUrl,
+      time: time,
+      episodeCurrent: episodeCurrent,
+      episodeTotal: episodeTotal,
+      quality: quality,
+      lang: lang,
+      notify: notify,
+      showtimes: showtimes,
+      year: year,
+      view: view,
+      actor: actor != null ? List<String>.from(actor!) : null,
+      director: director != null ? List<String>.from(director!) : null,
+      category: category,
+      country: country,
+      episodes: episodes,
+      color: color,
+    );
+  }
+
 }
