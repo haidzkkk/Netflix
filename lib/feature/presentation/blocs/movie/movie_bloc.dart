@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:better_player/better_player.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:spotify/feature/commons/contants/app_constants.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/db_local/episode_download.dart';
 import 'package:spotify/feature/data/models/db_local/episode_local.dart';
@@ -39,6 +40,8 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     on<ChangeEpisodeMovieEvent>(changeEpisode);
     on<UpdateDownloadEpisodeMovieEvent>(updateDownloadEpisodeMovie);
     on<ListenerBetterPlayerEvent>(onBetterPlayerEvent);
+    on<UpdateShowPlayerWindowMovieEvent>(onShowPlayerWindow);
+
   }
 
   var durationScroll = const Duration(milliseconds: 300);
@@ -111,11 +114,14 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       emit: emit,
       episode: currentEpisode,
     );
+    listenShowPipEventFromAndroid();
     add(ChangeExpandedMovieEvent(isExpand: true));
   }
 
   Future<void> cleanWatchMovieEvent(CleanWatchMovieEvent event, Emitter<MovieState> emit) async{
     saveEpisodePreviousToLocal();
+
+    cancelListenShowPipEventFromAndroid();
 
     betterPlayerController?.dispose();
     betterPlayerController = null;
@@ -146,6 +152,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     required Episode? episode,
     required Emitter<MovieState> emit
   }){
+    print("sdasdsa đang được dispose movie initVideoController");
     betterPlayerController?.dispose();
     betterPlayerController = null;
     emit(state.copyWithResetStateEpisode(
@@ -216,8 +223,10 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
             emit(state.copyWith(timeWatchedEpisode: currentEpisode?.episodeLocal?.currentSecond));
           }
           emit(state.copyWith(isPlay: true));
+          listenShowPipEventFromAndroid();
         }else if(event.event.betterPlayerEventType == BetterPlayerEventType.pause && state.isPlay != null){
           emit(state.copyWith(isPlay: false));
+          cancelListenShowPipEventFromAndroid();
         }
         break;
       }
@@ -262,6 +271,28 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     emit(state.copyWith(
       currentMovie: state.currentMovie?.copy()?..episodes = serversData
     ));
+  }
 
+  StreamSubscription? _eventPipSubscription;
+  void listenShowPipEventFromAndroid() {
+    if (_eventPipSubscription != null) return;
+    _eventPipSubscription = const EventChannel(AppConstants.methodEventPip)
+        .receiveBroadcastStream().listen((data) {
+
+      bool isShow = data == 1;
+      add(UpdateShowPlayerWindowMovieEvent(isShow: isShow));
+    });
+  }
+
+  void cancelListenShowPipEventFromAndroid() {
+    add(UpdateShowPlayerWindowMovieEvent(isShow: false));
+    _eventPipSubscription?.cancel();
+    _eventPipSubscription = null;
+  }
+
+  onShowPlayerWindow(UpdateShowPlayerWindowMovieEvent event, Emitter<MovieState> emit) {
+    emit(state.copyWith(
+        isPlayerWindow: event.isShow
+    ));
   }
 }

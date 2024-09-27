@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:better_player/better_player.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

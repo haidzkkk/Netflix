@@ -83,7 +83,6 @@ class _ActionMovieWidgetState extends State<ActionMovieWidget> {
             ],
           ),
           seconds: 10,
-          backgroundColor: viewModel.state.currentMovie?.color
       );
     });
   }

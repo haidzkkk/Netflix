@@ -10,6 +10,7 @@ class MovieState extends Equatable{
   final int? totalTimeEpisode;
   final int? currentTimeEpisode;
   final int? timeWatchedEpisode;
+  final bool? isPlayerWindow;
 
   MovieState({
     Status<MovieInfo>? movie,
@@ -21,6 +22,7 @@ class MovieState extends Equatable{
     bool? visibleControlsPlayer,
     this.currentTimeEpisode,
     this.totalTimeEpisode,
+    this.isPlayerWindow,
   }) : movie = movie ?? Status.initial(),
         visibleControlsPlayer = visibleControlsPlayer ?? false,
         isExpandWatchMovie = isExpandWatchMovie ?? false;
@@ -35,6 +37,7 @@ class MovieState extends Equatable{
     int? timeWatchedEpisode,
     bool? isPlay,
     bool? visibleControlsPlayer,
+    bool? isPlayerWindow,
   }){
     return MovieState(
       movie: movie ?? this.movie,
@@ -46,6 +49,7 @@ class MovieState extends Equatable{
       timeWatchedEpisode: timeWatchedEpisode ?? this.timeWatchedEpisode,
       isPlay: isPlay ?? this.isPlay,
       visibleControlsPlayer: visibleControlsPlayer ?? this.visibleControlsPlayer,
+      isPlayerWindow: isPlayerWindow ?? this.isPlayerWindow,
     );
   }
 
@@ -98,6 +102,7 @@ class MovieState extends Equatable{
     totalTimeEpisode,
     currentTimeEpisode,
     visibleControlsPlayer,
+    isPlayerWindow,
   ];
 
 }
