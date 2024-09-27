@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/commons/utility/connect_util.dart';
 import 'package:spotify/feature/commons/utility/pageutil.dart';
+import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/category_movie.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
@@ -137,7 +138,7 @@ class _MainScreenState extends State<MainScreen>{
                             return BottomNavigationBar(
                               enableFeedback: true,
                               type: BottomNavigationBarType.fixed,
-                              iconSize: 18,
+                              iconSize: 18.sp,
                               currentIndex: state.currentPageIndex,
                               backgroundColor: Colors.black,
                               onTap: (value) => homeViewModel.add(ChangePageIndexHomeEvent(value)),

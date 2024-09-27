@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 import 'package:spotify/feature/presentation/screen/widget/read_more_widget.dart';
 
 class DescriptionMovieWidget extends StatefulWidget {
@@ -28,8 +29,8 @@ class _DescriptionMovieWidgetState extends State<DescriptionMovieWidget> {
                 child: BlocBuilder<MovieBloc, MovieState>(
                     buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
                     builder: (context, state){
-                      return CachedNetworkImage(
-                        imageUrl: state.currentMovie?.getPosterUrl ?? "",
+                      return ImageWidget(
+                        url: state.currentMovie?.getPosterUrl ?? "",
                         fit: BoxFit.cover,
                       );
                     }

@@ -134,7 +134,7 @@ class DataBaseHelper{
     return id;
   }
 
-  Future<int> deleteUser({
+  Future<int> delete({
     required String tableName,
     required Map<String, dynamic> params,
   }) async{

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
+import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 
 import '../../../../data/models/response/movie.dart';
 import '../../overview_movie/widget/chip_banner.dart';
@@ -29,8 +30,8 @@ class MovieItem extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: CachedNetworkImage(
-                imageUrl: movie.getPosterUrl,
+              child: ImageWidget(
+                url: movie.getPosterUrl,
                 fit: BoxFit.cover,
               ),
             ),

@@ -13,6 +13,7 @@ import 'package:spotify/feature/presentation/screen/home_screen/widget/action_bu
 import 'package:spotify/feature/presentation/screen/overview_movie/overview_shimmer_widget.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/chip_text.dart';
 import 'package:spotify/feature/presentation/screen/widget/custom_bottom.dart';
+import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 import 'package:spotify/feature/presentation/screen/widget/read_more_widget.dart';
 import 'package:spotify/feature/presentation/screen/widget/trailer_widget.dart';
 
@@ -294,8 +295,8 @@ class _OverViewScreenState extends State<OverViewScreen>{
                                   if(state.movie.data?.getPosterUrl.isNotEmpty != true){
                                     return const SizedBox();
                                   }
-                                  return CachedNetworkImage(
-                                    imageUrl: state.movie.data?.getPosterUrl ?? "",
+                                  return ImageWidget(
+                                    url: state.movie.data?.getPosterUrl ?? "",
                                     fit: BoxFit.cover,
                                   );
                                 }

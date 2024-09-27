@@ -43,7 +43,6 @@ class _CategoryWidgetState extends State<CategoryWidget> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Padding(

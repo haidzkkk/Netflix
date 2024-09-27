@@ -31,4 +31,6 @@ class AppConstants{
   static const String downloadStartDownload = 'startService';
   static const String downloadStopDownload = 'stopService';
   static const String methodEventDownload = 'com.example.method_event/download';
+
+  static const int defaultPageSize = 10;
 }

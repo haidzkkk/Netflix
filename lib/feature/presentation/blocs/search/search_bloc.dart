@@ -89,6 +89,10 @@ class SearchBloc extends Cubit<SearchState> {
           )
       );
     }
+
+    if(pageIndex <= 1){
+      fetchMoviesCategory(categoryMovie);
+    }
   }
 
   fetchTextSearchMovies(String strSearch, [int? limit]) async{
