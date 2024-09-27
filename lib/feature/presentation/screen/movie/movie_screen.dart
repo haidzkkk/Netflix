@@ -42,7 +42,7 @@ class _MovieScreenState extends State<MovieScreen> {
   }
 
   double heightBottomNav = 56;
-  double heightMovieCollapse = 35.h;
+  double heightMovieCollapse = 56.w;
   double heightProcess = 1.5.h;
   late double maxSize = 1;
   late double minSize = (heightMovieCollapse + heightBottomNav + heightProcess) / PageUtil.screenHeight;

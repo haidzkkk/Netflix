@@ -8,6 +8,7 @@ import 'package:spotify/feature/presentation/screen/home_screen/slide_widget.dar
 import 'package:spotify/feature/presentation/screen/home_screen/widget/movie_item.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/widget/title_widget.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/overview_screen.dart';
+import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 import '../../../data/models/category_movie.dart';
 import '../../../data/models/response/movie.dart';
 import '../../blocs/home/home_bloc.dart';
@@ -72,7 +73,13 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                             decoration: const BoxDecoration(
                                 shape: BoxShape.circle
                             ),
-                            child: CachedNetworkImage(imageUrl: item.getThumbUrl, width: 90, height: 90, fit: BoxFit.cover,));
+                            child: ImageWidget(
+                              url: item.getThumbUrl,
+                              width: 90,
+                              height: 90,
+                              fit: BoxFit.cover,
+                            )
+                        );
                       },
                       separatorBuilder: (context, index) => const SizedBox(width: 10,),
                     ),

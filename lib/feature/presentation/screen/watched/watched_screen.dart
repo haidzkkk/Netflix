@@ -33,6 +33,7 @@ class _WatchedScreenState extends State<WatchedScreen> with AutomaticKeepAliveCl
 
   @override
   void dispose() {
+    watchedViewModel.clearScreen();
     scrollController.dispose();
     refreshController.dispose();
     super.dispose();
@@ -78,11 +79,12 @@ class _WatchedScreenState extends State<WatchedScreen> with AutomaticKeepAliveCl
                 },
                 child: BlocBuilder<WatchedCubit, WatchedState>(
                   builder: (context, state) {
-                    return ListView.builder(
+                    return AnimatedList(
+                      key: watchedViewModel.keyListAnimation,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: state.histories.length,
-                      itemBuilder: (context, index){
+                      initialItemCount: state.histories.length,
+                      itemBuilder: (context, index, animation){
                         MovieLocal? previousItem = index == 0 ? null : state.histories[index - 1];
                         var item = state.histories[index];
 
@@ -90,7 +92,10 @@ class _WatchedScreenState extends State<WatchedScreen> with AutomaticKeepAliveCl
                         var itemTime = DateTime.fromMillisecondsSinceEpoch(item.lastTime ?? 0);
                         var showDate = itemTime.day != previousItemTime.day;
 
-                        return WatchedItem(movieLocal: item, showDate: showDate,);
+                        return WatchedItem(
+                          movieLocal: item,
+                          showDate: showDate,
+                        );
                       },
                     );
                   }

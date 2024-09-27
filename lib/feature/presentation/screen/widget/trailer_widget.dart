@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class TrailerWidget extends StatefulWidget {
@@ -84,7 +85,7 @@ class _TrailerWidgetState extends State<TrailerWidget> {
 
   Widget thumbnail(){
     return widget.thumbnail.isNotEmpty
-        ? CachedNetworkImage(imageUrl: widget.thumbnail, fit: BoxFit.cover,)
+        ? ImageWidget(url: widget.thumbnail, fit: BoxFit.cover,)
         : const Center(child: CupertinoActivityIndicator(),);
   }
 

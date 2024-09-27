@@ -9,6 +9,7 @@ import 'package:spotify/feature/data/models/db_local/episode_download.dart';
 import 'package:spotify/feature/data/models/db_local/movie_local.dart';
 import 'package:spotify/feature/data/models/db_local/movie_status_download.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/chip_text.dart';
+import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 
 import '../../../../commons/utility/style_util.dart';
 import '../../overview_movie/overview_screen.dart';
@@ -60,8 +61,8 @@ class _MovieDownloadItemState extends State<MovieDownloadItem> {
                   ),
                   child: Stack(
                     children: [
-                      CachedNetworkImage(
-                        imageUrl: widget.movieLocal.poster ?? "",
+                      ImageWidget(
+                        url: widget.movieLocal.poster ?? "",
                         fit: BoxFit.cover,
                       ),
                       Builder(

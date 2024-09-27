@@ -24,7 +24,7 @@ class _SlideWidgetState extends State<SlideWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 200.h,
+      height: 450,
       child: CarouselSlider.builder(
         itemCount: widget.movies.length,
         options: CarouselOptions(

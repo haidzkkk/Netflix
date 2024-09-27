@@ -1,3 +1,4 @@
+import 'package:spotify/feature/commons/contants/app_constants.dart';
 import 'package:spotify/feature/data/models/db_local/episode_download.dart';
 import 'package:spotify/feature/data/models/db_local/episode_local.dart';
 import 'package:spotify/feature/data/models/db_local/movie_local.dart';
@@ -23,8 +24,17 @@ class LocalDbRepository{
     return await dataBaseHelper.getAll(
       tableName: MovieLocalField.movieTableName,
       arrange: const MapEntry(true, "lastTime"),
-      pageSize: pageSize ?? 20,
+      pageSize: AppConstants.defaultPageSize,
       pageIndex: pageIndex
+    );
+  }
+
+  Future<int> deleteMovieHistory(int id,) async{
+    return await dataBaseHelper.delete(
+      tableName: MovieLocalField.movieTableName,
+      params: {
+        MovieLocalField.id : id
+      }
     );
   }
 
