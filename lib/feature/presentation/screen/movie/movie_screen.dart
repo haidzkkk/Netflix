@@ -1,17 +1,22 @@
 import 'dart:ffi';
 
+import 'package:better_player/better_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/utility/pageutil.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/presentation/screen/movie/widget/picture_in_picture_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/player_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/action_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/background_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/description_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/episodes_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/info_movie_widget.dart';
+import 'package:spotify/feature/presentation/screen/widget/custom_better_player.dart';
+import 'package:spotify/feature/presentation/screen/widget/custom_builder.dart';
+import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 import '../../../commons/utility/style_util.dart';
 import '../../blocs/movie/movie_bloc.dart';
 
@@ -35,7 +40,7 @@ class _MovieScreenState extends State<MovieScreen> {
 
   bool isDispose = false;
   disposeScreen(){
-    if(isDispose) return;
+    if(isDispose || viewModel.state.isPlayerWindow == true) return;
     _dragController.dispose();
     viewModel.add(CleanWatchMovieEvent());
     isDispose = true;
@@ -89,54 +94,30 @@ class _MovieScreenState extends State<MovieScreen> {
                       child: Stack(
                         children: [
                           const BackgroundMovieWidget(),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              PlayerMovieWidget(
-                                heightBottomNav: heightBottomNav,
-                                heightMovieCollapse: heightMovieCollapse,
-                                actionDispose: () => disposeScreen(),
-                              ),
-                              BlocBuilder<MovieBloc, MovieState>(
-                                buildWhen: (previous, current) {
-                                  if(previous.visibleControlsPlayer != current.visibleControlsPlayer){
-                                    return true;
-                                  }else if(current.visibleControlsPlayer == false
-                                      && (previous.totalTimeEpisode != current.totalTimeEpisode
-                                      || previous.currentTimeEpisode != current.currentTimeEpisode)){
-                                    return true;
-                                  }
-                                  return false;
-                                },
-                                builder: (context, state){
-                                  var process = (state.currentTimeEpisode ?? 0.0) /  (state.totalTimeEpisode ?? 0.0);
-                                  if(process.isNaN || process.isInfinite || process < 0 || process > 1){
-                                    process = 0;
-                                  }
-                                    return AnimatedOpacity(
-                                      duration: state.visibleControlsPlayer ? const Duration(milliseconds: 50) : const Duration(milliseconds: 1000),
-                                      opacity: state.visibleControlsPlayer ? 0 : 1,
-                                      child: LinearProgressIndicator(
-                                        minHeight: heightProcess,
-                                        color: viewModel.state.currentMovie?.color,
-                                        value: process,
-                                      ),
-                                    );
-                                  }
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    InfoMovieWidget(),
-                                    ActionMovieWidget(),
-                                    EpisodesMovieWidget(),
-                                    DescriptionMovieWidget(),
-                                  ],
+                          PictureInPictureMovieWidget(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                PlayerMovieWidget(
+                                  heightBottomNav: heightBottomNav,
+                                  heightMovieCollapse: heightMovieCollapse,
+                                  heightProcess: heightProcess,
+                                  actionDispose: () => disposeScreen(),
                                 ),
-                              ),
-                            ],
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      InfoMovieWidget(),
+                                      ActionMovieWidget(),
+                                      EpisodesMovieWidget(),
+                                      DescriptionMovieWidget(),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -171,7 +152,6 @@ class _MovieScreenState extends State<MovieScreen> {
           ],
         ),
         seconds: 5,
-        backgroundColor: viewModel.state.currentMovie?.color
     );
   }
 }

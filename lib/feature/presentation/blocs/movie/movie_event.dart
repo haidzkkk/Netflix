@@ -43,3 +43,8 @@ class UpdateDownloadEpisodeMovieEvent extends MovieEvent{
   List<MovieStatusDownload> episodesDownload;
   UpdateDownloadEpisodeMovieEvent({required this.episodesDownload});
 }
+
+class UpdateShowPlayerWindowMovieEvent extends MovieEvent{
+  bool isShow;
+  UpdateShowPlayerWindowMovieEvent({required this.isShow});
+}

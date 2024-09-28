@@ -6,6 +6,7 @@ class AppConstants {
 
         const val METHOD_CHANNEL_DOWNLOAD = "com.example.method_chanel/download"
         const val METHOD_EVENT_DOWNLOAD = "com.example.method_event/download"
+        const val METHOD_EVENT_PIP = "com.example.method_event/pip"
 
         const val METHOD_CHANNEL_START_SERVICE = "startService"
         const val METHOD_CHANNEL_STOP_SERVICE = "stopService"

@@ -2,12 +2,15 @@ package com.example.spotify
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PictureInPictureParams
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.res.Configuration
 import android.os.Build
 import android.util.Log
+import android.util.Rational
 import com.example.spotify.data.model.MovieEpisode
 import com.example.spotify.data.model.Status
 import com.google.gson.Gson
@@ -17,11 +20,12 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
+    private lateinit var builderParams: PictureInPictureParams.Builder
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         createChannelNotify()
-
+        setupPip()
         MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             AppConstants.METHOD_CHANNEL_DOWNLOAD
@@ -47,21 +51,35 @@ class MainActivity: FlutterActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val jsonData = intent?.getStringExtra(AppConstants.DOWNLOAD_SERVICE_DATA)
 
-            if (jsonData != null && eventSink != null){
-                eventSink?.success(jsonData)
+            if (jsonData != null && eventDownloadSink != null){
+                eventDownloadSink?.success(jsonData)
             }
         }
     }
-    private var eventSink: EventChannel.EventSink? = null
+
+    private var eventDownloadSink: EventChannel.EventSink? = null
+    private var eventPipSink: EventChannel.EventSink? = null
     private fun registerChannelEvent(){
         EventChannel(flutterEngine?.dartExecutor?.binaryMessenger, AppConstants.METHOD_EVENT_DOWNLOAD).setStreamHandler(
             object : EventChannel.StreamHandler {
                 override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                    eventSink = events
+                    eventDownloadSink = events
                 }
 
                 override fun onCancel(arguments: Any?) {
-                    eventSink = null
+                    eventDownloadSink = null
+                }
+            }
+        )
+
+        EventChannel(flutterEngine?.dartExecutor?.binaryMessenger, AppConstants.METHOD_EVENT_PIP).setStreamHandler(
+            object : EventChannel.StreamHandler {
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    eventPipSink = events
+                }
+
+                override fun onCancel(arguments: Any?) {
+                    eventPipSink = null
                 }
             }
         )
@@ -106,6 +124,42 @@ class MainActivity: FlutterActivity() {
         val channel1 = NotificationChannel(AppConstants.CHANNEL_ID, "CHANNEL_NAME", NotificationManager.IMPORTANCE_DEFAULT)
         channel1.setSound(null, null)
         notificationManager.createNotificationChannel(channel1)
+    }
+
+    private fun setupPip() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            builderParams = PictureInPictureParams.Builder()
+            val aspectRation = Rational(1920, 1080)
+            builderParams.apply {
+                setAspectRatio(aspectRation)
+            }
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        openPipMode()
+    }
+
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration?
+    ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        if(isInPictureInPictureMode){
+            eventPipSink?.success(1)
+        }else{
+            eventPipSink?.success(0)
+        }
+    }
+
+    private fun openPipMode(){
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+            || isInPictureInPictureMode
+            || eventPipSink == null
+        ) return
+
+        enterPictureInPictureMode(builderParams.build())
     }
 }
 

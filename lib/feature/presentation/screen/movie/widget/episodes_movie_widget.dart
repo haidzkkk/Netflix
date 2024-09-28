@@ -51,8 +51,8 @@ class _EpisodesMovieWidgetState extends State<EpisodesMovieWidget> {
                                 ? const [Colors.white12, Colors.white12]
                                 : const [Colors.white38, Colors.white38],
                             child: Padding(
-                                padding: const EdgeInsets.all(4),
-                                child: Text(content, style: Style.title2.copyWith(
+                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                                child: Text(content, style: Style.body.copyWith(
                                   color: isSelect ? Colors.red : null,
                                 ),)
                             )
