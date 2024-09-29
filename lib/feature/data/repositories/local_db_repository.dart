@@ -2,6 +2,7 @@ import 'package:spotify/feature/commons/contants/app_constants.dart';
 import 'package:spotify/feature/data/models/db_local/episode_download.dart';
 import 'package:spotify/feature/data/models/db_local/episode_local.dart';
 import 'package:spotify/feature/data/models/db_local/movie_local.dart';
+import 'package:spotify/feature/data/models/db_local/movie_status_download.dart';
 
 import '../local/database_helper.dart';
 
@@ -9,6 +10,8 @@ class LocalDbRepository{
   DataBaseHelper dataBaseHelper;
 
   LocalDbRepository(this.dataBaseHelper);
+
+  /// History
 
   Future<int> addMovieToHistory(MovieLocal movie) async{
     return await dataBaseHelper.insert(
@@ -45,12 +48,14 @@ class LocalDbRepository{
     );
   }
 
-  Future<List<Map<String, dynamic>>> getAllEpisodeFromMovie(String movieId) async{
+  Future<List<Map<String, dynamic>>> getAllEpisodeFromMovieHistory(String movieId) async{
     return await dataBaseHelper.getAll(
       tableName: EpisodeLocalField.tableName,
-      whereParams: {EpisodeLocalField.movieId: movieId}
+      whereParams: [MapEntry(EpisodeLocalField.movieId, movieId)]
     );
   }
+
+  /// Download
 
   Future<int> addEpisodeToDownload(EpisodeDownload episode) async{
     return await dataBaseHelper.insert(
@@ -66,10 +71,10 @@ class LocalDbRepository{
     );
   }
 
-  Future<List<Map<String, dynamic>>> getAllEpisodeDownloadFromMovie(String movieId) async{
+  Future<List<Map<String, dynamic>>> getAllEpisodeDownloadFromMovieDownload(String movieId) async{
     return await dataBaseHelper.getAll(
         tableName: EpisodeDownloadField.tableName,
-        whereParams: {EpisodeLocalField.movieId: movieId}
+        whereParams: [MapEntry(EpisodeLocalField.movieId, movieId)]
     );
   }
 
@@ -96,10 +101,10 @@ class LocalDbRepository{
       ''',
       arguments: movieId != null ? [movieId] : null
     );
-    return _formatMovieAndEpisodes(jsonData);
+    return _formatMovieAndEpisodesDownload(jsonData);
   }
 
-  List<Map<String, dynamic>> _formatMovieAndEpisodes(List<Map<String, dynamic>> queryResult) {
+  List<Map<String, dynamic>> _formatMovieAndEpisodesDownload(List<Map<String, dynamic>> queryResult) {
     Map<String, Map<String, dynamic>> movieMap = {};
 
     for (var row in queryResult) {
@@ -131,4 +136,16 @@ class LocalDbRepository{
     }
     return movieMap.values.toList();
   }
+
+  Future<List<Map<String, dynamic>>> getEpisodeDownloading() async{
+    return await dataBaseHelper.getAll(
+        tableName: EpisodeDownloadField.tableName,
+        whereParams: [
+          const MapEntry(EpisodeDownloadField.status, StatusDownload.LOADING),
+          const MapEntry(EpisodeDownloadField.status, StatusDownload.INITIALIZATION),
+        ],
+        whereOperators: "or"
+    );
+  }
+
 }

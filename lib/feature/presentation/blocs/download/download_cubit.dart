@@ -1,24 +1,32 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:isolate';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/contants/app_constants.dart';
 import 'package:spotify/feature/commons/utility/file_util.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/data/local/database_helper.dart';
 import 'package:spotify/feature/data/models/db_local/episode_download.dart';
 import 'package:spotify/feature/data/models/db_local/movie_local.dart';
 import 'package:spotify/feature/data/models/db_local/movie_status_download.dart';
+import 'package:spotify/feature/data/models/file/file_movie_episode.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
+import 'package:spotify/feature/data/models/status.dart';
+import 'package:spotify/feature/data/repositories/file_repo.dart';
 import 'package:spotify/feature/data/repositories/local_db_repository.dart';
+import 'package:spotify/feature/di/InjectionContainer.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_state.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 
 class DownloadCubit extends Cubit<DownloadState>{
   LocalDbRepository dbRepository;
+  FileRepository fileRepository;
 
-  DownloadCubit(this.dbRepository) : super(DownloadState());
+  DownloadCubit(this.dbRepository, this.fileRepository) : super(DownloadState());
 
   StreamSubscription? _eventSubscription;
   Timer? periodicTimer;
@@ -32,7 +40,6 @@ class DownloadCubit extends Cubit<DownloadState>{
       Map<String, MovieLocal> movies = Map.from(state.movies);
       List<MovieStatusDownload> moviesDownloading = List.from(jsonDecode(jsonData).map((json) {
         var  asdasd = MovieStatusDownload.fromJson(json);
-        print("aaaaa ${asdasd.movieSlug} - ${asdasd.slug} - ${asdasd.status?.status} - ${asdasd.executeProcess}");
         return asdasd;
       }));
       emit(state.copyWith(moviesDownloading: moviesDownloading));
@@ -98,7 +105,7 @@ class DownloadCubit extends Cubit<DownloadState>{
       return const MapEntry(false, "Không tìm tên, tập phim để lưu vào local");
     }
 
-    var localPath = await FileUtil.getLocalPathToDownloadVideo(
+    var localPath = await fileRepository.createLocalPathToDownloadVideo(
         movieName: movie!.slug!,
         episodeName: episode!.slug!
     );
@@ -145,15 +152,114 @@ class DownloadCubit extends Cubit<DownloadState>{
 
   getMoviesDownload({bool? isRefresh}) async{
     if(isRefresh == true){
-      emit(state.copyWith(movies: {}));
+      emit(state.copyWith(movies: {}, moviesDownloading: []));
     }
 
     var jsonData = await dbRepository.getMovieDownload();
-    Map<String, MovieLocal> histories = Map.fromEntries(jsonData.map((json) {
+    Map<String, MovieLocal> movieDownloaded = Map.fromEntries(jsonData.map((json) {
       var item = MovieLocal.fromJson(json);
       return MapEntry(item.movieId ?? "", item);
     }));
 
-    emit(state.copyWith(movies: histories));
+    emit(state.copyWith(movies: movieDownloaded));
+  }
+
+  Future<bool> checkAndSyncMovieDownloading() async{
+    var responses = await dbRepository.getEpisodeDownloading();
+    if(responses.isNotEmpty){
+      showToast("Đang đồng bộ download");
+      syncMovieDownloading();
+    }
+    return responses.isNotEmpty;
+  }
+
+  Future<void> syncMovieDownloading() async{
+    var jsonData = await dbRepository.getMovieDownload();
+    Map<String, MovieLocal> moviesDownloaded = Map.fromEntries(jsonData.map((json) {
+      var item = MovieLocal.fromJson(json);
+      return MapEntry(item.slug ?? "", item); /// slug to async with folder name moive
+    }));
+
+    Map<String, FileMovieEpisode> moviesFile = Map.fromEntries((await fileRepository.getAllMovies()).map((movie){
+      return MapEntry(movie.movie.name, movie);
+    }));
+
+
+    final receivePort = ReceivePort();
+    Isolate isolate = await Isolate.spawn(
+        _syncMovieDownloadingInIsolate,
+        [
+          receivePort.sendPort,
+          moviesDownloaded,
+          moviesFile
+        ]
+    );
+
+    receivePort.listen((message) async{
+      if(message is MapEntry){
+        var path = message.key as String?;
+        var episode = message.value as EpisodeDownload;
+        bool validFile = path?.isNotEmpty == true
+            ? await fileRepository.checkMp4FileValidate(path!)
+            : false;
+        episode.status = validFile ? StatusDownload.SUCCESS : StatusDownload.ERROR;
+        await dbRepository.addEpisodeToDownload(episode);
+
+      }else if(message is bool && message == true){
+        receivePort.close();
+        isolate.kill();
+
+      }
+    });
+  }
+
+  /// isolate always is static function or topLevel function
+  static Future<void> _syncMovieDownloadingInIsolate(List<dynamic> args) async{
+    SendPort sendPort = args[0];
+    Map<String, MovieLocal> moviesDownloaded = args[1];
+    Map<String, FileMovieEpisode> moviesFile = args[2];
+
+    /// sync file to db
+    for (var movieDb in moviesDownloaded.values) {
+      FileMovieEpisode? movieFile = moviesFile[movieDb.slug];
+      if(movieFile == null){
+        continue;
+      }
+
+      Map<String, File> episodesFile = movieFile.mapEpisode;
+      await Future.wait(movieDb.episodesDownload?.values.map((episode) async {
+        String? path = episodesFile[episode.slug]?.path;
+
+        /// send to main isolate to handle db
+        sendPort.send(MapEntry(path, episode));
+      }) ?? []);
+    }
+
+    /// sync db to file
+    for(var movieFile in moviesFile.values) {
+      MovieLocal? movieDownload = moviesDownloaded[movieFile.movie.name];
+
+      /// delete folder movie
+      if(movieDownload == null){
+        await movieFile.movie.delete();
+        continue;
+      }
+
+      /// delete file episode
+      for (var episodeFile in movieFile.episode) {
+        if(movieDownload.movieId == null) continue;
+        EpisodeDownload? episodeDownload = movieDownload.episodesDownload?[EpisodeDownload.getSetupId(movieId: movieDownload.movieId!, slug: episodeFile.name)];
+        if(episodeDownload == null){
+          await episodeFile.delete();
+        }
+      }
+    }
+
+    sendPort.send(true);
+  }
+
+  Future<List<MovieLocal>> getMovieDb() async {
+    var jsonData = await dbRepository.getMovieDownload();
+    return List.from(jsonData.map((json) {return MovieLocal.fromJson(json);}));
   }
 }

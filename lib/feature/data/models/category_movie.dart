@@ -8,10 +8,10 @@ import '../../commons/contants/app_constants.dart';
 import 'data.dart';
 
 enum CategoryMovie{
-  search(name: "Tìm kiếm", slug: "tim-kiem", path: AppConstants.GET_SEARCH),
-  movieNew(name: "Phim mới cập nhật", slug: "phim-moi-cap-nhat", path: AppConstants.GET_LIST_MOVIE),
-  listMovieSingle(name: "Phim lẻ", slug: "phim-le", path: AppConstants.GET_CATEGORY_1),
   listCartoon(name: "Hoạt hình", slug: "hoat-hinh", path: AppConstants.GET_CATEGORY_1),
+  search(name: "Tìm kiếm", slug: "tim-kiem", path: AppConstants.GET_SEARCH),
+  movieNew(name: "Phim mới nhất", slug: "phim-moi-cap-nhat", path: AppConstants.GET_LIST_MOVIE),
+  listMovieSingle(name: "Phim lẻ", slug: "phim-le", path: AppConstants.GET_CATEGORY_1),
   listTvShow(name: "Tv show", slug: "tv-shows", path: AppConstants.GET_CATEGORY_1),
   listSeries(name: "Phim bộ", slug: "phim-bo", path: AppConstants.GET_CATEGORY_1),
   listMovieAction(name: "Hành động", slug: "hanh-dong", path: AppConstants.GET_CATEGORY_2),

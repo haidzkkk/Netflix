@@ -68,9 +68,8 @@ class _MovieDownloadItemState extends State<MovieDownloadItem> {
                       Builder(
                         builder: (context) {
                           EpisodeDownload? item = widget.movieLocal.episodesDownload?.values.firstWhereOrNull((e) {
-                            return e.status == StatusDownload.LOADING;
+                            return e.status == StatusDownload.LOADING && e.executeProcess != null;
                           });
-
                           if(item == null) return const SizedBox();
 
                           return  Positioned.fill(child: Container(
@@ -138,8 +137,12 @@ class _MovieDownloadItemState extends State<MovieDownloadItem> {
                             }else if(item.executeProcess != null
                                 && item.status == StatusDownload.INITIALIZATION
                             ){
-                              downloadStr = " (đang trờ)";
+                              downloadStr = " (Chờ)";
+                            }else if(item.status == StatusDownload.ERROR
+                            ){
+                              downloadStr = " (Lỗi)";
                             }
+
                             items.add(Padding(
                               padding: const EdgeInsetsDirectional.all(4),
                               child: ChipText(child: Text("${item.name}$downloadStr")),

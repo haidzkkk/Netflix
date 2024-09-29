@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:better_player/better_player.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/commons/utility/connect_util.dart';
 import 'package:spotify/feature/commons/utility/pageutil.dart';
@@ -17,6 +19,7 @@ import 'package:spotify/feature/presentation/blocs/download/download_state.dart'
 import 'package:spotify/feature/presentation/screen/download/download_screen.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/home_screen.dart';
 import 'package:spotify/feature/presentation/screen/main/widget/item_bottom_bar.dart';
+import 'package:spotify/feature/presentation/screen/more/more_screen.dart';
 import 'package:spotify/feature/presentation/screen/movie/movie_screen.dart';
 import 'package:spotify/feature/presentation/screen/watched/watched_screen.dart';
 import '../../blocs/home/home_bloc.dart';
@@ -37,6 +40,7 @@ class _MainScreenState extends State<MainScreen>{
 
   late final homeViewModel = context.read<HomeBloc>();
   late final movieViewModel = context.read<MovieBloc>();
+  late final downloadViewModel = context.read<DownloadCubit>();
 
   late StreamSubscription streamSubscription;
 
@@ -45,7 +49,7 @@ class _MainScreenState extends State<MainScreen>{
     const FilterScreen(),
     const WatchedScreen(),
     const DownloadScreen(),
-    const SizedBox(),
+    const MoreScreen(),
   ];
 
   @override
@@ -54,6 +58,8 @@ class _MainScreenState extends State<MainScreen>{
       homeViewModel.add(GetCategoryMovie(category));
     }
     listenNetworkState();
+
+    downloadViewModel.checkAndSyncMovieDownloading();
     super.initState();
   }
 

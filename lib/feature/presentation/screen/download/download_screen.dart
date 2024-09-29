@@ -35,29 +35,6 @@ class _DownloadScreenState extends State<DownloadScreen> with AutomaticKeepAlive
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      // body: FutureBuilder(
-      //   future: FileUtil.getListMovieDownload(),
-      //   builder: (context, snapshot){
-      //     return ListView.builder(
-      //       itemCount: snapshot.data?.length ?? 0,
-      //       itemBuilder: (context, index){
-      //         var item = snapshot.data![index];
-      //
-      //         return Container(
-      //           padding: const EdgeInsetsDirectional.all(8),
-      //           margin: const EdgeInsetsDirectional.all(8),
-      //           color: Colors.brown,
-      //           child: FutureBuilder(
-      //               future: item.getSize(),
-      //               builder: (context, snapshot){
-      //               return Text("${item.getName()} ${bytesToMb(snapshot.data?.toDouble() ?? 0.0).toStringAsFixed(1)} MB");
-      //             }
-      //           ),
-      //         );
-      //       },
-      //     );
-      //   },
-      // ),
       body: Scaffold(
         body: SafeArea(
         child: Column(

@@ -4,57 +4,25 @@ import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:path/path.dart';
 
 class FileUtil{
-  static Future<Directory?> getLocalPathDownload() async{
-    Directory? directory;
-    if (Platform.isAndroid){
-      directory = Directory("${(await getExternalStorageDirectory())?.path}/download");
-    } else if (Platform.isIOS) {
-    } else if (Platform.isWindows) {
-    }
-
-    if (directory != null && !await directory.exists()) {
-      await directory.create(recursive: true);
-    }
-
-    return directory;
+  static double bytesToMb(double bytes){
+    return bytes / (1024 * 1024);
   }
 
-  static Future<String?> getLocalPathToDownloadVideo({required String movieName, required String episodeName}) async{
-    Directory? directory = await getLocalPathDownload();
+}
 
-    if(directory == null){
-      return null;
-    }
+extension FileExt on File{
+  String get name{
+    String fileName = basename(path);
 
-    Directory movieDirectory = Directory("${directory.path}/$movieName");
-    if (!await movieDirectory.exists()) {
-      await movieDirectory.create(recursive: true);
-    }
-
-    return "${movieDirectory.path}/$episodeName.mp4";
+    return fileName.substring(0, fileName.indexOf("."));
   }
-
-  static Future<List<Directory>> getListMovieDownload() async{
-    List<Directory> directories = [];
-
-    Directory? directory = await getLocalPathDownload();
-
-    if(directory != null){
-      try{
-        directories = directory.listSync()
-            .where((element) => element is Directory)
-            .map((directory) => directory as Directory).toList();
-      }catch(e){
-        printData("Lỗi không lấy được thư mục");
-      }
-    }
-
-    return directories;
+  String get fileName{
+    return basename(path);
   }
 }
 
 extension DirectoryExt on Directory{
-  String getName(){
+  String get name{
     return basename(path);
   }
 
