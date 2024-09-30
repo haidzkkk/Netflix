@@ -74,11 +74,12 @@ class _DownloadScreenState extends State<DownloadScreen> with AutomaticKeepAlive
                       return const Center(child: Text("Không có phim nào"));
                     }
 
-                    return ListView.builder(
+                    return AnimatedList(
+                      key: viewModel.keyListAnimation,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: items.length,
-                      itemBuilder: (context, index){
+                      initialItemCount: items.length,
+                      itemBuilder: (context, index, animation){
                         var item = items[index];
                         return MovieDownloadItem(movieLocal: item,);
                       },

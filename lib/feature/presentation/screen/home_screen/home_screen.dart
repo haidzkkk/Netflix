@@ -48,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 return HeaderWidget(movie: state.movies[CategoryMovie.listCartoon]?.firstOrNull,);
               }
             ),
-            const SizedBox(height: 10,),
             const TitleWidget(
                 title: "Previews",
             ),

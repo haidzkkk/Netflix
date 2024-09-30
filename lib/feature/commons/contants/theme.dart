@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spotify/feature/commons/utility/color_resource.dart';
 
 ThemeData lightTheme = ThemeData(
   fontFamily: 'SanFrancisco',
@@ -22,10 +23,16 @@ ThemeData darkTheme = ThemeData(
   fontFamily: 'SanFrancisco',
   splashColor: Colors.transparent,
   highlightColor: Colors.transparent,
-  scaffoldBackgroundColor: Colors.black,
+  bottomSheetTheme: const BottomSheetThemeData(
+      backgroundColor: ColorResources.primaryColor
+  ),
+  scaffoldBackgroundColor: ColorResources.primaryColor,
   textTheme: const TextTheme(
     displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
     bodyLarge: TextStyle(fontSize: 18, color: Colors.white70),
+  ),
+  bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+    backgroundColor: ColorResources.secondaryColor
   ),
   appBarTheme: const AppBarTheme(
     color: Colors.red,

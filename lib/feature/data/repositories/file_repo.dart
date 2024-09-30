@@ -84,7 +84,7 @@ class FileRepository{
   }
 
   /// get all movie with episode
-  Future<List<FileMovieEpisode>> getAllMovies() async{
+  Future<List<FileMovieEpisode>> getAllMovieEpisode() async{
     List<FileMovieEpisode> movieEpisode = [];
 
     List<Directory> movieDirectories = [];
@@ -156,5 +156,26 @@ class FileRepository{
     bool isValid = await completer.future;
     betterPlayerController.dispose();
     return isValid;
+  }
+
+  Future<bool> deleteFiles(List<FileSystemEntity> files) async{
+    try{
+      await Future.wait(files.map((file) async{
+        if(await file.exists() && file is Directory){
+          file.listSync().forEach((element){
+            if(element is File){
+              element.deleteSync();
+            }else if(element is Directory){
+              deleteFiles([element]);
+            }
+          });
+        }
+        await file.delete();
+      }));
+      return true;
+    }catch(e){
+      printData("$e");
+      return false;
+    }
   }
 }

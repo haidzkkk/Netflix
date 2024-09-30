@@ -7,7 +7,7 @@ import 'package:spotify/feature/data/repositories/local_db_repository.dart';
 import 'package:spotify/feature/presentation/blocs/watched/watched_state.dart';
 import 'package:spotify/feature/presentation/screen/watched/widget/watched_item.dart';
 
-class WatchedCubit extends Cubit<WatchedState> implements ListAnimation{
+class WatchedCubit extends Cubit<WatchedState> implements ListAnimation<MovieLocal>{
   LocalDbRepository localRepo;
 
   WatchedCubit({
@@ -27,7 +27,6 @@ class WatchedCubit extends Cubit<WatchedState> implements ListAnimation{
   getMovieHistory({bool? isRefresh}) async{
     if(isRefresh == true){
       emit(WatchedState());
-      removeAnimationList(keyList: keyListAnimation);
     }
 
     if(state.lastPage) return;
@@ -67,7 +66,7 @@ class WatchedCubit extends Cubit<WatchedState> implements ListAnimation{
       emit(state.copyWith(
         histories: List.from(state.histories)..removeAt(position),
       ));
-      removeAnimationList(keyList: keyListAnimation, removeWhere: position);
+      removeAnimationList(keyList: keyListAnimation, removeWhere: position, data: movieHistory);
     }
 
     return isSuccess;
@@ -79,6 +78,9 @@ class WatchedCubit extends Cubit<WatchedState> implements ListAnimation{
     required int fromIndex,
     required int toIndex
   }) {
+    if(fromIndex == 0){
+      removeAnimationList(keyList: keyList);
+    }
     for (int offset = fromIndex; offset < toIndex; offset++) {
       keyList.currentState?.insertItem(offset);
     }
@@ -88,22 +90,22 @@ class WatchedCubit extends Cubit<WatchedState> implements ListAnimation{
   removeAnimationList({
     required GlobalKey<AnimatedListState> keyList,
     int? removeWhere,
+    MovieLocal? data
   }) {
     if(removeWhere != null){
       keyListAnimation.currentState?.removeItem(
         removeWhere,
         (context, animation) => WatchedItem(
-          movieLocal: MovieLocal(),
+          movieLocal: data ?? MovieLocal(),
           animation: animation,
         ),
-        duration: const Duration(milliseconds: 500)
+        duration: const Duration(milliseconds: 300)
       );
     }else{
       keyListAnimation.currentState?.removeAllItems(
           (context, animation) => const SizedBox(),
-          duration: const Duration(milliseconds: 500)
+          duration: const Duration(milliseconds: 300)
       );
     }
   }
-
 }

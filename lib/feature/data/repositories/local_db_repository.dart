@@ -57,6 +57,13 @@ class LocalDbRepository{
 
   /// Download
 
+  Future<int> addMovieToDownload(MovieLocal movie) async{
+    return await dataBaseHelper.insert(
+        tableName: MovieLocalField.movieDownloadTableName,
+        body: movie.toJsonDownload()
+    );
+  }
+
   Future<int> addEpisodeToDownload(EpisodeDownload episode) async{
     return await dataBaseHelper.insert(
         tableName: EpisodeDownloadField.tableName,
@@ -64,12 +71,30 @@ class LocalDbRepository{
     );
   }
 
-  Future<int> addMovieToDownload(MovieLocal movie) async{
-    return await dataBaseHelper.insert(
+  Future<int> deleteMovieAndEpisodeDownload(String movieId,) async{
+    await dataBaseHelper.delete(
+        tableName: EpisodeDownloadField.tableName,
+        params: {
+          EpisodeDownloadField.movieId : movieId
+        }
+    );
+    return await dataBaseHelper.delete(
         tableName: MovieLocalField.movieDownloadTableName,
-        body: movie.toJsonDownload()
+        params: {
+          MovieLocalField.movieId : movieId
+        }
     );
   }
+
+  Future<int> deleteEpisodeDownload(String id,) async{
+    return await dataBaseHelper.delete(
+        tableName: EpisodeDownloadField.tableName,
+        params: {
+          EpisodeDownloadField.id : id
+        }
+    );
+  }
+
 
   Future<List<Map<String, dynamic>>> getAllEpisodeDownloadFromMovieDownload(String movieId) async{
     return await dataBaseHelper.getAll(

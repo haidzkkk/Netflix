@@ -1,7 +1,7 @@
 
 import 'package:flutter/cupertino.dart';
 
-abstract class ListAnimation{
+abstract class ListAnimation<T>{
   late GlobalKey<AnimatedListState> keyListAnimation;
 
   insertAnimationList({
@@ -13,5 +13,6 @@ abstract class ListAnimation{
   removeAnimationList({
     required GlobalKey<AnimatedListState> keyList,
     int? removeWhere,
+    T? data
   });
 }

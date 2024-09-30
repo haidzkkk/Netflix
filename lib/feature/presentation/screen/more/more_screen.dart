@@ -4,6 +4,7 @@ import 'package:spotify/feature/commons/utility/file_util.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
 import 'package:spotify/feature/data/models/file/file_movie_episode.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
+import 'package:spotify/feature/presentation/blocs/download/download_state.dart';
 
 class MoreScreen extends StatefulWidget {
   const MoreScreen({super.key});
@@ -23,7 +24,7 @@ class _MoreScreenState extends State<MoreScreen> {
           children: [
             Text("file"),
             FutureBuilder(
-              future: viewModel.fileRepository.getAllMovies(),
+              future: viewModel.fileRepository.getAllMovieEpisode(),
               builder: (context, snapshot){
                 return ListView.builder(
                   shrinkWrap: true,
@@ -65,15 +66,14 @@ class _MoreScreenState extends State<MoreScreen> {
               },
             ),
             Text("db"),
-            FutureBuilder(
-              future: viewModel.getMovieDb(),
-              builder: (context, snapshot){
+            BlocBuilder<DownloadCubit, DownloadState>(
+              builder: (context, state){
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: snapshot.data?.length ?? 0,
+                  itemCount: state.movies.values.length,
                   itemBuilder: (context, index){
-                    var movie = snapshot.data![index];
+                    var movie = state.movies.values.toList()[index];
 
                     return Container(
                       padding: const EdgeInsetsDirectional.all(8),

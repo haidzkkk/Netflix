@@ -147,7 +147,6 @@ class _MainScreenState extends State<MainScreen>{
                               type: BottomNavigationBarType.fixed,
                               iconSize: 18.sp,
                               currentIndex: state.currentPageIndex,
-                              backgroundColor: Colors.black,
                               onTap: (value) => homeViewModel.add(ChangePageIndexHomeEvent(value)),
                               selectedItemColor: Colors.white,
                               selectedLabelStyle: const TextStyle(color: Colors.white),

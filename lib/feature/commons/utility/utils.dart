@@ -83,7 +83,24 @@ extension BuildContextExt on BuildContext{
     Navigator.pushReplacement(this, MaterialPageRoute(builder: (context) => screen));
   }
 
-  void showDraggableBottomSheet({
+  Future<void> showBottomSheet({
+    required Widget child,
+  }) async{
+    showModalBottomSheet(
+        context: this,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+            )
+        ),
+        builder: (context){
+          return child;
+        }
+    );
+  }
+
+  Future<void> showDraggableBottomSheet({
     required Widget Function(BuildContext context, ScrollController scrollController) builder
   }) async{
     bool bottomSheetOpen = true;

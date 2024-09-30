@@ -207,7 +207,7 @@ class _SearchScreenState extends State<SearchScreen>
                                       ),
                                       shrinkWrap: true,
                                       physics: const NeverScrollableScrollPhysics(),
-                                      itemCount: status == StatusEnum.loading ? 12 : (items.length > 50 ? 50 : items.length),
+                                      itemCount: status == StatusEnum.loading ? 12 : (items.length > 51 ? 51 : items.length),
                                       itemBuilder: (context, index){
                                         if(status == StatusEnum.loading){
                                           return const ShimmerWidget(width: 0, height: 0);

@@ -86,7 +86,7 @@ class SearchBloc extends Cubit<SearchState> {
       );
     }
 
-    if(pageIndex % 2 == 0){
+    if(pageIndex == 0 || pageIndex % 3 != 0){
       fetchMoviesCategory(categoryMovie);
     }
   }
