@@ -43,6 +43,10 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
   Timer? periodicTimer;
   void listenEventFromService(){
     if(_eventSubscription != null) return;
+    printData("start listen download");
+    Future.delayed(const Duration(milliseconds: 5000)).then((_){
+      if(state.moviesDownloading.isEmpty) _stopListener();
+    });
 
     _eventSubscription = const EventChannel(AppConstants.methodEventDownload)
         .receiveBroadcastStream().listen((jsonData) {
@@ -50,8 +54,7 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
 
       Map<String, MovieLocal> movies = Map.from(state.movies);
       List<MovieStatusDownload> moviesDownloading = List.from(jsonDecode(jsonData).map((json) {
-        var  asdasd = MovieStatusDownload.fromJson(json);
-        return asdasd;
+        return MovieStatusDownload.fromJson(json);
       }));
       emit(state.copyWith(moviesDownloading: moviesDownloading));
 
@@ -93,6 +96,7 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
   }
 
   void _stopListener() {
+    printData("stop listen download");
     _eventSubscription?.cancel();
     _eventSubscription = null;
     periodicTimer?.cancel();
@@ -273,6 +277,12 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
   }
 
   Future<void> syncMovieDownloading() async{
+    /// delay for service download emit process the movie downloading
+    listenEventFromService();
+    await Future.delayed(const Duration(milliseconds: 1000));
+    Map<String, MovieStatusDownload> movieDownloading = Map.fromEntries(state.moviesDownloading.map(
+            (e) => MapEntry(e.id ?? "", e)));
+
     var jsonData = await dbRepository.getMovieDownload();
     Map<String, MovieLocal> moviesDownloaded = Map.fromEntries(jsonData.map((json) {
       var item = MovieLocal.fromJson(json);
@@ -290,6 +300,7 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
         [
           receivePort.sendPort,
           moviesDownloaded,
+          movieDownloading,
           moviesFile
         ]
     );
@@ -318,7 +329,8 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
 
     SendPort sendPort = args[0];
     Map<String, MovieLocal> moviesDownloaded = args[1];
-    Map<String, FileMovieEpisode> moviesFile = args[2];
+    Map<String, MovieStatusDownload> movieDownloading = args[2];
+    Map<String, FileMovieEpisode> moviesFile = args[3];
 
 
     /// sync file to db
@@ -330,10 +342,12 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
 
       Map<String, File> episodesFile = movieFile.mapEpisode;
       await Future.wait(movieDb.episodesDownload?.values.map((episode) async {
-        String? path = episodesFile[episode.slug]?.path;
+        /// check movie not downloading
+        if(movieDownloading[episode.id] == null){
 
-        /// send to main isolate to handle db
-        sendPort.send(MapEntry(path, episode));
+          /// send to main isolate to handle db
+          sendPort.send(MapEntry(episodesFile[episode.slug]?.path, episode));
+        }
       }) ?? []);
     }
 
