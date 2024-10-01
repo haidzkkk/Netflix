@@ -146,12 +146,6 @@ class _WatchedItemState extends State<WatchedItem> {
                     },
                     icon: Icon(Icons.more_vert, color: Colors.white, size: 20.sp,)
                   )
-                  // IconButton(
-                  //   onPressed: (){
-                  //   },
-                  //   visualDensity: const VisualDensity(vertical: -4),
-                  //   icon: Icon(Icons.more_vert, color: Colors.white, size: 20.sp,)
-                  // )
                 ],
               ),
             ),

@@ -38,7 +38,7 @@ class CustomButton extends StatelessWidget {
               splashFactory: NoSplash.splashFactory,
               padding: padding,
               backgroundColor: onPressed != null && enable == true ? backgroundColor : Colors.grey.shade400,
-              fixedSize: wrapWidth == true ? Size.fromHeight(height ?? 48) : Size(width ?? MediaQuery.of(context).size.width, height ?? 48),
+              fixedSize: wrapWidth == true ? (height != null ? Size.fromHeight(height!) : null) : Size(width ?? MediaQuery.of(context).size.width, height ?? 48),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(borderRadius ?? 10)
               )

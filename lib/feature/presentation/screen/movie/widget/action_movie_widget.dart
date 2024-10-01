@@ -82,7 +82,7 @@ class _ActionMovieWidgetState extends State<ActionMovieWidget> {
               ),
             ],
           ),
-          seconds: 10,
+          seconds: 3,
       );
     });
   }

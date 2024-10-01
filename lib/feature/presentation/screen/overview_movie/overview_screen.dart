@@ -214,7 +214,6 @@ class _OverViewScreenState extends State<OverViewScreen>{
                           backgroundColor: Colors.white,
                           margin: EdgeInsets.zero,
                           padding: EdgeInsets.zero,
-                          height: 30,
                           borderRadius: 5,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -233,16 +232,16 @@ class _OverViewScreenState extends State<OverViewScreen>{
                             }
                           },
                         ),
+                        const SizedBox(height: 5,),
                         CustomButton(
                           backgroundColor: Colors.white.withOpacity(0.3),
                           margin: EdgeInsets.zero,
                           padding: EdgeInsets.zero,
-                          height: 30,
                           borderRadius: 5,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.download, color: Colors.white, size: 30.w,),
+                              Icon(Icons.download, color: Colors.white, size: 40.w,),
                               const SizedBox(width: 5,),
                               Text("Download", style: Style.title2.copyWith(color: Colors.white, fontSize: 20.sp),),
                             ],

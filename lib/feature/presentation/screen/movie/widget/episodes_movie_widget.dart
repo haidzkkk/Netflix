@@ -32,11 +32,21 @@ class _EpisodesMovieWidgetState extends State<EpisodesMovieWidget> {
 
                 bool isSelect = episode.slug == state.currentEpisode?.slug;
                 bool watched = episode.episodeLocal != null;
-                StatusDownload? downloaded = episode.episodesDownload?.status == StatusDownload.SUCCESS
-                    ? StatusDownload(status: StatusDownload.SUCCESS)
-                    : episode.episodesDownload?.status == StatusDownload.INITIALIZATION ||  episode.episodesDownload?.status == StatusDownload.LOADING
-                    ? StatusDownload(status: StatusDownload.LOADING)
-                    : null;
+                IconData? iconDownload;
+                switch(episode.episodesDownload?.status){
+                  case StatusDownload.INITIALIZATION || StatusDownload.LOADING: {
+                    iconDownload = Icons.downloading;
+                    break;
+                  }
+                  case StatusDownload.SUCCESS: {
+                    iconDownload = Icons.download_rounded;
+                    break;
+                  }
+                  case StatusDownload.ERROR: {
+                    iconDownload = Icons.error_outline;
+                    break;
+                  }
+                }
 
                 return Container(
                   padding: const EdgeInsets.all(4),
@@ -48,25 +58,18 @@ class _EpisodesMovieWidgetState extends State<EpisodesMovieWidget> {
                       children: [
                         ChipBanner(
                             colors: isSelect || watched
-                                ? const [Colors.white12, Colors.white12]
-                                : const [Colors.white38, Colors.white38],
-                            child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                                child: Text(content, style: Style.body.copyWith(
-                                  color: isSelect ? Colors.red : null,
-                                ),)
-                            )
+                                ? const [Colors.white12]
+                                : const [Colors.white38],
+                            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                            child: Text(content, style: Style.body.copyWith(
+                              color: isSelect ? Colors.red : null,
+                            ),)
                         ),
-                        if(downloaded != null)
+                        if(iconDownload != null)
                           Positioned(
                               top: 0,
                               right: 0,
-                              child: Icon(
-                                downloaded.status == StatusDownload.SUCCESS ? Icons.download_rounded
-                                : downloaded.status == StatusDownload.LOADING ? Icons.downloading
-                                : Icons.error_outline,
-                                size: 10.sp,
-                              )
+                              child: Icon(iconDownload, size: 10.sp,)
                           ),
                       ],
                     ),

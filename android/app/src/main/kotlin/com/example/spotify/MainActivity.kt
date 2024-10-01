@@ -33,20 +33,31 @@ class MainActivity: FlutterActivity() {
 
         registerChannelEvent()
     }
+
     override fun onResume() {
         super.onResume()
-        context.registerReceiver(broadcastRegister, IntentFilter(AppConstants.ACTION_COMMUNICATE))
+        if(isReceiverRegistered == false){
+            isReceiverRegistered = true;
+            context.registerReceiver(broadcastRegister, IntentFilter(AppConstants.ACTION_COMMUNICATE))
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        unregisterReceiver(broadcastRegister)
+        if(isReceiverRegistered == true){
+            unregisterReceiver(broadcastRegister)
+            isReceiverRegistered = false;
+        }
     }
     override fun onDestroy() {
-        unregisterReceiver(broadcastRegister)
         super.onDestroy()
+        if(isReceiverRegistered == true){
+            unregisterReceiver(broadcastRegister)
+            isReceiverRegistered = false;
+        }
     }
 
+    private var isReceiverRegistered = false
     private var broadcastRegister = object : BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
             val jsonData = intent?.getStringExtra(AppConstants.DOWNLOAD_SERVICE_DATA)

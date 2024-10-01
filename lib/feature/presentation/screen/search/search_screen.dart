@@ -117,10 +117,9 @@ class _SearchScreenState extends State<SearchScreen>
                                 StatusEnum? status = state.searchMovies[category]?.status;
                                 var items = state.searchMovies[category]?.data ?? [];
 
-                                if(status == StatusEnum.successfully && items.isEmpty){
+                                if((status == StatusEnum.successfully || status == StatusEnum.failed)
+                                    && items.isEmpty){
                                   return const Text("Không tìm thấy dữ liệu");
-                                }else if(status == StatusEnum.failed){
-                                  return Text(state.searchMovies[CategoryMovie.search]?.message ?? "Có lỗi sảy ra");
                                 }
 
                                 bool isLoadingWhenEmpty = status == StatusEnum.loading && items.isEmpty;
@@ -176,12 +175,12 @@ class _SearchScreenState extends State<SearchScreen>
                           builder: (context) {
                             var itemCount = 3;
                             var heightItem = calculateHeightItemGirdView(context, 100.h, itemCount);
-                            var category = CategoryMovie.movieNew;
+                            var category = CategoryMovie.valuesCategory.first;
 
                             return Column(
                               children: [
                                 TitleWidget(
-                                  title: "Phim mới nhất",
+                                  title: "${category.name} mới nhất",
                                   padding: const EdgeInsetsDirectional.symmetric(vertical: 4),
                                   onTap: (){
                                     context.read<HomeBloc>().add(ChangePageIndexHomeEvent(1));
@@ -208,7 +207,7 @@ class _SearchScreenState extends State<SearchScreen>
                                       ),
                                       shrinkWrap: true,
                                       physics: const NeverScrollableScrollPhysics(),
-                                      itemCount: status == StatusEnum.loading ? 12 : items.length,
+                                      itemCount: status == StatusEnum.loading ? 12 : (items.length > 51 ? 51 : items.length),
                                       itemBuilder: (context, index){
                                         if(status == StatusEnum.loading){
                                           return const ShimmerWidget(width: 0, height: 0);

@@ -78,6 +78,7 @@ class _WatchedScreenState extends State<WatchedScreen> with AutomaticKeepAliveCl
                   await watchedViewModel.getMovieHistory(isRefresh: true);
                 },
                 child: BlocBuilder<WatchedCubit, WatchedState>(
+                  buildWhen: (previous, current) => previous.histories != current.histories,
                   builder: (context, state) {
                     return AnimatedList(
                       key: watchedViewModel.keyListAnimation,

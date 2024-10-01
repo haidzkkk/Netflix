@@ -75,7 +75,8 @@ class DataBaseHelper{
 
   Future<List<Map<String, dynamic>>> getAll({
     required String tableName,
-    Map<String, dynamic>? whereParams,
+    List<MapEntry<String, dynamic>>? whereParams,
+    String? whereOperators,
     MapEntry<bool, String>? arrange,
     int? pageSize,
     int? pageIndex,
@@ -86,8 +87,8 @@ class DataBaseHelper{
     return await db.query(
       tableName,
       orderBy: "${arrange?.value} ${arrange?.key == false ? "ASC" : "DESC"}",
-      where: whereParams?.keys.map(((key) => "$key = ?")).toList().join(" and "),
-      whereArgs: whereParams?.values.toList(),
+      where: whereParams?.map(((mapEntry) => "${mapEntry.key} = ?")).toList().join(" ${whereOperators ?? "and"} "),
+      whereArgs: whereParams?.map((mapEntry) => mapEntry.value).toList(),
       limit: pageSize,
       offset: offset,
     );

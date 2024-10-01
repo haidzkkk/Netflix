@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:spotify/feature/data/repositories/file_repo.dart';
 import 'package:spotify/feature/data/repositories/movie_repo.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/main/main_bloc_cubit.dart';
@@ -48,11 +49,12 @@ Future<void> init() async {
   sl.registerFactory(() => MovieBloc(sl(), sl()));
   sl.registerFactory(() => SearchBloc(repo: sl()));
   sl.registerFactory(() => WatchedCubit(localRepo: sl()));
-  sl.registerFactory(() => DownloadCubit(sl()));
+  sl.registerFactory(() => DownloadCubit(sl(), sl()));
 
   ///[Repository]
   sl.registerFactory(() => AuthRepo(apiClient: sl(), sharedPreferences: sl()));
   sl.registerFactory(() => MovieRepo(sl(), sl()));
   sl.registerFactory(() => LocalDbRepository(sl()));
   sl.registerFactory(() => LocalNosqlRepository(sl()));
+  sl.registerFactory(() => FileRepository());
 }

@@ -24,7 +24,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 250.h,
+      height: 270.h,
       width: double.infinity,
       child: Stack(
         children: [
@@ -39,7 +39,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                     Colors.black.withOpacity(0.5),
                     Colors.black.withOpacity(0.8),
                   ],
-                  stops: [0.07.h, 0.3, 0.4],
+                  stops: const [0.002, 0.3, 0.4],
                 ).createShader(bounds);
               },
               blendMode: BlendMode.dstIn,
@@ -96,20 +96,20 @@ class _HeaderWidgetState extends State<HeaderWidget> {
             ),
           ),
           Positioned(
-            bottom: 10,
+            bottom: 15.h,
             left: 0,
             right: 0,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text("#2 in Nigeria Today", style: TextStyle(fontSize: 18.sp),),
+                Text("#1 in Anime Today", style: TextStyle(fontSize: 18.sp),),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ActionButton(
-                        icon: const Icon(FontAwesomeIcons.plus),
-                        title: const Text("My list"),
+                        icon: Icon(FontAwesomeIcons.plus, size: 25.sp,),
+                        title: Text("My list", style: Style.body,),
                         onTap: (){
 
                         }
@@ -120,12 +120,12 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                       height: 30,
                       wrapWidth: true,
                       borderRadius: 5,
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(FontAwesomeIcons.play, color: Colors.black,),
-                          SizedBox(width: 5,),
-                          Text("Play", style: TextStyle(color: Colors.black,),)
+                          Icon(FontAwesomeIcons.play, color: Colors.black, size: 23.sp,),
+                          const SizedBox(width: 5,),
+                          Text("Play", style: Style.title2.copyWith(color: Colors.black),)
                         ],
                       ),
                       onPressed: (){
@@ -144,8 +144,8 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                       },
                     ),
                     ActionButton(
-                        icon: const Icon(Icons.error_outline),
-                        title: const Text("Info"),
+                        icon: Icon(Icons.error_outline, size: 25.sp,),
+                        title: Text("Info", style: Style.body),
                         onTap: (){
 
                         }

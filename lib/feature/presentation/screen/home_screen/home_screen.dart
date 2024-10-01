@@ -14,7 +14,6 @@ import '../../../data/models/response/movie.dart';
 import '../../blocs/home/home_bloc.dart';
 import '../../blocs/home/home_event.dart';
 import '../../blocs/home/home_state.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../blocs/search/search_bloc.dart';
 
@@ -44,30 +43,26 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             BlocBuilder<HomeBloc, HomeState>(
-              buildWhen: (previous, current) => previous.movies[CategoryMovie.movieNew] != current.movies[CategoryMovie.movieNew],
+              buildWhen: (previous, current) => previous.movies[CategoryMovie.listCartoon] != current.movies[CategoryMovie.listCartoon],
               builder: (context, state) {
-                return HeaderWidget(movie: state.movies[CategoryMovie.movieNew]?.firstOrNull,);
+                return HeaderWidget(movie: state.movies[CategoryMovie.listCartoon]?.firstOrNull,);
               }
             ),
-            const SizedBox(height: 10,),
-            TitleWidget(
+            const TitleWidget(
                 title: "Previews",
-                onTap: (){
-
-                }
             ),
             SizedBox(
               height: 100,
               child: BlocBuilder<HomeBloc, HomeState>(
-                buildWhen: (previous, current) => previous.movies[CategoryMovie.listTvShow] != current.movies[CategoryMovie.listTvShow],
+                buildWhen: (previous, current) => previous.movies[CategoryMovie.listMovieSingle] != current.movies[CategoryMovie.listMovieSingle],
                 builder: (context, state) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: state.movies[CategoryMovie.listTvShow]?.length ?? 0,
+                      itemCount: state.movies[CategoryMovie.listMovieSingle]?.length ?? 0,
                       itemBuilder: (context, index) {
-                        var item = state.movies[CategoryMovie.listTvShow]![index];
+                        var item = state.movies[CategoryMovie.listMovieSingle]![index];
                         return Container(
                             clipBehavior: Clip.antiAlias,
                             decoration: const BoxDecoration(
@@ -89,9 +84,10 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
             ),
             const SizedBox(height: 10,),
             TitleWidget(
-                title: "Trending now",
+                title: "Phim mới cập nhật",
                 onTap: (){
-
+                  homeViewModel.add(ChangePageIndexHomeEvent(1));
+                  context.read<SearchBloc>().pageTabCategorySearch(CategoryMovie.movieNew);
                 }
             ),
             SizedBox(
@@ -127,11 +123,8 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               ),
             ),
             const SizedBox(height: 10,),
-            TitleWidget(
+            const TitleWidget(
               title: "Phim hay nhất",
-              onTap: (){
-
-              }
             ),
             BlocBuilder<HomeBloc, HomeState>(
               buildWhen: (previous, current) => previous.movies[CategoryMovie.listEmotional] != current.movies[CategoryMovie.listEmotional],

@@ -39,11 +39,7 @@ class SearchBloc extends Cubit<SearchState> {
         tabController.animateTo(pageIndex);
       }
     }catch(e){
-      printData("\n\n The tabController has been not initialized yet in: "
-          "${"package:spotify/feature/presentation/blocs/search/search_bloc.dart:35:36"}\n"
-          "The tabController will init when the search widget init in: "
-          "${"package:spotify/feature/presentation/screen/search/filter_screen.dart:27:35"}"
-          "\n\n\n");
+      printData("$e");
     }
   }
 
@@ -90,7 +86,7 @@ class SearchBloc extends Cubit<SearchState> {
       );
     }
 
-    if(pageIndex <= 1){
+    if(pageIndex == 0 || pageIndex % 3 != 0){
       fetchMoviesCategory(categoryMovie);
     }
   }

@@ -94,7 +94,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     /// set movie watched to local
     dbRepository.addMovieToHistory(MovieLocal.fromMovieInfo(currentMovie));
     /// get episode watched from local
-    var responses = await dbRepository.getAllEpisodeFromMovie(currentMovie.sId ?? "");
+    var responses = await dbRepository.getAllEpisodeFromMovieHistory(currentMovie.sId ?? "");
     Map<String, EpisodeLocal> episodeWatched = Map.fromEntries(responses.map((element){
       var episodeLocal = EpisodeLocal.fromJson(element);
       return MapEntry(episodeLocal.slug ?? "", episodeLocal);
@@ -152,7 +152,6 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     required Episode? episode,
     required Emitter<MovieState> emit
   }){
-    print("sdasdsa đang được dispose movie initVideoController");
     betterPlayerController?.dispose();
     betterPlayerController = null;
     emit(state.copyWithResetStateEpisode(
@@ -163,7 +162,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     String? url = episode?.linkM3u8;
     String? localPath = episode?.episodesDownload?.path;
     late BetterPlayerDataSource dataSource;
-    if(localPath != null) {
+    if(localPath != null && episode?.episodesDownload?.status == StatusDownload.SUCCESS) {
       dataSource = BetterPlayerDataSource.file(localPath);
     } else if(url != null) {
       dataSource = BetterPlayerDataSource(

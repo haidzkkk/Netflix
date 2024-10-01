@@ -26,10 +26,6 @@ void printData(String? content){
   }
 }
 
-double bytesToMb(double bytes){
-  return bytes / (1024 * 1024);
-}
-
 double calculateHeightItemGirdView(BuildContext context, double height, int columnCount){
   double widgetItem = MediaQuery.of(context).size.width / columnCount;
   return widgetItem / height;
@@ -87,7 +83,24 @@ extension BuildContextExt on BuildContext{
     Navigator.pushReplacement(this, MaterialPageRoute(builder: (context) => screen));
   }
 
-  void showDraggableBottomSheet({
+  Future<void> showBottomSheet({
+    required Widget child,
+  }) async{
+    showModalBottomSheet(
+        context: this,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(16),
+                topRight: Radius.circular(16),
+            )
+        ),
+        builder: (context){
+          return child;
+        }
+    );
+  }
+
+  Future<void> showDraggableBottomSheet({
     required Widget Function(BuildContext context, ScrollController scrollController) builder
   }) async{
     bool bottomSheetOpen = true;
