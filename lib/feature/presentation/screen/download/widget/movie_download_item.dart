@@ -68,6 +68,9 @@ class _MovieDownloadItemState extends State<MovieDownloadItem> {
                   }
               );
             },
+            onLongPress: (){
+              selectEpisode();
+            },
             child: Container(
               margin: const EdgeInsetsDirectional.all(5),
               child: Row(
