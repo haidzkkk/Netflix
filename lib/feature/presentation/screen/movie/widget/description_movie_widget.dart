@@ -114,7 +114,8 @@ class _DescriptionMovieWidgetState extends State<DescriptionMovieWidget> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Mô tả"),
+                  const SizedBox(height: 5,),
+                  Text("Mô tả", style: Style.body.copyWith(fontWeight: FontWeight.w700)),
                   ReadMoreText(
                     "${state.currentMovie?.content ?? " _ _ "}  ",
                     style: Style.body.copyWith(color: Colors.white.withOpacity(0.4)),

@@ -1,9 +1,12 @@
 import 'package:get_it/get_it.dart';
+import 'package:spotify/context_service.dart';
 import 'package:spotify/feature/data/repositories/file_repo.dart';
 import 'package:spotify/feature/data/repositories/movie_repo.dart';
+import 'package:spotify/feature/data/repositories/setting_repo.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/main/main_bloc_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/watched/watched_cubit.dart';
 import '../commons/utility/locale_util.dart';
 import '../commons/utility/theme_ulti.dart';
@@ -32,6 +35,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ThemeHelper(sharedPreferences: sl()));
   sl.registerLazySingleton(() => HiveManager());
   sl.registerLazySingleton(() => DataBaseHelper.instance);
+  sl.registerLazySingleton(() => ContextService());
 
   ///[Core]
   ///
@@ -50,6 +54,7 @@ Future<void> init() async {
   sl.registerFactory(() => SearchBloc(repo: sl()));
   sl.registerFactory(() => WatchedCubit(localRepo: sl()));
   sl.registerFactory(() => DownloadCubit(sl(), sl()));
+  sl.registerFactory(() => SettingCubit(sl()));
 
   ///[Repository]
   sl.registerFactory(() => AuthRepo(apiClient: sl(), sharedPreferences: sl()));
@@ -57,4 +62,5 @@ Future<void> init() async {
   sl.registerFactory(() => LocalDbRepository(sl()));
   sl.registerFactory(() => LocalNosqlRepository(sl()));
   sl.registerFactory(() => FileRepository());
+  sl.registerFactory(() => SettingRepo(sl()));
 }

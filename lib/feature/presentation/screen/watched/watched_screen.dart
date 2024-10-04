@@ -80,14 +80,20 @@ class _WatchedScreenState extends State<WatchedScreen> with AutomaticKeepAliveCl
                 child: BlocBuilder<WatchedCubit, WatchedState>(
                   buildWhen: (previous, current) => previous.histories != current.histories,
                   builder: (context, state) {
+                    var items = state.histories;
+
+                    if(items.isEmpty){
+                      return const Center(child: Text("Không có phim nào"));
+                    }
+
                     return AnimatedList(
                       key: watchedViewModel.keyListAnimation,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      initialItemCount: state.histories.length,
+                      initialItemCount: items.length,
                       itemBuilder: (context, index, animation){
-                        MovieLocal? previousItem = index == 0 ? null : state.histories[index - 1];
-                        var item = state.histories[index];
+                        MovieLocal? previousItem = index == 0 ? null : items[index - 1];
+                        var item = items[index];
 
                         var previousItemTime = DateTime.fromMillisecondsSinceEpoch(previousItem?.lastTime ?? 0);
                         var itemTime = DateTime.fromMillisecondsSinceEpoch(item.lastTime ?? 0);

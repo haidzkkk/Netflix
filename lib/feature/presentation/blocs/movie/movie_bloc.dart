@@ -5,6 +5,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spotify/context_service.dart';
 import 'package:spotify/feature/commons/contants/app_constants.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/db_local/episode_download.dart';
@@ -15,6 +17,10 @@ import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
 import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
 import 'package:spotify/feature/data/models/status.dart';
 import 'package:spotify/feature/data/repositories/local_db_repository.dart';
+import 'package:spotify/feature/di/InjectionContainer.dart';
+import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
+import 'package:spotify/feature/presentation/screen/movie/widget/custom_control_widget.dart';
+import 'package:spotify/feature/presentation/screen/widget/process_indicator/progress_controller.dart';
 
 import '../../../data/repositories/movie_repo.dart';
 part 'movie_event.dart';
@@ -22,6 +28,7 @@ part 'movie_state.dart';
 
 class MovieBloc extends Bloc<MovieEvent, MovieState> {
   MovieRepo repo;
+  SettingCubit? settingCubit;
   LocalDbRepository dbRepository;
 
   MovieBloc(this.repo, this.dbRepository) : super(MovieState()) {
@@ -29,6 +36,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
   }
 
   BetterPlayerController? betterPlayerController;
+  ProgressController? progressController;
 
   void listenEvent(){
     on<InitMovieEvent>((event, emit) => emit(MovieState()));
@@ -41,7 +49,10 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     on<UpdateDownloadEpisodeMovieEvent>(updateDownloadEpisodeMovie);
     on<ListenerBetterPlayerEvent>(onBetterPlayerEvent);
     on<UpdateShowPlayerWindowMovieEvent>(onShowPlayerWindow);
+  }
 
+  initSettingCubit(){
+    settingCubit = sl<ContextService>().context?.read<SettingCubit>();
   }
 
   var durationScroll = const Duration(milliseconds: 300);
@@ -116,6 +127,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     );
     listenShowPipEventFromAndroid();
     add(ChangeExpandedMovieEvent(isExpand: true));
+    progressController ??= ProgressController();
   }
 
   Future<void> cleanWatchMovieEvent(CleanWatchMovieEvent event, Emitter<MovieState> emit) async{
@@ -125,6 +137,8 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
 
     betterPlayerController?.dispose();
     betterPlayerController = null;
+    progressController?.dispose();
+    progressController = null;
     emit(state.copyWithAbsolute(
       movie: null,
       episode: null,
@@ -138,9 +152,6 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
 
   Future<void> changeEpisode(ChangeEpisodeMovieEvent event, Emitter<MovieState> emit) async{
     saveEpisodePreviousToLocal();
-    if(event.episode == null) {
-      /// fetch history episode local
-    }
     emit(state.copyWith(episode: event.episode));
     initVideoController(
       episode: event.episode,
@@ -181,29 +192,61 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
           add(ListenerBetterPlayerEvent(event: event));
         },
         controlsConfiguration: BetterPlayerControlsConfiguration(
-            customControlsBuilder: (controller, onControlsVisibilityChanged){
-              return Container(height: 100, width:  100, color: Colors.white,);
-            }
+            // customControlsBuilder: (controller, onControlsVisibilityChanged){
+            //   return Container(height: 100, width:  100, color: Colors.white,);
+            // }
+          customControlsBuilder: (controller, onControlsVisibilityChanged){
+            return CustomControlsWidget(
+              controller: controller,
+            );
+          },
+          playerTheme: BetterPlayerTheme.custom,
         )
     ));
     betterPlayerController?.setupDataSource(dataSource);
   }
 
+  bool isNextEpisode = false;
   onBetterPlayerEvent(ListenerBetterPlayerEvent event, Emitter<MovieState> emit){
-
+    print("event: ${event.event.betterPlayerEventType}");
     switch(event.event.betterPlayerEventType){
       case BetterPlayerEventType.progress :{
         /// get current time watch episode
-        Duration? myProgress = event.event.parameters?['progress'];
-        if(myProgress?.inSeconds != null){
+        Duration? progress = event.event.parameters?['progress'];
+
+        int? totalProcess = betterPlayerController?.videoPlayerController?.value.duration?.inSeconds;
+        int? currentProcess = progress?.inSeconds;
+
+        if(progress?.inSeconds != null && currentProcess != null){
           emit(state.copyWith(
-            totalTimeEpisode: betterPlayerController?.videoPlayerController?.value.duration?.inSeconds,
-            currentTimeEpisode: myProgress?.inSeconds,
+            totalTimeEpisode: totalProcess,
+            currentTimeEpisode: currentProcess,
           ));
+
+          double? processIndicator;
+          if(totalProcess != null){
+            processIndicator = currentProcess / totalProcess;
+          }
+          progressController?.moveTo(processIndicator ?? 0);
+        }
+
+        /// auto next episode
+        bool ended = totalProcess == currentProcess;
+        if(ended && isNextEpisode == false && settingCubit?.state.isAutoChangeEpisode == true){
+          isNextEpisode = true;
+          Future.delayed(const Duration(milliseconds: 3000), (){
+            List<Episode> listEpisode = state.currentMovie?.episodes?.firstOrNull?.episode ?? [];
+            if(listEpisode.isEmpty) return;
+            int currentEpisodePosition = listEpisode.indexWhere((element) => element.slug == state.currentEpisode?.slug,);
+            if(currentEpisodePosition < 0
+                || (currentEpisodePosition + 1) >= listEpisode.length) return;
+            Episode nextEpisode = listEpisode[currentEpisodePosition + 1];
+            add(ChangeEpisodeMovieEvent(episode: nextEpisode));
+          });
         }
         break;
       }
-      case BetterPlayerEventType.controlsVisible || BetterPlayerEventType.controlsHiddenStart:{
+      case BetterPlayerEventType.controlsVisible || BetterPlayerEventType.controlsHiddenEnd:{
         emit(state.copyWith(
           visibleControlsPlayer: event.event.betterPlayerEventType == BetterPlayerEventType.controlsVisible,
         ));
@@ -274,7 +317,13 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
 
   StreamSubscription? _eventPipSubscription;
   void listenShowPipEventFromAndroid() {
-    if (_eventPipSubscription != null) return;
+    if(settingCubit?.state.isWatchBackground == false && _eventPipSubscription != null){
+      cancelListenShowPipEventFromAndroid();
+      return;
+    }else if (_eventPipSubscription != null) {
+      return;
+    }
+
     _eventPipSubscription = const EventChannel(AppConstants.methodEventPip)
         .receiveBroadcastStream().listen((data) {
 

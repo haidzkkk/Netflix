@@ -33,5 +33,14 @@ class AppConstants{
   static const String methodEventDownload = 'com.example.method_event/download';
   static const String methodEventPip = 'com.example.method_event/pip';
 
+  static const String appShare = 'https://github.com/haidzkkk/netflix';
+
   static const int defaultPageSize = 10;
+
+  static const String spfsWatchBackground = 'spfs1#_watchBackground';
+  static const String spfsAutoChangeEpisode = 'spfs1#_autoChangeEpisode';
+  static const String spfsSuggestEpisodeWatched = 'spfs1#_suggestEpisodeWatched';
+  static const String spfsFavouriteCategories = 'spfs1#_favouriteCategories';
+  static const String spfsShowNotifyWhenDownloadSuccess = 'spfs1#_showNotifyWhenDownloadSuccess';
+
 }

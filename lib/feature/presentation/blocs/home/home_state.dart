@@ -7,6 +7,7 @@ class HomeState extends Equatable {
   final bool isConnect;
   final Map<CategoryMovie, List<Movie>> movies;
 
+
   HomeState({
     int? pageIndex,
     bool? isConnect,

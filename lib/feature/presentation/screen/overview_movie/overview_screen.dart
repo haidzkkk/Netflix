@@ -99,42 +99,15 @@ class _OverViewScreenState extends State<OverViewScreen>{
                   SizedBox(
                     height: 100.h,
                     width: double.infinity,
-                    child: Stack(
-                      children: [
-                        Positioned.fill(
-                          child: BlocBuilder<MovieBloc, MovieState>(
-                            buildWhen: (previous, current) => previous.movie.data?.getThumbUrl != current.movie.data?.getThumbUrl,
-                            builder: (context, state){
-                              return TrailerWidget(
-                                  thumbnail: state.movie.data?.getThumbUrl ?? "",
-                                  // trailerUrl: state.movie.data?.trailerUrl ?? ""
-                                  trailerUrl: "",
-                              );
-                            }
-                          ),
-                        ),
-                        Positioned(
-                          top: MediaQuery.of(context).viewPadding.top + 8.h,
-                          right: 0,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              GestureDetector(
-                                onTap: (){
-
-                                },
-                                child: Icon(FontAwesomeIcons.chromecast, color: Colors.black.withOpacity(0.7), size: 25.sp,)
-                              ),
-                              IconButton(
-                                onPressed: (){
-                                  Navigator.pop(context);
-                                },
-                                icon: Icon(FontAwesomeIcons.solidCircleXmark, color: Colors.black.withOpacity(0.7), size: 25.sp,)
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
+                    child: BlocBuilder<MovieBloc, MovieState>(
+                      buildWhen: (previous, current) => previous.movie.data?.getThumbUrl != current.movie.data?.getThumbUrl,
+                      builder: (context, state){
+                        return TrailerWidget(
+                            thumbnail: state.movie.data?.getThumbUrl ?? "",
+                            // trailerUrl: state.movie.data?.trailerUrl ?? ""
+                            trailerUrl: "",
+                        );
+                      }
                     ),
                   ),
                   Padding(
@@ -379,7 +352,8 @@ class _OverViewScreenState extends State<OverViewScreen>{
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text("Mô tả"),
+                                  const SizedBox(height: 5,),
+                                  Text("Mô tả", style: Style.body.copyWith(fontWeight: FontWeight.w700)),
                                   ReadMoreText(
                                     "${state.movie.data?.content ?? " _ _"}  ",
                                     style: Style.body.copyWith(color: Colors.white.withOpacity(0.4)),

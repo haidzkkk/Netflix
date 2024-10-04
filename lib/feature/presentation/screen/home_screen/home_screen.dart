@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
+import 'package:spotify/feature/presentation/blocs/setting/setting_state.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/header_widget.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/slide_widget.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/widget/movie_item.dart';
@@ -42,10 +44,16 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BlocBuilder<HomeBloc, HomeState>(
-              buildWhen: (previous, current) => previous.movies[CategoryMovie.listCartoon] != current.movies[CategoryMovie.listCartoon],
+            BlocBuilder<SettingCubit, SettingState>(
+              buildWhen: (previous, current) => previous.favouriteCategories != current.favouriteCategories,
               builder: (context, state) {
-                return HeaderWidget(movie: state.movies[CategoryMovie.listCartoon]?.firstOrNull,);
+                var category = state.favouriteCategories.firstOrNull ?? CategoryMovie.listCartoon;
+                return BlocBuilder<HomeBloc, HomeState>(
+                  buildWhen: (previous, current) => previous.movies[category] != current.movies[category],
+                  builder: (context, state) {
+                    return HeaderWidget(movie: state.movies[category]?.firstOrNull,);
+                  }
+                );
               }
             ),
             const TitleWidget(
@@ -54,15 +62,15 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
             SizedBox(
               height: 100,
               child: BlocBuilder<HomeBloc, HomeState>(
-                buildWhen: (previous, current) => previous.movies[CategoryMovie.listMovieSingle] != current.movies[CategoryMovie.listMovieSingle],
+                buildWhen: (previous, current) => previous.movies[CategoryMovie.movieNew] != current.movies[CategoryMovie.movieNew],
                 builder: (context, state) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: state.movies[CategoryMovie.listMovieSingle]?.length ?? 0,
+                      itemCount: state.movies[CategoryMovie.movieNew]?.length ?? 0,
                       itemBuilder: (context, index) {
-                        var item = state.movies[CategoryMovie.listMovieSingle]![index];
+                        var item = state.movies[CategoryMovie.movieNew]![index];
                         return Container(
                             clipBehavior: Clip.antiAlias,
                             decoration: const BoxDecoration(
@@ -83,117 +91,101 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               ),
             ),
             const SizedBox(height: 10,),
-            TitleWidget(
-                title: "Phim mới cập nhật",
-                onTap: (){
-                  homeViewModel.add(ChangePageIndexHomeEvent(1));
-                  context.read<SearchBloc>().pageTabCategorySearch(CategoryMovie.movieNew);
-                }
-            ),
-            SizedBox(
-              height: 180.w,
-              child: BlocBuilder<HomeBloc, HomeState>(
-                buildWhen: (previous, current) => previous.movies[CategoryMovie.movieNew] != current.movies[CategoryMovie.movieNew],
-                builder: (context, state) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: state.movies[CategoryMovie.movieNew]?.length ?? 0,
-                      itemBuilder: (context, index) {
-                      var item = state.movies[CategoryMovie.movieNew]![index];
-                      return MovieItem(
-                          movie: item,
-                          onTap: (){
+            BlocBuilder<SettingCubit, SettingState>(
+              buildWhen: (previous, current) => previous.favouriteCategories != current.favouriteCategories,
+              builder: (context, state) {
+                var category = state.favouriteCategories.firstOrNull ?? CategoryMovie.listEmotional;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TitleWidget(
+                        title: category.name,
+                        onTap: (){
+                          homeViewModel.add(ChangePageIndexHomeEvent(1));
+                          context.read<SearchBloc>().pageTabCategorySearch(category);
+                        }
+                    ),
+                    BlocBuilder<HomeBloc, HomeState>(
+                      buildWhen: (previous, current) => previous.movies[category] != current.movies[category],
+                      builder: (context, state) {
+                        return SlideWidget(
+                          movies: state.movies[category] ?? [],
+                          onTap: (Movie movie){
                             context.showDraggableBottomSheet(
                                 builder: (context, controller){
                                   return OverViewScreen(
-                                    movie: item.toMovieInfo(),
+                                    movie: movie.toMovieInfo(),
                                     draggableScrollController: controller,
                                   );
                                 }
                             );
                           }
-                      );
-                    },
-                      separatorBuilder: (context, index) => const SizedBox(width: 10,),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 10,),
-            const TitleWidget(
-              title: "Phim hay nhất",
-            ),
-            BlocBuilder<HomeBloc, HomeState>(
-              buildWhen: (previous, current) => previous.movies[CategoryMovie.listEmotional] != current.movies[CategoryMovie.listEmotional],
-              builder: (context, state) {
-                return SlideWidget(
-                  movies: state.movies[CategoryMovie.listEmotional] ?? [],
-                  onTap: (Movie movie){
-                    context.showDraggableBottomSheet(
-                        builder: (context, controller){
-                          return OverViewScreen(
-                            movie: movie.toMovieInfo(),
-                            draggableScrollController: controller,
-                          );
-                        }
-                    );
-                  }
-                );
-              },
-            ),
-            ...CategoryMovie.valuesCategory
-                .map((category){
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10,),
-                  TitleWidget(
-                      title: category.name,
-                      onTap: (){
-                        homeViewModel.add(ChangePageIndexHomeEvent(1));
-                        context.read<SearchBloc>().pageTabCategorySearch(category);
-                      }
-                  ),
-                  SizedBox(
-                    height: 180.w,
-                    child: BlocBuilder<HomeBloc, HomeState>(
-                      buildWhen: (previous, current) => previous.movies[category] != current.movies[category],
-                      builder: (context, state) {
-                        var items = state.movies[category] ?? [];
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: ListView.separated(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: items.length,
-                            itemBuilder: (context, index) {
-                              var item = items[index];
-                              return MovieItem(
-                                  movie: item,
-                                  onTap: (){
-                                    context.showDraggableBottomSheet(
-                                        builder: (context, controller){
-                                          return OverViewScreen(
-                                            movie: item.toMovieInfo(),
-                                            draggableScrollController: controller,
-                                          );
-                                        }
-                                    );
-                                  }
-                              );
-                            },
-                            separatorBuilder: (context, index) => const SizedBox(width: 10,),
-                          ),
                         );
                       },
                     ),
-                  ),
-                ],
-              );
-            }),
+                  ],
+                );
+              }
+            ),
+            BlocBuilder<SettingCubit, SettingState>(
+              buildWhen: (previous, current) => previous.favouriteCategories != current.favouriteCategories,
+              builder: (context, state) {
+                List<CategoryMovie> categories = List.from(state.favouriteCategories)..removeAt(0);
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: categories.map((category){
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 10,),
+                      TitleWidget(
+                          title: category.name,
+                          onTap: (){
+                            homeViewModel.add(ChangePageIndexHomeEvent(1));
+                            context.read<SearchBloc>().pageTabCategorySearch(category);
+                          }
+                      ),
+                      SizedBox(
+                        height: 180.w,
+                        child: BlocBuilder<HomeBloc, HomeState>(
+                          buildWhen: (previous, current) => previous.movies[category] != current.movies[category],
+                          builder: (context, state) {
+                            List<Movie> items = state.movies[category] ?? [];
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: items.length,
+                                itemBuilder: (context, index) {
+                                  var item = items[index];
+                                  return MovieItem(
+                                      movie: item,
+                                      onTap: (){
+                                        context.showDraggableBottomSheet(
+                                            builder: (context, controller){
+                                              return OverViewScreen(
+                                                movie: item.toMovieInfo(),
+                                                draggableScrollController: controller,
+                                              );
+                                            }
+                                        );
+                                      }
+                                  );
+                                },
+                                separatorBuilder: (context, index) => const SizedBox(width: 10,),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+                );
+              },
+            ),
           ],
         ),
       ),

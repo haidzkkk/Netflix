@@ -8,6 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:spotify/feature/commons/utility/color_resource.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
 
 void showToast(String content){
@@ -70,11 +71,21 @@ extension NumExt on num {
     final NumberFormat formatter = NumberFormat('#,###');
     return formatter.format(this);
   }
+
+  String get secondsToMinute {
+    var minuteSeconds = this / 60;
+    var minute = minuteSeconds.truncate();
+    var second = ((double.parse(minuteSeconds.toStringAsFixed(2)) - minute) * 60).toInt();
+    return "${minute.toString().padLeft(2, "0")}:${second.toString().padLeft(2, "0")}";
+  }
 }
 
 extension BuildContextExt on BuildContext{
   void to(Widget screen){
     Navigator.push(this, MaterialPageRoute(builder: (context) => screen));
+  }
+  void toWithCupertino(Widget screen){
+    Navigator.push(this, CupertinoPageRoute(builder: (context) => screen));
   }
   void back(){
     Navigator.pop(this);
@@ -135,7 +146,7 @@ extension BuildContextExt on BuildContext{
     ScaffoldMessenger.of(this).hideCurrentSnackBar();
     var snackBar = SnackBar(
       content: Text(content, style: Style.body.copyWith(color: Colors.white),),
-      backgroundColor: Colors.brown,
+      backgroundColor: ColorResources.secondaryColor,
     );
 
     ScaffoldMessenger.of(this).showSnackBar(snackBar);
@@ -145,7 +156,7 @@ extension BuildContextExt on BuildContext{
     ScaffoldMessenger.of(this).hideCurrentSnackBar();
     SnackBar snackBar = SnackBar(
       content: child,
-      backgroundColor: backgroundColor ?? Colors.brown,
+      backgroundColor: backgroundColor ?? ColorResources.secondaryColor,
       duration: Duration(seconds: seconds ?? 2),
     );
 
