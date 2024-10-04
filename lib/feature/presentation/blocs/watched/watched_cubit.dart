@@ -26,6 +26,7 @@ class WatchedCubit extends Cubit<WatchedState> implements ListAnimation<MovieLoc
 
   getMovieHistory({bool? isRefresh}) async{
     if(isRefresh == true){
+      removeAnimationList(keyList: keyListAnimation);
       emit(WatchedState());
     }
 
@@ -78,9 +79,6 @@ class WatchedCubit extends Cubit<WatchedState> implements ListAnimation<MovieLoc
     required int fromIndex,
     required int toIndex
   }) {
-    if(fromIndex == 0){
-      removeAnimationList(keyList: keyList);
-    }
     for (int offset = fromIndex; offset < toIndex; offset++) {
       keyList.currentState?.insertItem(offset);
     }

@@ -11,5 +11,4 @@ change the icon app
 - cmd: flutter pub run flutter_launcher_icons
 
 flutter gen asset
-- fluttergen -h
 - fluttergen -c pubspec.yaml

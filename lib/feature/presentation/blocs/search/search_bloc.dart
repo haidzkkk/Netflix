@@ -1,7 +1,11 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spotify/context_service.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/di/InjectionContainer.dart';
+import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
 import '../../../data/models/category_movie.dart';
 import '../../../data/models/response/movie.dart';
 import '../../../data/models/status.dart';
@@ -14,7 +18,12 @@ class SearchBloc extends Cubit<SearchState> {
   SearchBloc({required this.repo}) : super(SearchState());
 
   late TabController tabController;
-  var tabCategories = CategoryMovie.valuesCategory;
+  SettingCubit? settingCubit;
+  List<CategoryMovie> get categories => settingCubit?.state.favouriteCategories ?? [];
+
+  initSettingCubit(){
+    settingCubit = sl<ContextService>().context?.read<SettingCubit>();
+  }
 
   initScreen({required TabController tabController}){
     this.tabController = tabController;
@@ -26,7 +35,7 @@ class SearchBloc extends Cubit<SearchState> {
   }
 
   void pageTabCategorySearch(CategoryMovie category){
-    var pageIndex = tabCategories.indexWhere((element) => element.slug == category.slug);
+    var pageIndex = categories.indexWhere((element) => element.slug == category.slug);
     if(pageIndex != -1){
       pageTabIndexSearch(pageIndex);
     }

@@ -56,7 +56,7 @@ class _MovieScreenState extends State<MovieScreen> {
   Widget build(BuildContext context) {
     return BlocListener<MovieBloc, MovieState>(
       listenWhen: (previous, current) => previous.timeWatchedEpisode != current.timeWatchedEpisode
-          && current.timeWatchedEpisode != null,
+          && current.timeWatchedEpisode != null && viewModel.settingCubit?.state.isSuggestEpisodeWatched == true,
       listener: (context, state){
         showSnackBarContinueEpisode(state.timeWatchedEpisode!);
       },

@@ -175,7 +175,7 @@ class _SearchScreenState extends State<SearchScreen>
                           builder: (context) {
                             var itemCount = 3;
                             var heightItem = calculateHeightItemGirdView(context, 100.h, itemCount);
-                            var category = CategoryMovie.valuesCategory.first;
+                            var category = CategoryMovie.valueCategories.first;
 
                             return Column(
                               children: [

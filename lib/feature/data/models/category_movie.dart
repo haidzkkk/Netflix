@@ -3,6 +3,7 @@ import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/response/collection.dart';
 import 'package:spotify/feature/data/models/response/movie.dart';
 import 'package:spotify/feature/data/models/response/movie_response.dart';
+import 'package:spotify/gen/assets.gen.dart';
 
 import '../../commons/contants/app_constants.dart';
 import 'data.dart';
@@ -24,15 +25,29 @@ enum CategoryMovie{
   const CategoryMovie({required this.name, required this.slug, required this.path});
 
   static CategoryMovie? getCategoryMovie(String? slug){
-    return CategoryMovie.valuesCategory.firstWhereOrNull((category){
+    return CategoryMovie.valueCategories.firstWhereOrNull((category){
       return category.slug == slug;
     });
   }
 
-  static List<CategoryMovie> get valuesCategory {
+  static List<CategoryMovie> get valueCategories {
     return CategoryMovie.values.where((category) => category != CategoryMovie.search).toList();
   }
 
+  static Map<String, CategoryMovie> get mapCategories {
+    return Map.fromEntries(valueCategories.map((e) => MapEntry(e.slug, e)));
+  }
+
+  static List<String> toListString(List<CategoryMovie> data){
+    return data.map((e) => e.slug).toList();
+  }
+
+  static List<CategoryMovie> fromListString(List<String> data){
+    Map<String, CategoryMovie> mapCategoriesData = mapCategories;
+    return data.map((e) => mapCategoriesData[e]).whereType<CategoryMovie>().toList();
+  }
+
+  /// decode data json movie each category
   Data<List<Movie>> itemDataFromJson(Map<String, dynamic> body) {
     switch (path) {
       case AppConstants.GET_LIST_MOVIE:{
@@ -56,4 +71,26 @@ enum CategoryMovie{
         throw Exception("Unknown category path: $path");
     }
   }
+}
+
+extension CategoryMovieExt on CategoryMovie{
+  String get getPathImage {
+    if(this == CategoryMovie.listCartoon){
+      return Assets.img.cartoon.path;
+    }else if(this == CategoryMovie.movieNew){
+      return Assets.img.newMovie.path;
+    }else if(this == CategoryMovie.listMovieSingle){
+      return Assets.img.singleMovie.path;
+    }else if(this == CategoryMovie.listTvShow){
+      return Assets.img.tvshow.path;
+    }else if(this == CategoryMovie.listSeries){
+      return Assets.img.series.path;
+    }else if(this == CategoryMovie.listMovieAction){
+      return Assets.img.action.path;
+    }else if(this == CategoryMovie.listEmotional){
+      return Assets.img.emotional.path;
+    }
+    return "";
+  }
+
 }

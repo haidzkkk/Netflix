@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
+import 'package:spotify/context_service.dart';
 import 'package:spotify/feature/commons/contants/theme.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/home/home_bloc.dart';
 import 'package:spotify/feature/presentation/blocs/main/main_bloc_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/blocs/search/search_bloc.dart';
+import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/watched/watched_cubit.dart';
 import 'package:spotify/feature/presentation/screen/main/main_screen.dart';
+import 'package:spotify/feature/presentation/screen/splash/splash_screen.dart';
 import 'feature/commons/utility/pageutil.dart';
 import 'feature/data/local/hive_manager.dart';
 import 'feature/di/InjectionContainer.dart';
@@ -54,6 +57,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<SearchBloc>(create: (context) => sl<SearchBloc>()),
         BlocProvider<WatchedCubit>(create: (context) => sl<WatchedCubit>()),
         BlocProvider<DownloadCubit>(create: (context) => sl<DownloadCubit>()),
+        BlocProvider<SettingCubit>(create: (context) => sl<SettingCubit>()),
       ],
       child: Builder(
         builder: (context) {
@@ -64,6 +68,7 @@ class _MyAppState extends State<MyApp> {
             },
             builder: (context, state) {
               return MaterialApp(
+                navigatorKey: sl<ContextService>().globalKey,
                 debugShowCheckedModeBanner: false,
                 theme: darkTheme,
                 locale: state.locale,
@@ -75,7 +80,7 @@ class _MyAppState extends State<MyApp> {
                 ],
                 supportedLocales: AppLocalizations.supportedLocales,
                 // list languages AppLocalizations auto generate
-                home: const MainScreen(),
+                home: const SplashScreen(),
               );
             },
           );

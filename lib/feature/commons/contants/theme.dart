@@ -35,11 +35,11 @@ ThemeData darkTheme = ThemeData(
     backgroundColor: ColorResources.secondaryColor
   ),
   appBarTheme: const AppBarTheme(
-    color: Colors.red,
+    color: ColorResources.primaryColor,
     iconTheme: IconThemeData(color: Colors.white),
   ),
   colorScheme: ColorScheme.fromSeed(
-    seedColor: Colors.red,
+    seedColor: ColorResources.primaryColor,
     brightness: Brightness.dark,
   ),
 );
