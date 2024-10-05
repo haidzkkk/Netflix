@@ -30,8 +30,7 @@ class ChangeExpandedMovieEvent extends MovieEvent{
 
 class ChangeEpisodeMovieEvent extends MovieEvent{
   Episode? episode;
-  EpisodeDownload? episodeDownload;
-  ChangeEpisodeMovieEvent({this.episode, this.episodeDownload});
+  ChangeEpisodeMovieEvent({this.episode});
 }
 
 class ListenerBetterPlayerEvent extends MovieEvent{

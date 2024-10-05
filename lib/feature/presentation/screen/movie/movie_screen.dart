@@ -14,9 +14,6 @@ import 'package:spotify/feature/presentation/screen/movie/widget/background_movi
 import 'package:spotify/feature/presentation/screen/movie/widget/description_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/episodes_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/info_movie_widget.dart';
-import 'package:spotify/feature/presentation/screen/widget/custom_better_player.dart';
-import 'package:spotify/feature/presentation/screen/widget/custom_builder.dart';
-import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 import '../../../commons/utility/style_util.dart';
 import '../../blocs/movie/movie_bloc.dart';
 

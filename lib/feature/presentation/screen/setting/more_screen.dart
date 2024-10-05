@@ -235,7 +235,7 @@ class _MoreScreenState extends State<MoreScreen> with AutomaticKeepAliveClientMi
                     ],
                   ),
                 ),
-                const SizedBox(height: 1000,),
+                const SizedBox(height: 50,),
               ],
             ),
             Positioned(
