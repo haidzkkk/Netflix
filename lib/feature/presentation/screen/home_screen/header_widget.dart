@@ -24,7 +24,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 270.h,
+      height: 180.h,
       width: double.infinity,
       child: Stack(
         children: [

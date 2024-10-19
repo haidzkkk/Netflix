@@ -36,22 +36,33 @@ class MainActivity: FlutterActivity() {
 
     override fun onResume() {
         super.onResume()
-        if(isReceiverRegistered == false){
-            isReceiverRegistered = true;
-            context.registerReceiver(broadcastRegister, IntentFilter(AppConstants.ACTION_COMMUNICATE))
+        if(!isReceiverRegistered){
+            isReceiverRegistered = true
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+                context.registerReceiver(
+                    broadcastRegister,
+                    IntentFilter(AppConstants.ACTION_COMMUNICATE),
+                    RECEIVER_NOT_EXPORTED
+                )
+            }else{
+                context.registerReceiver(
+                    broadcastRegister,
+                    IntentFilter(AppConstants.ACTION_COMMUNICATE),
+                )
+            }
         }
     }
 
     override fun onPause() {
         super.onPause()
-        if(isReceiverRegistered == true){
+        if(isReceiverRegistered){
             unregisterReceiver(broadcastRegister)
             isReceiverRegistered = false;
         }
     }
     override fun onDestroy() {
         super.onDestroy()
-        if(isReceiverRegistered == true){
+        if(isReceiverRegistered){
             unregisterReceiver(broadcastRegister)
             isReceiverRegistered = false;
         }

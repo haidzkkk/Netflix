@@ -33,6 +33,9 @@ class AppConstants{
   static const String methodEventDownload = 'com.example.method_event/download';
   static const String methodEventPip = 'com.example.method_event/pip';
 
+  static const String backupFolderName = "NetFLixBackup";
+  static const String backupMineType = "application/vnd.google-apps.folder";
+
   static const String appShare = 'https://github.com/haidzkkk/netflix';
 
   static const int defaultPageSize = 10;

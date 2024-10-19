@@ -90,9 +90,9 @@ class DownloadViewModel(private val listener: IEventListener
         }
     }
 
-
     fun sendActionToActivity(applicationContext: Context, event: MovieEpisode) {
         val intent = Intent(AppConstants.ACTION_COMMUNICATE)
+        intent.setPackage(applicationContext.packageName)
         val arrayProcess = ArrayList<MovieEpisode>();
         arrayProcess.add(event)
         arrayProcess.addAll(moviesWaiting)

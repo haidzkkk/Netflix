@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:spotify/context_service.dart';
 import 'package:spotify/feature/data/repositories/file_repo.dart';
+import 'package:spotify/feature/commons/hepler/google_service.dart';
+import 'package:spotify/feature/data/repositories/google_repo.dart';
 import 'package:spotify/feature/data/repositories/movie_repo.dart';
 import 'package:spotify/feature/data/repositories/setting_repo.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
@@ -45,6 +47,7 @@ Future<void> init() async {
 
   ///[External]
   ///
+  sl.registerLazySingleton(() => GoogleService(sl()));
 
   ///[Bloc]
   ///
@@ -54,7 +57,7 @@ Future<void> init() async {
   sl.registerFactory(() => SearchBloc(repo: sl()));
   sl.registerFactory(() => WatchedCubit(localRepo: sl()));
   sl.registerFactory(() => DownloadCubit(sl(), sl()));
-  sl.registerFactory(() => SettingCubit(sl()));
+  sl.registerFactory(() => SettingCubit(sl(), sl()));
 
   ///[Repository]
   sl.registerFactory(() => AuthRepo(apiClient: sl(), sharedPreferences: sl()));
@@ -63,4 +66,6 @@ Future<void> init() async {
   sl.registerFactory(() => LocalNosqlRepository(sl()));
   sl.registerFactory(() => FileRepository());
   sl.registerFactory(() => SettingRepo(sl()));
+  sl.registerFactory(() => GoogleRepo(sl()));
+
 }

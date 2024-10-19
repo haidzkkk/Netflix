@@ -270,13 +270,13 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
   Future<bool> checkAndSyncMovieDownloading() async{
     var responses = await dbRepository.getEpisodeDownloading();
     if(responses.isNotEmpty){
-      showToast("Đang đồng bộ download");
       syncMovieDownloading();
     }
     return responses.isNotEmpty;
   }
 
   Future<void> syncMovieDownloading() async{
+    showToast("Đang đồng bộ download");
     /// delay for service download emit process the movie downloading
     listenEventFromService();
     await Future.delayed(const Duration(milliseconds: 1000));
