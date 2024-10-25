@@ -19,8 +19,7 @@ interface IEventListener{
     fun onDownloaded()
 }
 
-class DownloadViewModel(private val listener: IEventListener
-) {
+class DownloadViewModel(private val listener: IEventListener) {
 
     private val moviesWaiting: Queue<MovieEpisode> = LinkedList()
     private var currentMovie: MovieEpisode? = null
@@ -47,20 +46,25 @@ class DownloadViewModel(private val listener: IEventListener
         FFmpeg.executeAsync(
             "-i ${currentMovie!!.url} -c:v mpeg4 -y ${currentMovie!!.localPath}"
         ) { _, returnCode ->
-            if (returnCode == Config.RETURN_CODE_SUCCESS) {
-                listener.onDownload(
-                    currentMovie!!.apply {
-                        status = Status.Success("Download completed successfully")
-                    }
-                )
-            } else {
-                listener.onDownload(
-                    currentMovie!!.apply {
-                        status = if (returnCode == Config.RETURN_CODE_CANCEL)
-                                    Status.Error("Download canceled", "")
-                                else Status.Error("Download failed", "")
-                    }
-                )
+            when (returnCode) {
+                Config.RETURN_CODE_SUCCESS -> {
+                    listener.onDownload(
+                        currentMovie!!.apply {
+                            status = Status.Success("Download completed successfully")
+                        })
+                }
+                Config.RETURN_CODE_CANCEL -> {
+                    listener.onDownload(
+                        currentMovie!!.apply {
+                            status = Status.Error("Download canceled", "")
+                        })
+                }
+                else -> {
+                    listener.onDownload(
+                        currentMovie!!.apply {
+                            status = Status.Error("Download failed", "")
+                        })
+                }
             }
             startDownload()
         }
@@ -91,7 +95,7 @@ class DownloadViewModel(private val listener: IEventListener
     }
 
     fun sendActionToActivity(applicationContext: Context, event: MovieEpisode) {
-        val intent = Intent(AppConstants.ACTION_COMMUNICATE)
+        val intent = Intent(AppConstants.ACTION_DOWNLOAD)
         intent.setPackage(applicationContext.packageName)
         val arrayProcess = ArrayList<MovieEpisode>();
         arrayProcess.add(event)

@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/presentation/blocs/home/home_bloc.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/blocs/search/search_bloc.dart';
 import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
@@ -23,6 +24,7 @@ class _SplashScreenState extends State<SplashScreen>{
   void initState() {
     context.read<MovieBloc>().initSettingCubit();
     context.read<SearchBloc>().initSettingCubit();
+    context.read<HomeBloc>().initSettingCubit();
     context.read<SettingCubit>().syncSetting().then((value){
       Future.delayed(const Duration(milliseconds: 1500), (){
         context.replace(const MainScreen());

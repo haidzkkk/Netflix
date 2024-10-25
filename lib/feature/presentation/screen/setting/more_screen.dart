@@ -17,6 +17,7 @@ import 'package:spotify/feature/presentation/screen/setting/help_screen.dart';
 import 'package:spotify/feature/presentation/screen/setting/extension_screen.dart';
 import 'package:spotify/feature/presentation/screen/setting/notification_screen.dart';
 import 'package:spotify/feature/presentation/screen/setting/sync_screen.dart';
+import 'package:spotify/feature/presentation/screen/setting/widget_provider_screen.dart';
 import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 import 'package:spotify/feature/presentation/screen/widget/overlay_widget.dart';
 import 'package:spotify/feature/presentation/screen/setting/widget/icon_setting.dart';
@@ -272,7 +273,7 @@ class _MoreScreenState extends State<MoreScreen> with AutomaticKeepAliveClientMi
                     leading: Icons.view_agenda_outlined,
                     label: "Thêm vào nền",
                     onTap: (){
-                      context.toWithCupertino(const HelpScreen());
+                      context.toWithCupertino(const WidgetProviderScreen());
                     }
                   ),
                   IconSetting(

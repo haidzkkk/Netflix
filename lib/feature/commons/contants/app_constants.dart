@@ -33,6 +33,14 @@ class AppConstants{
   static const String methodEventDownload = 'com.example.method_event/download';
   static const String methodEventPip = 'com.example.method_event/pip';
 
+  static const String methodChannelOpenMovie = "com.example.method_chanel/openMovie";
+  static const String methodChannelWidgetProvider = "com.example.method_chanel/widgetProvider";
+  static const String openMovieInvokeMethod = "openMovie";
+  static const String invokeMethodProvideMovie = "provideMovie";
+  static const String invokeMethodDragWidget = "dragWidget";
+  static const String provideMovieData = "data";
+  static const String provideMovieCategory = "category";
+
   static const String backupFolderName = "NetFLixBackup";
   static const String backupMineType = "application/vnd.google-apps.folder";
 

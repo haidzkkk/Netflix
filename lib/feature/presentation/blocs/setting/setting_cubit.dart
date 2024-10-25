@@ -1,6 +1,8 @@
 
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:spotify/feature/commons/contants/app_constants.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/category_movie.dart';
 import 'package:spotify/feature/data/repositories/google_repo.dart';
@@ -131,5 +133,21 @@ class SettingCubit extends Cubit<SettingState>{
       return;
     }
     emit(state.copyWith(syncingFavouriteDriveFile: StatusEnum.successfully,));
+  }
+
+  sendDataToAndroidWidgetProvider({required String categoryJson, required String movieJson}){
+    const MethodChannel(AppConstants.methodChannelWidgetProvider)
+        .invokeMethod(
+        AppConstants.invokeMethodProvideMovie,
+        {
+          AppConstants.provideMovieCategory: categoryJson,
+          AppConstants.provideMovieData: movieJson,
+        }
+    );
+  }
+
+  sendActionDragToAndroidWidgetProvider(){
+    const MethodChannel(AppConstants.methodChannelWidgetProvider)
+        .invokeMethod(AppConstants.invokeMethodDragWidget,);
   }
 }

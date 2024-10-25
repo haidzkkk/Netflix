@@ -130,8 +130,8 @@ class Movie extends Equatable{
     data['slug'] = slug;
     data['origin_name'] = originName;
     data['type'] = type;
-    data['poster_url'] = posterUrl;
-    data['thumb_url'] = thumbUrl;
+    data['poster_url'] = getPosterUrl;
+    data['thumb_url'] = getThumbUrl;
     data['sub_docquyen'] = subDocquyen;
     data['chieurap'] = chieurap;
     data['time'] = time;

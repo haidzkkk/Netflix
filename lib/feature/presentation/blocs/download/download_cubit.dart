@@ -138,8 +138,8 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
       movieId: movie.sId,
       movieName: "${movie.name} - ${episode.name}",
       movieSlug: movie.slug,
-      // url: "https://flipfit-cdn.akamaized.net/flip_hls/661f570aab9d840019942b80-473e0b/video_h1.m3u8",
-      url: episode.linkM3u8,
+      url: "https://flipfit-cdn.akamaized.net/flip_hls/661f570aab9d840019942b80-473e0b/video_h1.m3u8",
+      // url: episode.linkM3u8,
       localPath: localPath,
     );
 

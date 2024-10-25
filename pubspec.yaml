@@ -50,8 +50,6 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   better_player: ^0.0.84
   cached_network_image: ^3.4.0
-  youtube_player_flutter: ^9.0.2
-#  youtube_player_iframe: ^4.0.4
   font_awesome_flutter: ^10.7.0
   palette_generator: ^0.3.3+4
   shimmer: ^3.0.0
