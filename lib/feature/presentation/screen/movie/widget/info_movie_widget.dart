@@ -23,7 +23,6 @@ class _InfoMovieWidgetState extends State<InfoMovieWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 10,),
         BlocBuilder<MovieBloc, MovieState>(
             buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
             builder: (context, state){

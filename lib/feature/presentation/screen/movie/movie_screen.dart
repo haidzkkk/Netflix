@@ -14,9 +14,6 @@ import 'package:spotify/feature/presentation/screen/movie/widget/background_movi
 import 'package:spotify/feature/presentation/screen/movie/widget/description_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/episodes_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/info_movie_widget.dart';
-import 'package:spotify/feature/presentation/screen/widget/custom_better_player.dart';
-import 'package:spotify/feature/presentation/screen/widget/custom_builder.dart';
-import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 import '../../../commons/utility/style_util.dart';
 import '../../blocs/movie/movie_bloc.dart';
 
@@ -48,7 +45,7 @@ class _MovieScreenState extends State<MovieScreen> {
 
   double heightBottomNav = 56;
   double heightMovieCollapse = 56.w;
-  double heightProcess = 1.5.h;
+  double heightProcess = 3;
   late double maxSize = 1;
   late double minSize = (heightMovieCollapse + heightBottomNav + heightProcess) / PageUtil.screenHeight;
 

@@ -9,7 +9,7 @@ import 'package:spotify/feature/commons/utility/color_resource.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
-import 'package:spotify/feature/presentation/screen/widget/process_indicator/custom_progress_bar.dart';
+import 'package:spotify/feature/presentation/screen/widget/process_indicator/custom_process.dart';
 
 class CustomControlsWidget extends StatefulWidget {
   final BetterPlayerController controller;
@@ -46,9 +46,11 @@ class CustomControlsWidgetState extends State<CustomControlsWidget> {
     }
   }
 
+  late StreamSubscription streamSubscription;
+
   @override
   void initState() {
-    widget.controller.controlsVisibilityStream.listen((isVisible){
+    streamSubscription = widget.controller.controlsVisibilityStream.listen((isVisible){
       widget.controller.toggleControlsVisibility(isVisible);
       controllerVisible = isVisible;
       setState(() {});
@@ -61,6 +63,12 @@ class CustomControlsWidgetState extends State<CustomControlsWidget> {
       }
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    streamSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -89,17 +97,16 @@ class CustomControlsWidgetState extends State<CustomControlsWidget> {
                 }
                 handleControlVisible();
 
+                Duration rewindDuration;
                 if(details.localPosition.dx < (sizeScreen.width / 2)){
                   Duration? videoDuration =
                   await widget.controller.videoPlayerController!.position;
-                  Duration rewindDuration =
-                  Duration(seconds: (videoDuration!.inSeconds - 20));
+                  rewindDuration = Duration(seconds: (videoDuration!.inSeconds - 20));
                   widget.controller.seekTo(rewindDuration);
                 }else{
                   Duration? videoDuration =
                   await widget.controller.videoPlayerController!.position;
-                  Duration rewindDuration =
-                  Duration(seconds: (videoDuration!.inSeconds + 20));
+                  rewindDuration = Duration(seconds: (videoDuration!.inSeconds + 20));
                   widget.controller.seekTo(rewindDuration);
                 }
               },
@@ -184,24 +191,26 @@ class CustomControlsWidgetState extends State<CustomControlsWidget> {
                     ),
                     if(widget.controller.isFullScreen)
                       BlocBuilder<MovieBloc, MovieState>(
+                        buildWhen: (previous, current) => previous.visibleControlsPlayer != current.visibleControlsPlayer
+                            || previous.totalTimeEpisode != current.totalTimeEpisode
+                            || previous.currentTimeEpisode != current.currentTimeEpisode,
                         builder: (context, state){
-                          return SizedBox(
-                            width: double.infinity,
-                            child: CustomProgressBar(
-                              controller: viewModel.progressController,
-                              initProgress: viewModel.progressController?.progress ?? 0,
-                              untouchedColor: ColorResources.secondaryColor,
-                              largerWhenDrag: true,
-                              primaryColor: viewModel.state.currentMovie?.color ?? ColorResources.primaryColor,
-                              onMoved: (value) {
-                                handleControlVisible();
-                                viewModel.betterPlayerController?.seekTo(Duration(seconds: ((state.totalTimeEpisode ?? 0).toDouble() * value).toInt()));
-                              },
-                              onTap: (value) {
-                                handleControlVisible();
-                                viewModel.betterPlayerController?.seekTo(Duration(seconds: ((state.totalTimeEpisode ?? 0).toDouble() * value).toInt()));
-                              },
-                            ),
+                          var process = (state.currentTimeEpisode ?? 0.0) /  (state.totalTimeEpisode ?? 0.0);
+                          if(process.isNaN || process.isInfinite || process < 0 || process > 1){
+                            process = 0;
+                          }
+                          return CustomProcessIndicator(
+                            width: MediaQuery.of(context).size.width,
+                            height: 5.sp,
+                            indicatorSize: 10.sp,
+                            color: viewModel.state.currentMovie?.color,
+                            process: process,
+                            enable: state.visibleControlsPlayer,
+                            margin: const EdgeInsets.symmetric(vertical: 15),
+                            onMoved: (value) {
+                              handleControlVisible();
+                              viewModel.betterPlayerController?.seekTo(Duration(seconds: ((state.totalTimeEpisode ?? 0).toDouble() * value).toInt()));
+                            },
                           );
                         },
                       )
@@ -217,8 +226,7 @@ class CustomControlsWidgetState extends State<CustomControlsWidget> {
               child: InkWell(
                 onTap: () {
                   if(isException){
-                    widget.controller.retryDataSource();
-                    isException = false;
+                    viewModel.add(ChangeEpisodeMovieEvent(episode: viewModel.state.currentEpisode));
                     return;
                   }else{
                     if (widget.controller.isPlaying()!) {

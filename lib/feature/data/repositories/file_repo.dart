@@ -11,16 +11,15 @@ import 'package:spotify/feature/data/models/file/file_movie_episode.dart';
 
 class FileRepository{
 
-  /// get local path in app
-  Future<Directory?> getLocalPathDownload() async{
-    Directory? directory;
-    if (Platform.isAndroid){
-      directory = Directory("${(await getExternalStorageDirectory())?.path}/download");
-    } else if (Platform.isIOS) {
-    } else if (Platform.isWindows) {
-    }
 
-    if (directory != null && !await directory.exists()) {
+  /// get local path in app
+  Future<Directory> getLocalPath() async{
+    return await getApplicationDocumentsDirectory();
+  }
+
+  Future<Directory?> getLocalPathDownload() async{
+    Directory? directory = Directory("${(await getLocalPath()).path}/download");
+    if (!await directory.exists()) {
       await directory.create(recursive: true);
     }
 

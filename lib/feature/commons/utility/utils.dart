@@ -111,10 +111,13 @@ extension BuildContextExt on BuildContext{
     );
   }
 
+  static bool bottomSheetOpen = false;
   Future<void> showDraggableBottomSheet({
     required Widget Function(BuildContext context, ScrollController scrollController) builder
   }) async{
-    bool bottomSheetOpen = true;
+    if(bottomSheetOpen) back();
+
+    bottomSheetOpen = true;
     await showModalBottomSheet(
         context: this,
         isScrollControlled: true,

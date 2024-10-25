@@ -5,6 +5,8 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.example.spotify.data.model.MovieEpisode
@@ -55,13 +57,13 @@ class DownloadService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        showNotifyForeground()
         val data = intent?.getSerializableExtra(AppConstants.DOWNLOAD_SERVICE_DATA)
         val movieEpisode: MovieEpisode? = if(data != null) (data as MovieEpisode?) else null
 
         if(movieEpisode != null){
             viewMode.setData(applicationContext, movieEpisode)
         }
-        showNotifyForeground()
         return START_STICKY
     }
 
@@ -87,7 +89,11 @@ class DownloadService : Service() {
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .build()
-
-        startForeground(1, notification)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            startForeground(1, notification)
+        } else {
+            startForeground(1, notification,
+                FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+        }
     }
 }

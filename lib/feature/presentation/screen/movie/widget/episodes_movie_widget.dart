@@ -52,7 +52,9 @@ class _EpisodesMovieWidgetState extends State<EpisodesMovieWidget> {
                   padding: const EdgeInsets.all(4),
                   child: GestureDetector(
                     onTap: (){
-                      viewModel.add(ChangeEpisodeMovieEvent(episode: episode));
+                      if(state.currentEpisode?.slug != episode.slug){
+                        viewModel.add(ChangeEpisodeMovieEvent(episode: episode));
+                      }
                     },
                     child: Stack(
                       children: [

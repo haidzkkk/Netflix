@@ -3,13 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:spotify/feature/commons/utility/color_resource.dart';
 import 'package:spotify/feature/commons/utility/pageutil.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/widget/custom_better_player.dart';
-import 'package:spotify/feature/presentation/screen/widget/process_indicator/custom_progress_bar.dart';
+import 'package:spotify/feature/presentation/screen/widget/process_indicator/custom_process.dart';
 
 class PlayerMovieWidget extends StatefulWidget {
   const PlayerMovieWidget({
@@ -106,62 +105,28 @@ class _PlayerMovieWidgetState extends State<PlayerMovieWidget> {
               );
             }
         ),
-        Stack(
-          children: [
-            BlocBuilder<MovieBloc, MovieState>(
-                buildWhen: (previous, current) {
-                  if(previous.visibleControlsPlayer != current.visibleControlsPlayer){
-                    return true;
-                  }else if(current.visibleControlsPlayer == false
-                      && (previous.totalTimeEpisode != current.totalTimeEpisode
-                          || previous.currentTimeEpisode != current.currentTimeEpisode)){
-                    return true;
-                  }
-                  return false;
+        BlocBuilder<MovieBloc, MovieState>(
+            buildWhen: (previous, current) => previous.visibleControlsPlayer != current.visibleControlsPlayer
+                || previous.totalTimeEpisode != current.totalTimeEpisode
+                || previous.currentTimeEpisode != current.currentTimeEpisode,
+            builder: (context, state){
+              var process = (state.currentTimeEpisode ?? 0.0) /  (state.totalTimeEpisode ?? 0.0);
+              if(process.isNaN || process.isInfinite || process < 0 || process > 1){
+                process = 0;
+              }
+              return CustomProcessIndicator(
+                width: MediaQuery.of(context).size.width,
+                height: widget.heightProcess ,
+                indicatorSize: widget.heightProcess * 3,
+                color: viewModel.state.currentMovie?.color,
+                process: process,
+                enable: state.visibleControlsPlayer,
+                margin: const EdgeInsets.only(bottom: 15),
+                onMoved: (value) {
+                  viewModel.betterPlayerController?.seekTo(Duration(seconds: ((state.totalTimeEpisode ?? 0).toDouble() * value).toInt()));
                 },
-                builder: (context, state){
-                  var process = (state.currentTimeEpisode ?? 0.0) /  (state.totalTimeEpisode ?? 0.0);
-                  if(process.isNaN || process.isInfinite || process < 0 || process > 1){
-                    process = 0;
-                  }
-                  return AnimatedOpacity(
-                    duration: const Duration(milliseconds: 500),
-                    opacity: state.visibleControlsPlayer ? 0 : 1,
-                    child: LinearProgressIndicator(
-                      minHeight: widget.heightProcess,
-                      color: viewModel.state.currentMovie?.color,
-                      backgroundColor: ColorResources.secondaryColor,
-                      value: process,
-                    ),
-                  );
-                }
-            ),
-            Positioned.fill(
-              child: BlocBuilder<MovieBloc, MovieState>(
-                builder: (context, state){
-                  return AnimatedOpacity(
-                    duration: const Duration(milliseconds: 500),
-                    opacity: state.visibleControlsPlayer ? 1 : 0,
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: CustomProgressBar(
-                        indicatorSize: 20,
-                        controller: viewModel.progressController,
-                        untouchedColor: ColorResources.secondaryColor,
-                        primaryColor: viewModel.state.currentMovie?.color ?? ColorResources.primaryColor,
-                        onMoved: (value) {
-                          viewModel.betterPlayerController?.seekTo(Duration(seconds: ((state.totalTimeEpisode ?? 0).toDouble() * value).toInt()));
-                        },
-                        onTap: (value) {
-                          viewModel.betterPlayerController?.seekTo(Duration(seconds: ((state.totalTimeEpisode ?? 0).toDouble() * value).toInt()));
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
-            )
-          ],
+              );
+            }
         ),
       ],
     );

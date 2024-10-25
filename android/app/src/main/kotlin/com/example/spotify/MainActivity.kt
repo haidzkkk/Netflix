@@ -3,21 +3,21 @@ package com.example.spotify
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PictureInPictureParams
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.res.Configuration
 import android.os.Build
 import android.util.Log
 import android.util.Rational
 import com.example.spotify.data.model.MovieEpisode
 import com.example.spotify.data.model.Status
+import com.example.spotify.widgetprovider.MovieWorker
+import com.example.spotify.widgetprovider.WidgetProvider
 import com.google.gson.Gson
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
+import kotlinx.coroutines.*
 
 class MainActivity: FlutterActivity() {
     private lateinit var builderParams: PictureInPictureParams.Builder
@@ -31,39 +31,59 @@ class MainActivity: FlutterActivity() {
             AppConstants.METHOD_CHANNEL_DOWNLOAD
         ).setMethodCallHandler(handleMethodDownload)
 
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            AppConstants.METHOD_CHANNEL_WIDGET_PROVIDER
+        ).setMethodCallHandler(handleMethodWidgetProvider)
+
         registerChannelEvent()
+        registerBroadcastReceiver()
+        sendDataOpenMovieToFlutter(intent.extras?.getString(WidgetProvider.MOVIE_CLICK))
     }
 
-    override fun onResume() {
-        super.onResume()
-        if(isReceiverRegistered == false){
-            isReceiverRegistered = true;
-            context.registerReceiver(broadcastRegister, IntentFilter(AppConstants.ACTION_COMMUNICATE))
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        sendDataOpenMovieToFlutter(intent.extras?.getString(WidgetProvider.MOVIE_CLICK))
+    }
+
+    private fun registerBroadcastReceiver(){
+        val intentFilter = IntentFilter().apply {
+            addAction(AppConstants.ACTION_DOWNLOAD)
+            addAction(AppConstants.ACTION_APPWIDGET_PINNED_SUCCESS)
+        }
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            context.registerReceiver(
+                registerBroadcastReceiver,
+                intentFilter,
+                RECEIVER_NOT_EXPORTED
+            )
+        }else{
+            context.registerReceiver(
+                registerBroadcastReceiver,
+                intentFilter,
+            )
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        if(isReceiverRegistered == true){
-            unregisterReceiver(broadcastRegister)
-            isReceiverRegistered = false;
-        }
-    }
     override fun onDestroy() {
         super.onDestroy()
-        if(isReceiverRegistered == true){
-            unregisterReceiver(broadcastRegister)
-            isReceiverRegistered = false;
-        }
+        unregisterReceiver(registerBroadcastReceiver)
     }
 
-    private var isReceiverRegistered = false
-    private var broadcastRegister = object : BroadcastReceiver(){
+    private var registerBroadcastReceiver = object : BroadcastReceiver(){
         override fun onReceive(context: Context?, intent: Intent?) {
-            val jsonData = intent?.getStringExtra(AppConstants.DOWNLOAD_SERVICE_DATA)
+            when(intent?.action){
+                AppConstants.ACTION_DOWNLOAD -> {
+                    val jsonData = intent.getStringExtra(AppConstants.DOWNLOAD_SERVICE_DATA)
 
-            if (jsonData != null && eventDownloadSink != null){
-                eventDownloadSink?.success(jsonData)
+                    if (jsonData != null && eventDownloadSink != null){
+                        eventDownloadSink?.success(jsonData)
+                    }
+                }
+                AppConstants.ACTION_APPWIDGET_PINNED_SUCCESS -> {
+                    handleUpdateMovieData()
+                }
             }
         }
     }
@@ -99,7 +119,7 @@ class MainActivity: FlutterActivity() {
     private var handleMethodDownload: MethodChannel.MethodCallHandler =
         MethodChannel.MethodCallHandler{ call, result ->
             when(call.method){
-                AppConstants.METHOD_CHANNEL_START_SERVICE -> {
+                AppConstants.INVOKE_METHOD_START_SERVICE -> {
                     val movie = Gson().fromJson(call.arguments as String, MovieEpisode::class.java).apply {
                         this.status = Status.Initialization()
                     }
@@ -107,7 +127,7 @@ class MainActivity: FlutterActivity() {
 
                     return@MethodCallHandler
                 }
-                AppConstants.METHOD_CHANNEL_STOP_SERVICE -> {
+                AppConstants.INVOKE_METHOD_STOP_SERVICE -> {
                     stopService(Intent(this, DownloadService::class.java))
                     return@MethodCallHandler
                 }
@@ -116,6 +136,33 @@ class MainActivity: FlutterActivity() {
                 }
             }
         }
+
+    private var handleMethodWidgetProvider: MethodChannel.MethodCallHandler =
+        MethodChannel.MethodCallHandler{ call, result ->
+            when(call.method){
+                AppConstants.INVOKE_METHOD_PROVIDE_MOVIE -> {
+                    val categoryJson: String? = call.argument(AppConstants.PROVIDE_MOVIE_CATEGORY)
+                    val moviesJson: String? = call.argument(AppConstants.PROVIDE_MOVIE_DATA)
+                    if(moviesJson is String) WidgetProvider.updateWidgetProvider(applicationContext, categoryJson, moviesJson)
+                    return@MethodCallHandler
+                }
+                AppConstants.INVOKE_METHOD_DRAG_WIDGET -> {
+                    WidgetProvider.requestDragWidget(context)
+                    return@MethodCallHandler
+                }
+                else ->{
+                    result.notImplemented()
+                }
+            }
+        }
+
+    private fun sendDataOpenMovieToFlutter(movieJson: String?){
+        val binaryMessenger = flutterEngine?.dartExecutor?.binaryMessenger
+        if(binaryMessenger == null || movieJson == null) return
+
+        MethodChannel(binaryMessenger, AppConstants.METHOD_CHANNEL_OPEN_MOVIE)
+            .invokeMethod(AppConstants.INVOKE_METHOD_OPEN_MOVIE, movieJson)
+    }
 
     private fun sendActionToDownloadService(data: MovieEpisode){
 
@@ -171,6 +218,19 @@ class MainActivity: FlutterActivity() {
         ) return
 
         enterPictureInPictureMode(builderParams.build())
+    }
+
+    private fun handleUpdateMovieData(){
+        if(WidgetProvider.isWidgetExists(context)){
+            MovieWorker.startWorkPeriodic(context)
+        }else{
+            MovieWorker.cancelWorkPeriodic(context)
+        }
+    }
+
+    fun testCall(categoryJson: String?) {
+        CoroutineScope(Job() + Dispatchers.Unconfined).launch{
+        }
     }
 }
 

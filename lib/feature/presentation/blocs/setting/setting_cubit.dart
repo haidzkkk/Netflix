@@ -1,14 +1,23 @@
 
-import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:spotify/feature/commons/contants/app_constants.dart';
+import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/category_movie.dart';
-import 'package:spotify/feature/data/models/db_local/movie_local.dart';
+import 'package:spotify/feature/data/repositories/google_repo.dart';
 import 'package:spotify/feature/data/repositories/setting_repo.dart';
 import 'package:spotify/feature/presentation/blocs/setting/setting_state.dart';
+import 'package:googleapis/drive/v3.dart' as drive;
+
+import '../../../data/models/status.dart';
 
 class SettingCubit extends Cubit<SettingState>{
   SettingRepo repo;
-  SettingCubit(this.repo): super(SettingState());
+  GoogleRepo googleRepo;
+  SettingCubit(this.repo, this.googleRepo): super(SettingState()){
+    getCurrentUser();
+  }
 
   Future<void> syncSetting() async{
 
@@ -25,6 +34,8 @@ class SettingCubit extends Cubit<SettingState>{
       isShowNotifyWhenDownloadSuccess: isShowNotifyWhenDownloadSuccess,
       favouriteCategories: favouriteCategories,
     ));
+
+    getCurrentDriveFileMovieFavourite();
   }
 
   changeStateBool(bool enable, SettingBoolEnum stateType) async{
@@ -64,5 +75,79 @@ class SettingCubit extends Cubit<SettingState>{
     emit(state.copyWith(
       favouriteCategories: List.of(categories),
     ));
+  }
+
+
+  getCurrentUser() async{
+    var googleSignInAccount = await googleRepo.getCurrentUser();
+    emit(state.copyWith(
+      currentAccount: googleSignInAccount,
+    ));
+  }
+
+  signingGoogle() async{
+    GoogleSignInAccount? googleSignInAccount = await googleRepo.signIn();
+    emit(state.copyWith(
+      currentAccount: googleSignInAccount,
+    ));
+  }
+
+  logoutGoogle() async{
+    await googleRepo.logout();
+    emit(state.copyWithAccountUser(
+      currentAccount: null,
+    ));
+  }
+
+  uploadBackupData() async{
+    emit(state.copyWith(
+      favouriteFileDrive: Status.loading(),
+    ));
+    await googleRepo.uploadToDrive(
+        fileName: "moviesFavourite.json",
+        jsonData: '{"ok": "1", "s": true}'
+    );
+    getCurrentDriveFileMovieFavourite();
+  }
+
+  getCurrentDriveFileMovieFavourite() async{
+    emit(state.copyWith(
+      favouriteFileDrive: Status.loading(),
+    ));
+    List<drive.File> files = await googleRepo.getListFile(fileName: "moviesFavourite.json");
+    printData("${files.map((e) => e.name)}");
+    emit(state.copyWith(
+      favouriteFileDrive: Status.success(data: files.firstOrNull),
+    ));
+  }
+
+  cleanStateSyncFileMovieFavourite() async{
+    emit(state.copyWith(syncingFavouriteDriveFile: StatusEnum.initial,));
+  }
+
+  syncDriveFileMovieFavourite() async{
+    emit(state.copyWith(syncingFavouriteDriveFile: StatusEnum.loading,));
+    Map<String, dynamic>? mapJson = await googleRepo.getFileContent(fileId: state.favouriteFileDrive.data?.id ?? "");
+    if(mapJson?.isNotEmpty != true) {
+      emit(state.copyWith(syncingFavouriteDriveFile: StatusEnum.failed,));
+      return;
+    }
+    emit(state.copyWith(syncingFavouriteDriveFile: StatusEnum.successfully,));
+  }
+
+  sendDataToAndroidWidgetProvider({required String categoryJson, required String movieJson}){
+    const MethodChannel(AppConstants.methodChannelWidgetProvider)
+        .invokeMethod(
+        AppConstants.invokeMethodProvideMovie,
+        {
+          AppConstants.provideMovieCategory: categoryJson,
+          AppConstants.provideMovieData: movieJson,
+        }
+    );
+  }
+
+  sendActionDragToAndroidWidgetProvider(){
+    const MethodChannel(AppConstants.methodChannelWidgetProvider)
+        .invokeMethod(AppConstants.invokeMethodDragWidget,);
   }
 }

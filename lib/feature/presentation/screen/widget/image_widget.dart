@@ -9,23 +9,30 @@ class ImageWidget extends StatelessWidget {
     this.fit,
     this.width,
     this.height,
+    this.borderRadius,
   });
 
   final String? url;
   final BoxFit? fit;
   final double? width;
   final double? height;
+  final double? borderRadius;
 
   @override
   Widget build(BuildContext context) {
-    if(url?.isNotEmpty != true) return const SizedBox(child: Center(child: Icon(Icons.error_outline),),);
-    return CachedNetworkImage(
-      imageUrl: url!,
-      fit: fit,
-      width: width,
-      height: height,
-      placeholder: (context, s) => const ShimmerWidget(width: 0, height: 0),
-      errorWidget: (context, s, o) => const SizedBox(child: Center(child: Icon(Icons.error_outline),),),
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(borderRadius: BorderRadiusDirectional.all(Radius.circular(borderRadius ?? 0))),
+      child: url?.isNotEmpty != true
+      ? const SizedBox(child: Center(child: Icon(Icons.error_outline),),)
+      : CachedNetworkImage(
+          imageUrl: url!,
+          fit: fit,
+          width: width,
+          height: height,
+          placeholder: (context, s) => const ShimmerWidget(width: 0, height: 0),
+          errorWidget: (context, s, o) => const SizedBox(child: Center(child: Icon(Icons.error_outline),),),
+      ),
     );
   }
 }

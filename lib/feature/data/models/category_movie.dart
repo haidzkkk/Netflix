@@ -71,6 +71,12 @@ enum CategoryMovie{
         throw Exception("Unknown category path: $path");
     }
   }
+
+  Map<String, dynamic> toJson() => {
+    "name": name,
+    "slug": slug,
+    "path": path,
+  };
 }
 
 extension CategoryMovieExt on CategoryMovie{
