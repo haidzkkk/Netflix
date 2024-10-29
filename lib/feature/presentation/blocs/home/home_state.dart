@@ -1,33 +1,26 @@
 import 'package:equatable/equatable.dart';
-import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
-import 'package:spotify/feature/data/models/response/movie.dart';
-import '../../../data/models/category_movie.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
+import '../../../data/api/kk_request/category_movie.dart';
 
 class HomeState extends Equatable {
   final int currentPageIndex;
-  final bool isConnect;
-  final Map<CategoryMovie, List<Movie>> movies;
-  final MapEntry<String, Movie>? openMovie;
-
+  final Map<CategoryMovie, List<MovieInfo>> movies;
+  final MapEntry<String, MovieInfo>? openMovie;
 
   HomeState({
     int? pageIndex,
-    bool? isConnect,
-    Map<CategoryMovie, List<Movie>>? movies,
+    Map<CategoryMovie, List<MovieInfo>>? movies,
     this.openMovie
   }) : currentPageIndex = pageIndex ?? 0,
-      isConnect = isConnect ?? true,
       movies = movies ?? {};
 
   HomeState copyWith({
     int? pageIndex,
-    bool? isConnect,
-    Map<CategoryMovie, List<Movie>>? movies,
-    MapEntry<String, Movie>? openMovie,
+    Map<CategoryMovie, List<MovieInfo>>? movies,
+    MapEntry<String, MovieInfo>? openMovie,
   }){
     return HomeState(
       pageIndex: pageIndex ?? currentPageIndex,
-      isConnect: isConnect ?? this.isConnect,
       openMovie: openMovie ?? this.openMovie,
       movies: movies ?? Map.from(this.movies),
     );
@@ -36,7 +29,6 @@ class HomeState extends Equatable {
   HomeState copyWithPageIndex(int pageIndex,){
     return HomeState(
       pageIndex: pageIndex,
-      isConnect: isConnect,
       openMovie: openMovie,
       movies: movies,
     );
@@ -44,14 +36,13 @@ class HomeState extends Equatable {
 
   HomeState copyWithMovie({
     required CategoryMovie category,
-    required List<Movie> data
+    required List<MovieInfo> data
   }){
-    Map<CategoryMovie, List<Movie>> newMoves = Map.from(movies);
+    Map<CategoryMovie, List<MovieInfo>> newMoves = Map.from(movies);
     newMoves[category] = data;
 
     return HomeState(
       pageIndex: currentPageIndex,
-      isConnect: isConnect,
       openMovie: openMovie,
       movies: newMoves,
     );
@@ -60,7 +51,6 @@ class HomeState extends Equatable {
   @override
   List<Object?> get props => [
     currentPageIndex,
-    isConnect,
     openMovie,
     movies,
   ];

@@ -1,6 +1,6 @@
-import 'package:spotify/feature/data/models/response/movie.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
 
-import '../../../data/models/category_movie.dart';
+import '../../../data/api/kk_request/category_movie.dart';
 
 sealed class HomeEvent {}
 
@@ -13,13 +13,8 @@ class ChangePageIndexHomeEvent extends HomeEvent{
   ChangePageIndexHomeEvent(this.pageIndex);
 }
 
-class ListenNetworkConnectHomeEvent extends HomeEvent{
-  bool isConnect;
-  ListenNetworkConnectHomeEvent(this.isConnect);
-}
-
 class OpenMovieHomeEvent extends HomeEvent{
-  Movie movie;
+  MovieInfo movie;
   OpenMovieHomeEvent(this.movie);
 }
 

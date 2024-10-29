@@ -7,7 +7,7 @@ import 'package:googleapis/drive/v3.dart' as drive;
 
 class GoogleRepo{
   GoogleService googleService;
-  GoogleRepo(this.googleService);
+  GoogleRepo({required this.googleService});
 
   Future<GoogleSignInAccount?> getCurrentUser()
     async => googleService.getCurrentUser();

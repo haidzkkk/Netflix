@@ -1,19 +1,19 @@
 
-class SeoOnPage {
+class SeoOnPageDTO {
   String? ogType;
   String? titleHead;
   String? descriptionHead;
   List<String>? ogImage;
   String? ogUrl;
 
-  SeoOnPage(
+  SeoOnPageDTO(
       {this.ogType,
         this.titleHead,
         this.descriptionHead,
         this.ogImage,
         this.ogUrl});
 
-  SeoOnPage.fromJson(Map<String, dynamic> json) {
+  SeoOnPageDTO.fromJson(Map<String, dynamic> json) {
     ogType = json['og_type'];
     titleHead = json['titleHead'];
     descriptionHead = json['descriptionHead'];

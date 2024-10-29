@@ -1,9 +1,10 @@
 
-import 'package:spotify/feature/data/models/db_local/episode_download.dart';
-import 'package:spotify/feature/data/models/db_local/movie_status_download.dart';
-import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
+import 'package:spotify/feature/data/api/server_type.dart';
+import 'package:spotify/feature/data/models/entity/episode_download.dart';
+import 'package:spotify/feature/data/models/entity/movie_status_download.dart';
+import 'package:spotify/feature/data/models/server_data.dart';
 
-import '../movie_detail/movie_info.dart';
+import '../movie_info.dart';
 import 'episode_local.dart';
 
 class MovieLocalField{
@@ -17,8 +18,9 @@ class MovieLocalField{
   static const String moviePoster = 'poster';
   static const String movieThumb = 'thumb';
   static const String movieLastTime = 'lastTime';
+  static const String serverType = 'serverType';
 
-  static final List<String> query = [id, movieId, movieSlug, movieName, moviePoster, movieThumb, movieLastTime,];
+  static final List<String> query = [id, movieId, movieSlug, movieName, moviePoster, movieThumb, movieLastTime, serverType,];
 }
 
 class MovieLocal{
@@ -32,6 +34,7 @@ class MovieLocal{
 
   List<EpisodeLocal>? episodes;
   Map<String, EpisodeDownload>? episodesDownload;
+  ServerType? serverType;
 
   MovieLocal({
     this.id,
@@ -43,6 +46,7 @@ class MovieLocal{
     this.lastTime,
     this.episodes,
     this.episodesDownload,
+    required this.serverType,
   });
 
   Map<String, dynamic> toJson() {
@@ -54,6 +58,7 @@ class MovieLocal{
       'poster': poster,
       'thumb': thumb,
       'lastTime': lastTime,
+      'serverType': serverType?.id,
     };
   }
 
@@ -65,6 +70,7 @@ class MovieLocal{
       'poster': poster,
       'thumb': thumb,
       'lastTime': lastTime,
+      'serverType': serverType?.id,
     };
   }
 
@@ -75,7 +81,8 @@ class MovieLocal{
       name: name,
       posterUrl: poster,
       thumbUrl: thumb,
-      episodes: [ServerData.fromEpisodeLocal(episodesDownload)]
+      servers: [ServerData.fromEpisodeLocal(episodesDownload)],
+      serverType: serverType ?? ServerType.kkPhim
     );
   }
 
@@ -93,6 +100,7 @@ class MovieLocal{
         var item = EpisodeDownload.fromJson(e);
         return MapEntry(item.id ?? "", item);
       })) : null,
+      serverType: ServerType.getServerType(json["serverType"] ?? ""),
     );
   }
 
@@ -104,6 +112,7 @@ class MovieLocal{
       poster: body.posterUrl,
       thumb: body.thumbUrl,
       lastTime: DateTime.now().millisecondsSinceEpoch,
+      serverType: body.serverType,
     );
   }
 
@@ -115,6 +124,7 @@ class MovieLocal{
       poster: "body.posterUrl",
       thumb: "body.thumbUrl",
       lastTime: DateTime.now().millisecondsSinceEpoch,
+      serverType: body.serverType,
     );
   }
 }

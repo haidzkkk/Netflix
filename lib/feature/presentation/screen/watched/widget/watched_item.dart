@@ -7,7 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/commons/utility/date_converter.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/data/models/db_local/movie_local.dart';
+import 'package:spotify/feature/data/models/entity/movie_local.dart';
 import 'package:spotify/feature/presentation/blocs/watched/watched_cubit.dart';
 import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 

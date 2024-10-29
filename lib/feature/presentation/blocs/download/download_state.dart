@@ -1,8 +1,8 @@
 
 import 'package:equatable/equatable.dart';
-import 'package:spotify/feature/data/models/db_local/episode_download.dart';
-import 'package:spotify/feature/data/models/db_local/movie_local.dart';
-import 'package:spotify/feature/data/models/db_local/movie_status_download.dart';
+import 'package:spotify/feature/data/models/entity/episode_download.dart';
+import 'package:spotify/feature/data/models/entity/movie_local.dart';
+import 'package:spotify/feature/data/models/entity/movie_status_download.dart';
 
 class DownloadState extends Equatable{
 

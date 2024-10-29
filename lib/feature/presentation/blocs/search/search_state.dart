@@ -5,13 +5,13 @@ class SearchState extends Equatable {
   final int currentPageTab;
   final Map<CategoryMovie, int> searchPageIndex;
   final Map<CategoryMovie, bool> searchLastPage;
-  final Map<CategoryMovie, Status<List<Movie>>> searchMovies;
+  final Map<CategoryMovie, Status<List<MovieInfo>>> searchMovies;
 
   SearchState({
     int? currentPageTab,
     Map<CategoryMovie, int>? searchPageIndex,
     Map<CategoryMovie, bool>? searchLastPage,
-    Map<CategoryMovie, Status<List<Movie>>>? searchMovies,
+    Map<CategoryMovie, Status<List<MovieInfo>>>? searchMovies,
   }) : currentPageTab = currentPageTab ?? 0,
        searchPageIndex = searchPageIndex ?? {},
        searchLastPage = searchLastPage ?? {},
@@ -21,7 +21,7 @@ class SearchState extends Equatable {
     int? currentPageTab,
     Map<CategoryMovie, int>? searchPageIndex,
     Map<CategoryMovie, bool>? searchLastPage,
-    Map<CategoryMovie, Status<List<Movie>>>? searchMovies,
+    Map<CategoryMovie, Status<List<MovieInfo>>>? searchMovies,
   }){
     return SearchState(
       currentPageTab: currentPageTab ?? this.currentPageTab,
@@ -43,7 +43,7 @@ class SearchState extends Equatable {
 
   SearchState copyWithSearchMovie({
     required CategoryMovie categoryMovie,
-    required Status<List<Movie>> searchMovie,
+    required Status<List<MovieInfo>> searchMovie,
     int? pageIndex,
     bool? lastPage,
   }){
@@ -56,7 +56,7 @@ class SearchState extends Equatable {
       searchLastPage[categoryMovie] = lastPage;
     }
 
-    Map<CategoryMovie, Status<List<Movie>>> movies = Map.from(searchMovies);
+    Map<CategoryMovie, Status<List<MovieInfo>>> movies = Map.from(searchMovies);
     movies[categoryMovie] = searchMovie;
 
     return SearchState(

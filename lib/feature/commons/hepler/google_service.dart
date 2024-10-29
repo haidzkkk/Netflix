@@ -9,10 +9,11 @@ import 'package:http/http.dart' as http;
 import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:spotify/feature/data/repositories/file_repo.dart';
+import 'package:spotify/feature/data/repositories/file_repo_impl.dart';
 
 class GoogleService{
   GoogleService(this.fileRepository);
-  final FileRepository fileRepository;
+  final FileRepoImpl fileRepository;
 
   GoogleSignIn googleSignIn = GoogleSignIn(
     scopes: [drive.DriveApi.driveFileScope, drive.DriveApi.driveReadonlyScope],

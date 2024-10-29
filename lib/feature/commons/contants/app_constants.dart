@@ -4,15 +4,20 @@ class AppConstants{
   static const String LANGUAGE_CODE = "sprf_language";
   static const String THEME_CODE = "sprf_theme";
 
-  static const String BASE_URL = "https://phimapi.com";
-  static const String BASE_URL_IMAGE = "https://phimimg.com";
+  static const String KK_BASE_URL = "https://phimapi.com";
+  static const String OP_BASE_URL = "https://ophim1.com";
+  static const String KK_BASE_URL_IMAGE = "https://phimimg.com";
+  static const String OP_BASE_URL_IMAGE = "https://img.ophim.live/uploads/movies";
 
-  static const String GET_SEARCH = "/v1/api";
-  static const String GET_LIST_MOVIE = "/danh-sach";
-  static const String GET_CATEGORY_1 = "/v1/api/danh-sach";
-  static const String GET_CATEGORY_2 = "/v1/api/the-loai";
-  static const String GET_COUNTRY = "/v1/api/quoc-gia";
-  static const String GET_DETAIL_MOVIE = "/phim";
+  static const String KK_GET_SEARCH = "/v1/api";
+  static const String KK_GET_LIST_MOVIE = "/danh-sach";
+  static const String KK_GET_CATEGORY_1 = "/v1/api/danh-sach";
+  static const String KK_GET_CATEGORY_2 = "/v1/api/the-loai";
+  static const String KK_GET_COUNTRY = "/v1/api/quoc-gia";
+  static const String KK_GET_DETAIL_MOVIE = "/phim";
+  
+  static const String OP_GET_DETAIL_MOVIE = "/phim";
+  static const String OP_GET_SEARCH = "v1/api";
 
   static const int HTTP_OK = 200;
 

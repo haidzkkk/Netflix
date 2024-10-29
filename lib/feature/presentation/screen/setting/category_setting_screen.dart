@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/commons/utility/color_resource.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
-import 'package:spotify/feature/data/models/category_movie.dart';
+import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
 import 'package:spotify/feature/data/repositories/setting_repo.dart';
 import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/setting/setting_state.dart';

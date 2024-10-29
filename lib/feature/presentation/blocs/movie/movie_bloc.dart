@@ -9,28 +9,31 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/context_service.dart';
 import 'package:spotify/feature/commons/contants/app_constants.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/data/models/db_local/episode_download.dart';
-import 'package:spotify/feature/data/models/db_local/episode_local.dart';
-import 'package:spotify/feature/data/models/db_local/movie_local.dart';
-import 'package:spotify/feature/data/models/db_local/movie_status_download.dart';
-import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
-import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
+import 'package:spotify/feature/data/models/entity/episode_download.dart';
+import 'package:spotify/feature/data/models/entity/episode_local.dart';
+import 'package:spotify/feature/data/models/entity/movie_local.dart';
+import 'package:spotify/feature/data/models/entity/movie_status_download.dart';
+import 'package:spotify/feature/data/models/episode.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
+import 'package:spotify/feature/data/models/server_data.dart';
 import 'package:spotify/feature/data/models/status.dart';
-import 'package:spotify/feature/data/repositories/local_db_repository.dart';
-import 'package:spotify/feature/di/InjectionContainer.dart';
+import 'package:spotify/feature/data/repositories/local_db_download_repo_impl.dart';
+import 'package:spotify/feature/data/repositories/local_db_history_repo_impl.dart';
+import 'package:spotify/feature/data/repositories/movie_repo_impl.dart';
+import 'package:spotify/feature/di/injection_container.dart';
 import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/custom_control_widget.dart';
-
-import '../../../data/repositories/movie_repo.dart';
 part 'movie_event.dart';
 part 'movie_state.dart';
 
 class MovieBloc extends Bloc<MovieEvent, MovieState> {
-  MovieRepo repo;
+  MovieRepoImpl kkMovieRepo;
+  MovieRepoImpl opMovieRepo;
   SettingCubit? settingCubit;
-  LocalDbRepository dbRepository;
+  LocalDbHistoryRepoImpl historyRepo;
+  LocalDbDownloadRepoImpl downloadRepo;
 
-  MovieBloc(this.repo, this.dbRepository) : super(MovieState()) {
+  MovieBloc({required this.kkMovieRepo, required this.opMovieRepo, required this.historyRepo, required this.downloadRepo}) : super(MovieState()) {
     listenEvent();
   }
 
@@ -67,11 +70,11 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
   Future<void> getMovie(GetInfoMovieEvent event, Emitter<MovieState> emit) async{
     emit(state.copyWith(movie: Status.loading(data: event.movie)));
     MovieLocal? movieDownload = await getMovieDownload(event.movie.sId);
-    var response = await repo.getInfoMovie(slugMovie: event.movie.slug ?? "",);
+    var data = await opMovieRepo.getInfoMovie(slugMovie: event.movie.slug ?? "",);
 
-    if (response.statusCode == 200 || movieDownload != null) {
-      MovieInfo? movieResponse = MovieInfoResponse.fromJson(response.body).movie;
-      movieResponse?.episodes = movieResponse.episodes?.map((serverData){
+    if (data.statusCode == 200 || movieDownload != null) {
+      MovieInfo? movieResponse = data.data;
+      movieResponse?.servers = movieResponse.servers?.map((serverData){
         serverData.episode = serverData.episode?.map((episode) {
           episode.episodesDownload = movieDownload?.episodesDownload?[
             EpisodeDownload.getSetupId(movieId: event.movie.sId ?? "", slug: episode.slug ?? "")
@@ -80,6 +83,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
         }).toList();
         return serverData;
       }).toList();
+
       var movie = movieResponse ?? movieDownload?.toMovieInfo();
       emit(state.copyWith(movie: Status.success(data: movie)));
     }else{
@@ -89,27 +93,23 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
 
   Future<MovieLocal?> getMovieDownload(String? movieId) async{
     if(movieId?.isNotEmpty != true) return null;
-    var movieDownloadJson = await dbRepository.getMovieDownload(movieId: movieId);
-    if(movieDownloadJson.isEmpty) return null;
-    return MovieLocal.fromJson(movieDownloadJson.first);
+    List<MovieLocal> listData = await downloadRepo.getMovieDownload(movieId: movieId);
+    if(listData.isEmpty) return null;
+    return listData.first;
   }
 
   initWatchMovie(InitWatchMovieEvent event, Emitter<MovieState> emit) async{
     saveEpisodePreviousToLocal();
 
     MovieInfo currentMovie = event.movie;
-    Episode? currentEpisode = currentMovie.episodes?.firstOrNull?.episode?.firstOrNull;
+    Episode? currentEpisode = currentMovie.servers?.firstOrNull?.episode?.firstOrNull;
 
     /// set movie watched to local
-    dbRepository.addMovieToHistory(MovieLocal.fromMovieInfo(currentMovie));
+    historyRepo.addMovieToHistory(MovieLocal.fromMovieInfo(currentMovie));
     /// get episode watched from local
-    var responses = await dbRepository.getAllEpisodeFromMovieHistory(currentMovie.sId ?? "");
-    Map<String, EpisodeLocal> episodeWatched = Map.fromEntries(responses.map((element){
-      var episodeLocal = EpisodeLocal.fromJson(element);
-      return MapEntry(episodeLocal.slug ?? "", episodeLocal);
-    }));
+    Map<String, EpisodeLocal> episodeWatched = await historyRepo.getAllEpisodeFromMovieHistory(currentMovie.sId ?? "");
 
-    currentMovie.episodes?.forEach((server){
+    currentMovie.servers?.forEach((server){
       server.episode?.forEach((episode){
         episode.episodeLocal = episodeWatched[episode.slug];
       });
@@ -222,7 +222,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
         if(ended && isNextEpisode == false && settingCubit?.state.isAutoChangeEpisode == true){
           isNextEpisode = true;
           Future.delayed(const Duration(milliseconds: 3000), (){
-            List<Episode> listEpisode = state.currentMovie?.episodes?.firstOrNull?.episode ?? [];
+            List<Episode> listEpisode = state.currentMovie?.servers?.firstOrNull?.episode ?? [];
             if(listEpisode.isEmpty) return;
             int currentEpisodePosition = listEpisode.indexWhere((element) => element.slug == state.currentEpisode?.slug,);
             if(currentEpisodePosition < 0
@@ -273,7 +273,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
         currentSecond: state.currentTimeEpisode
     );
     state.currentEpisode!.episodeLocal = episodeLocal;
-    dbRepository.addEpisodeToHistory(episodeLocal);
+    historyRepo.addEpisodeToHistory(episodeLocal);
   }
 
   updateDownloadEpisodeMovie(UpdateDownloadEpisodeMovieEvent event, Emitter<MovieState> emit) {
@@ -283,7 +283,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       return;
     }
 
-    List<ServerData> serversData = List.from(state.currentMovie?.episodes ?? []);
+    List<ServerData> serversData = List.from(state.currentMovie?.servers ?? []);
     Map<String, EpisodeDownload> mapEpisodesDownload = Map.fromEntries(event.episodesDownload.map((episodeDownloading){
       return MapEntry(episodeDownloading.id ?? "", EpisodeDownload.fromWhenDownload(episodeDownloading));
     }));
@@ -298,7 +298,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     }
 
     emit(state.copyWith(
-      currentMovie: state.currentMovie?.copy()?..episodes = serversData
+      currentMovie: state.currentMovie?.copy()?..servers = serversData
     ));
   }
 

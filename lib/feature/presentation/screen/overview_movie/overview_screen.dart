@@ -1,16 +1,13 @@
-import 'dart:math';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/data/models/status.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/widget/action_button.dart';
-import 'package:spotify/feature/presentation/screen/overview_movie/overview_shimmer_widget.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/chip_text.dart';
 import 'package:spotify/feature/presentation/screen/widget/custom_bottom.dart';
 import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
@@ -18,8 +15,7 @@ import 'package:spotify/feature/presentation/screen/widget/read_more_widget.dart
 import 'package:spotify/feature/presentation/screen/widget/trailer_widget.dart';
 
 import '../../../commons/utility/style_util.dart';
-import '../../../data/models/category_movie.dart';
-import '../../../data/models/response/movie.dart';
+import '../../../data/api/kk_request/category_movie.dart';
 import '../../blocs/home/home_bloc.dart';
 import '../../blocs/home/home_state.dart';
 import '../home_screen/widget/movie_item.dart';
@@ -100,10 +96,10 @@ class _OverViewScreenState extends State<OverViewScreen>{
                     height: 100.h,
                     width: double.infinity,
                     child: BlocBuilder<MovieBloc, MovieState>(
-                      buildWhen: (previous, current) => previous.movie.data?.getThumbUrl != current.movie.data?.getThumbUrl,
+                      buildWhen: (previous, current) => previous.movie.data?.thumbUrl != current.movie.data?.thumbUrl,
                       builder: (context, state){
                         return TrailerWidget(
-                            thumbnail: state.movie.data?.getThumbUrl ?? "",
+                            thumbnail: state.movie.data?.thumbUrl ?? "",
                             // trailerUrl: state.movie.data?.trailerUrl ?? ""
                             trailerUrl: "",
                         );
@@ -262,13 +258,13 @@ class _OverViewScreenState extends State<OverViewScreen>{
                             Expanded(
                               flex: 2,
                               child: BlocBuilder<MovieBloc, MovieState>(
-                                buildWhen: (previous, current) => previous.movie.data?.getPosterUrl != current.movie.data?.getPosterUrl,
+                                buildWhen: (previous, current) => previous.movie.data?.posterUrl != current.movie.data?.posterUrl,
                                 builder: (context, state){
-                                  if(state.movie.data?.getPosterUrl.isNotEmpty != true){
+                                  if(state.movie.data?.posterUrl?.isNotEmpty != true){
                                     return const SizedBox();
                                   }
                                   return ImageWidget(
-                                    url: state.movie.data?.getPosterUrl ?? "",
+                                    url: state.movie.data?.posterUrl ?? "",
                                     fit: BoxFit.cover,
                                   );
                                 }
@@ -291,7 +287,7 @@ class _OverViewScreenState extends State<OverViewScreen>{
                                               TextSpan(text: "Category: ",
                                                   style: Style.body.copyWith(fontWeight: FontWeight.w700)
                                               ),
-                                              TextSpan(text: state.movie.data?.category?.map((category) => category.name).toList().join(", ") ?? " _ _",
+                                              TextSpan(text: state.movie.data?.categories?.map((category) => category.name).toList().join(", ") ?? " _ _",
                                                   style: Style.body
                                               ),
                                             ]
@@ -304,7 +300,7 @@ class _OverViewScreenState extends State<OverViewScreen>{
                                               TextSpan(text: "Country: ",
                                                   style: Style.body.copyWith(fontWeight: FontWeight.w700)
                                               ),
-                                              TextSpan(text: state.movie.data?.country?.map((country) => country.name).toList().join(", ") ?? " _ _",
+                                              TextSpan(text: state.movie.data?.countries?.map((country) => country.name).toList().join(", ") ?? " _ _",
                                                   style: Style.body
                                               ),
                                             ]
@@ -369,8 +365,8 @@ class _OverViewScreenState extends State<OverViewScreen>{
                             return BlocBuilder<HomeBloc, HomeState>(
                               builder: (context, homeState) {
                                 return Column(
-                                  children: state.movie.data?.category?.map((category){
-                                    List<Movie>? movies = homeState.movies[CategoryMovie.getCategoryMovie(category.slug)];
+                                  children: state.movie.data?.categories?.map((category){
+                                    List<MovieInfo>? movies = homeState.movies[CategoryMovie.getCategoryMovie(category.slug)];
 
                                     if(movies == null) return const SizedBox();
                                     return Column(
@@ -393,7 +389,7 @@ class _OverViewScreenState extends State<OverViewScreen>{
                                                 return MovieItem(
                                                     movie: item,
                                                     onTap: (){
-                                                      viewModel.add(GetInfoMovieEvent(movie: item.toMovieInfo()));
+                                                      viewModel.add(GetInfoMovieEvent(movie: item));
                                                       widget.draggableScrollController.animateTo(0, duration: const Duration(milliseconds: 200), curve: Curves.bounceIn);
                                                     }
                                                 );

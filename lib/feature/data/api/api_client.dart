@@ -2,15 +2,15 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:spotify/feature/commons/contants/app_constants.dart';
 import 'package:spotify/feature/commons/utility/connect_util.dart';
 
 import '../../commons/utility/utils.dart';
-import '../models/response.dart' as model;
+import 'package:spotify/feature/data/api/response.dart' as model;
 
 class ApiClient {
-  ApiClient({required this.sharedPreferences});
+  ApiClient({required this.sharedPreferences, required this.apiBaseUrl});
   final SharedPreferences sharedPreferences;
+  final String apiBaseUrl;
 
   final int timeoutInSeconds = 30;
 
@@ -21,25 +21,24 @@ class ApiClient {
     String? baseUrl,
   }) async{
     if(await ConnectUtil.getStateNetwork() == false){
-    // if(true){
       return model.Response(statusCode: 1, statusText: "noInternetMessage", body: {});
     }
 
     if(query != null ){
-      printData("====> API Call: ${Uri.parse((baseUrl ?? AppConstants.BASE_URL) + uri)
+      printData("====> API Call: ${Uri.parse((baseUrl ?? apiBaseUrl) + uri)
           .replace(queryParameters: query)}"
           "\nHeader: $headers");
     }else{
-      printData('====> API Call: ${baseUrl ?? AppConstants.BASE_URL}$uri\nHeader: $headers');
+      printData('====> API Call: ${baseUrl ?? apiBaseUrl}$uri\nHeader: $headers');
     }
 
     try {
       http.Response response = await http.get(
-        Uri.parse((baseUrl ?? AppConstants.BASE_URL) + uri).replace(queryParameters: query),
+        Uri.parse((baseUrl ?? apiBaseUrl) + uri).replace(queryParameters: query),
         headers: headers,
       ).timeout(Duration(seconds: timeoutInSeconds));
 
-      return handleResponse(response, uri);
+      return _handleResponse(response, uri);
     } catch (e) {
       printData('------------${e.toString()}');
       return model.Response(statusCode: 1, statusText: "noInternetMessage", body: {});
@@ -56,15 +55,15 @@ class ApiClient {
       return model.Response(statusCode: 1, statusText: "noInternetMessage", body: {});
     }
     try {
-      printData('====> API Call: ${baseUrl ?? AppConstants.BASE_URL}$uri\nHeader: $headers');
+      printData('====> API Call: ${baseUrl ?? apiBaseUrl}$uri\nHeader: $headers');
       printData('====> API Body: $body');
 
       http.Response response = await http.post(
-        Uri.parse((baseUrl ?? AppConstants.BASE_URL) + uri),
+        Uri.parse((baseUrl ?? apiBaseUrl) + uri),
         body: jsonEncode(body),
         headers: headers,
       ).timeout(Duration(seconds: timeoutInSeconds));
-      return handleResponse(response, uri);
+      return _handleResponse(response, uri);
     } catch (e) {
       printData('------------${e.toString()}');
       return model.Response(statusCode: 1, statusText: "noInternetMessage", body: {});
@@ -81,15 +80,15 @@ class ApiClient {
       return model.Response(statusCode: 1, statusText: "noInternetMessage", body: {});
     }
     try {
-      printData('====> API Call: ${baseUrl ?? AppConstants.BASE_URL}$uri\nHeader: $headers');
+      printData('====> API Call: ${baseUrl ?? apiBaseUrl}$uri\nHeader: $headers');
       printData('====> API Body: $body');
 
       http.Response response = await http.put(
-        Uri.parse((baseUrl ?? AppConstants.BASE_URL) + uri),
+        Uri.parse((baseUrl ?? apiBaseUrl) + uri),
         body: jsonEncode(body),
         headers: headers,
       ).timeout(Duration(seconds: timeoutInSeconds));
-      return handleResponse(response, uri);
+      return _handleResponse(response, uri);
     } catch (e) {
       return model.Response(statusCode: 1, statusText: "noInternetMessage");
     }
@@ -104,13 +103,13 @@ class ApiClient {
       return model.Response(statusCode: 1, statusText: "noInternetMessage", body: {});
     }
     try {
-      printData('====> API Call: ${AppConstants.BASE_URL}$uri\nHeader: $headers');
+      printData('====> API Call: ${apiBaseUrl}$uri\nHeader: $headers');
 
       http.Response response = await http.delete(
-        Uri.parse(AppConstants.BASE_URL + uri),
+        Uri.parse(apiBaseUrl + uri),
         headers: headers,
       ).timeout(Duration(seconds: timeoutInSeconds));
-      return handleResponse(response, uri);
+      return _handleResponse(response, uri);
     } catch (e) {
       return model.Response(statusCode: 1, statusText: "noInternetMessage");
     }
@@ -127,7 +126,7 @@ class ApiClient {
       return model.Response(statusCode: 1, statusText: "noInternetMessage", body: {});
     }
     try {
-      printData('====> API Call: ${ baseUrl ?? AppConstants.BASE_URL}$uri\nHeader: $headers');
+      printData('====> API Call: ${ baseUrl ?? apiBaseUrl}$uri\nHeader: $headers');
 
       List<http.MultipartFile> imageMultipartFiles = [];
 
@@ -140,20 +139,20 @@ class ApiClient {
         imageMultipartFiles.add(imageMultipartFile);
       });
 
-      http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse((baseUrl ?? AppConstants.BASE_URL) + uri));
+      http.MultipartRequest request = http.MultipartRequest('POST', Uri.parse((baseUrl ?? apiBaseUrl) + uri));
       if(headers != null) request.headers.addAll(headers);
       request.files.addAll(imageMultipartFiles);
       request.fields.addAll(body);
 
       http.Response response = await http.Response.fromStream(await request.send());
-      return handleResponse(response, uri);
+      return _handleResponse(response, uri);
     } catch (e) {
       return model.Response(statusCode: 1, statusText: "noInternetMessage");
     }
   }
 
   /// utils
-  model.Response handleResponse(http.Response response, String uri) {
+  model.Response _handleResponse(http.Response response, String uri) {
     dynamic body;
     try {
       body = jsonDecode(utf8.decode(response.bodyBytes));

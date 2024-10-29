@@ -4,9 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
-
-import '../../../../data/models/response/movie.dart';
 import '../../overview_movie/widget/chip_banner.dart';
 
 class MovieItem extends StatelessWidget {
@@ -17,7 +16,7 @@ class MovieItem extends StatelessWidget {
     required this.onTap,
   });
 
-  final Movie movie;
+  final MovieInfo movie;
   final double? size;
   final Function() onTap;
 
@@ -31,7 +30,7 @@ class MovieItem extends StatelessWidget {
           children: [
             Positioned.fill(
               child: ImageWidget(
-                url: movie.getPosterUrl,
+                url: movie.posterUrl,
                 fit: BoxFit.cover,
               ),
             ),

@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
-import 'package:spotify/feature/data/models/db_local/movie_local.dart';
+import 'package:spotify/feature/data/models/entity/movie_local.dart';
 import 'package:spotify/feature/presentation/blocs/watched/watched_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/watched/watched_state.dart';
 import 'package:spotify/feature/presentation/screen/watched/widget/watched_item.dart';

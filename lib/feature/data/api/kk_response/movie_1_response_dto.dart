@@ -1,24 +1,23 @@
+import 'package:spotify/feature/data/api/kk_response/movie_info_dto.dart';
+import 'package:spotify/feature/data/api/kk_response/pagination_dto.dart';
 
-import 'collection.dart';
-import 'movie.dart';
-
-class MovieResponse {
+class Movie1ResponseDTO {
   bool? status;
-  List<Movie>? items;
-  Pagination? pagination;
+  List<MovieInfoDTO>? items;
+  PaginationDTO? pagination;
 
-  MovieResponse({this.status, this.items, this.pagination});
+  Movie1ResponseDTO({this.status, this.items, this.pagination});
 
-  MovieResponse.fromJson(Map<String, dynamic> json) {
+  Movie1ResponseDTO.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     if (json['items'] != null) {
-      items = <Movie>[];
+      items = <MovieInfoDTO>[];
       json['items'].forEach((v) {
-        items!.add(Movie.fromJson(v));
+        items!.add(MovieInfoDTO.fromJson(v));
       });
     }
     pagination = json['pagination'] != null
-        ? Pagination.fromJson(json['pagination'])
+        ? PaginationDTO.fromJson(json['pagination'])
         : null;
   }
 

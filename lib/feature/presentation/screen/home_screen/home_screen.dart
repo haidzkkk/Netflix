@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/setting/setting_state.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/header_widget.dart';
@@ -11,8 +12,7 @@ import 'package:spotify/feature/presentation/screen/home_screen/widget/movie_ite
 import 'package:spotify/feature/presentation/screen/home_screen/widget/title_widget.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/overview_screen.dart';
 import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
-import '../../../data/models/category_movie.dart';
-import '../../../data/models/response/movie.dart';
+import '../../../data/api/kk_request/category_movie.dart';
 import '../../blocs/home/home_bloc.dart';
 import '../../blocs/home/home_event.dart';
 import '../../blocs/home/home_state.dart';
@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                 shape: BoxShape.circle
                             ),
                             child: ImageWidget(
-                              url: item.getThumbUrl,
+                              url: item.thumbUrl,
                               width: 90,
                               height: 90,
                               fit: BoxFit.cover,
@@ -111,11 +111,11 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       builder: (context, state) {
                         return SlideWidget(
                           movies: state.movies[category] ?? [],
-                          onTap: (Movie movie){
+                          onTap: (MovieInfo movie){
                             context.showDraggableBottomSheet(
                                 builder: (context, controller){
                                   return OverViewScreen(
-                                    movie: movie.toMovieInfo(),
+                                    movie: movie,
                                     draggableScrollController: controller,
                                   );
                                 }
@@ -152,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                         child: BlocBuilder<HomeBloc, HomeState>(
                           buildWhen: (previous, current) => previous.movies[category] != current.movies[category],
                           builder: (context, state) {
-                            List<Movie> items = state.movies[category] ?? [];
+                            List<MovieInfo> items = state.movies[category] ?? [];
                             return Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 8),
                               child: ListView.separated(
@@ -166,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                         context.showDraggableBottomSheet(
                                             builder: (context, controller){
                                               return OverViewScreen(
-                                                movie: item.toMovieInfo(),
+                                                movie: item,
                                                 draggableScrollController: controller,
                                               );
                                             }

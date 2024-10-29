@@ -5,15 +5,14 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
-
+import 'package:spotify/feature/data/models/movie_info.dart';
 import '../../../commons/utility/style_util.dart';
-import '../../../data/models/response/movie.dart';
 import '../overview_movie/widget/chip_banner.dart';
 
 class SlideWidget extends StatefulWidget {
   const SlideWidget({super.key, required this.movies, this.onTap});
-  final List<Movie> movies;
-  final Function(Movie movie)? onTap;
+  final List<MovieInfo> movies;
+  final Function(MovieInfo movie)? onTap;
 
   @override
   State<SlideWidget> createState() => _SlideWidgetState();
@@ -60,7 +59,7 @@ class _SlideWidgetState extends State<SlideWidget> {
                 children: [
                   Positioned.fill(
                     child: Image.network(
-                      item.getPosterUrl,
+                      item.posterUrl ?? "",
                       width: double.infinity,
                       fit: BoxFit.fitWidth,
                       errorBuilder: (context, object, stackTrace){

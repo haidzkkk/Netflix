@@ -1,5 +1,5 @@
 
-import '../movie_detail/movie_info_response.dart';
+import 'package:spotify/feature/data/models/episode.dart';
 
 class EpisodeLocalField{
 

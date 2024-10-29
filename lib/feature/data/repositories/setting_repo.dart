@@ -1,7 +1,7 @@
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:spotify/feature/commons/contants/app_constants.dart';
-import 'package:spotify/feature/data/models/category_movie.dart';
+import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
 
 enum SettingBoolEnum{
   watchBackground(AppConstants.spfsWatchBackground),
@@ -16,7 +16,7 @@ enum SettingBoolEnum{
 
 class SettingRepo {
   SharedPreferences sharedPreferences;
-  SettingRepo(this.sharedPreferences);
+  SettingRepo({required this.sharedPreferences});
 
   Future<bool> setBoolData(SettingBoolEnum type, bool data) async{
     return await sharedPreferences.setBool(type.key, data);

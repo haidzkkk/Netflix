@@ -8,15 +8,17 @@ import 'package:path_provider/path_provider.dart';
 import 'package:spotify/feature/commons/utility/file_util.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/file/file_movie_episode.dart';
+import 'package:spotify/feature/data/repositories/file_repo_impl.dart';
 
-class FileRepository{
-
+class FileRepository implements FileRepoImpl{
 
   /// get local path in app
+  @override
   Future<Directory> getLocalPath() async{
     return await getApplicationDocumentsDirectory();
   }
 
+  @override
   Future<Directory?> getLocalPathDownload() async{
     Directory? directory = Directory("${(await getLocalPath()).path}/download");
     if (!await directory.exists()) {
@@ -27,6 +29,7 @@ class FileRepository{
   }
 
   /// create path download episode with movieName and episodeName
+  @override
   Future<String?> createLocalPathToDownloadVideo({required String movieName, required String episodeName}) async{
     Directory? directory = await getLocalPathDownload();
 
@@ -43,6 +46,7 @@ class FileRepository{
   }
 
   /// get all folder movie in folder download
+  @override
   Future<List<Directory>> getFolderMovies({String? movieName}) async{
     List<Directory> directories = [];
 
@@ -64,6 +68,7 @@ class FileRepository{
   }
 
   /// get all file data in folder movie
+  @override
   Future<List<File>> getFileMovies({String? movieName}) async{
     List<File> files = [];
 
@@ -83,6 +88,7 @@ class FileRepository{
   }
 
   /// get all movie with episode
+  @override
   Future<List<FileMovieEpisode>> getAllMovieEpisode() async{
     List<FileMovieEpisode> movieEpisode = [];
 
@@ -105,6 +111,7 @@ class FileRepository{
   }
 
   /// get movie with episode
+  @override
   Future<FileMovieEpisode> getMovie(String movieName) async{
     Directory? movieDirectory = await getLocalPathDownload();
     movieDirectory = Directory("${movieDirectory?.path}/$movieName");
@@ -114,6 +121,7 @@ class FileRepository{
   }
 
   /// check file episode has error
+  @override
   Future<bool> checkMp4FileValidate(String filePath) async {
     Completer<bool> completer = Completer();
 
@@ -157,6 +165,7 @@ class FileRepository{
     return isValid;
   }
 
+  @override
   Future<bool> deleteFiles(List<FileSystemEntity> files) async{
     try{
       await Future.wait(files.map((file) async{

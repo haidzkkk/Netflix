@@ -2,12 +2,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/data/models/status.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/shimmer_widget.dart';
-
 import '../../../commons/utility/utils.dart';
-import '../../../data/models/category_movie.dart';
-import '../../../data/models/response/movie.dart';
+import '../../../data/api/kk_request/category_movie.dart';
 import '../../blocs/search/search_bloc.dart';
 import '../home_screen/widget/movie_item.dart';
 import '../overview_movie/overview_screen.dart';
@@ -79,14 +78,14 @@ class _CategoryWidgetState extends State<CategoryWidget> {
                         return const ShimmerWidget(width: 0, height: 0);
                       }
 
-                      Movie item = items[index];
+                      MovieInfo item = items[index];
                       return MovieItem(
                         movie: item,
                         onTap: () {
                           context.showDraggableBottomSheet(
                               builder: (context, controller){
                                 return OverViewScreen(
-                                  movie: item.toMovieInfo(),
+                                  movie: item,
                                   draggableScrollController: controller,
                                 );
                               }
