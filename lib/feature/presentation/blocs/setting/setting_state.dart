@@ -34,7 +34,7 @@ class SettingState extends Equatable{
         isWatchBackground = isWatchBackground ?? true,
         isAutoChangeEpisode = isAutoChangeEpisode ?? true,
         isSuggestEpisodeWatched = isSuggestEpisodeWatched ?? true,
-        favouriteCategories = favouriteCategories ?? CategoryMovie.valueCategories,
+        favouriteCategories = favouriteCategories ?? CategoryMovie.valueCategoriesShow,
         favouriteFileDrive = favouriteFileDrive ?? Status.initial(),
         isShowNotifyWhenDownloadSuccess = isShowNotifyWhenDownloadSuccess ?? true,
         syncingFavouriteDriveFile = syncingFavouriteDriveFile ?? StatusEnum.initial;

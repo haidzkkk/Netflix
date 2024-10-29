@@ -59,14 +59,7 @@ class _MovieDownloadItemState extends State<MovieDownloadItem> {
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: (){
-              context.showDraggableBottomSheet(
-                  builder: (context, controller){
-                    return OverViewScreen(
-                      movie: widget.movieLocal.toMovieInfo(),
-                      draggableScrollController: controller,
-                    );
-                  }
-              );
+              context.openOverviewScreen(widget.movieLocal.toMovieInfo());
             },
             onLongPress: (){
               selectEpisode();

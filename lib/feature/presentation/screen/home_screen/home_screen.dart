@@ -35,9 +35,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     super.build(context);
     return RefreshIndicator(
       onRefresh: () async{
-        for (var category in CategoryMovie.values) {
-          homeViewModel.add(GetCategoryMovie(category));
-        }
+        homeViewModel.add(GetAllCategoryMovie());
       },
       child: SingleChildScrollView(
         child: Column(
@@ -112,14 +110,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                         return SlideWidget(
                           movies: state.movies[category] ?? [],
                           onTap: (MovieInfo movie){
-                            context.showDraggableBottomSheet(
-                                builder: (context, controller){
-                                  return OverViewScreen(
-                                    movie: movie,
-                                    draggableScrollController: controller,
-                                  );
-                                }
-                            );
+                            context.openOverviewScreen(movie);
                           }
                         );
                       },
@@ -163,14 +154,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                                   return MovieItem(
                                       movie: item,
                                       onTap: (){
-                                        context.showDraggableBottomSheet(
-                                            builder: (context, controller){
-                                              return OverViewScreen(
-                                                movie: item,
-                                                draggableScrollController: controller,
-                                              );
-                                            }
-                                        );
+                                        context.openOverviewScreen(item);
                                       }
                                   );
                                 },

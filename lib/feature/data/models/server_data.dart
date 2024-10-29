@@ -3,7 +3,7 @@ import 'package:spotify/feature/data/models/entity/episode_download.dart';
 import 'package:spotify/feature/data/models/episode.dart';
 
 class ServerData {
-  static const String SERVER_NAME_LOCAL = "local";
+  static const String SERVER_NAME_LOCAL = "Local";
 
   String? serverName;
   List<Episode>? episode;

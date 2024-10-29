@@ -232,15 +232,7 @@ class _MainScreenState extends State<MainScreen>{
   void checkOpenMovieWidgetProvider() {
     MovieInfo? data = homeViewModel.state.openMovie?.value;
     if(data == null) return;
-
-    context.showDraggableBottomSheet(
-        builder: (context, controller){
-          return OverViewScreen(
-            movie: data,
-            draggableScrollController: controller,
-          );
-        }
-    );
+    context.openOverviewScreen(data);
   }
 
 

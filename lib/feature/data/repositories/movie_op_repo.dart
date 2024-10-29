@@ -24,7 +24,7 @@ class MovieOpRepo implements MovieRepoImpl{
       msg: response.statusText,
     );
 
-    if(data.statusCode == AppConstants.HTTP_OK){
+    if(data.statusCode == AppConstants.HTTP_OK && response.body[AppConstants.HTTP_STATUS] == true){
       MovieDetailResponseDTO movieResponse = MovieDetailResponseDTO.fromJson(response.body);
       data.data = movieResponse.getMovieInfoData();
     }
@@ -44,7 +44,7 @@ class MovieOpRepo implements MovieRepoImpl{
   Future<Data<List<MovieInfo>>> searchMovie({
     required String keyword, int? limit
   }) async {
-    CategoryMovie category = CategoryMovie.search;
+    CategoryMovie category = CategoryMovie.kkSearch;
     var query = {
       "keyword": keyword,
       "limit": "${limit ?? 100}",

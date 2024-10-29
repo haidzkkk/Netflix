@@ -52,14 +52,7 @@ class _WatchedItemState extends State<WatchedItem> {
           GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: (){
-              context.showDraggableBottomSheet(
-                  builder: (context, controller){
-                    return OverViewScreen(
-                      movie: widget.movieLocal.toMovieInfo(),
-                      draggableScrollController: controller,
-                    );
-                  }
-              );
+              context.openOverviewScreen(widget.movieLocal.toMovieInfo());
             },
             child: Container(
               margin: const EdgeInsetsDirectional.all(5),

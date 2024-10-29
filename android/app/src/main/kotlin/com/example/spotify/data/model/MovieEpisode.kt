@@ -10,7 +10,8 @@ data class MovieEpisode(
     val name: String?,
     val slug: String?,
     val id: String?,
-    var status: Status<String>
+    var status: Status<String>,
+    var serverType: String?,
 ): Serializable{
     var executeProcess: Int = 0
     var totalSecondTime: Int = 0

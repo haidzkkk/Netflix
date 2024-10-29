@@ -20,6 +20,7 @@ class AppConstants{
   static const String OP_GET_SEARCH = "v1/api";
 
   static const int HTTP_OK = 200;
+  static const String HTTP_STATUS = "status";
 
   static const String DATA = "data";
   static const String ITEMS = "items";

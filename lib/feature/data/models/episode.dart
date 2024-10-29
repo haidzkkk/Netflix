@@ -9,11 +9,18 @@ class Episode {
   String? linkEmbed;
   String? linkM3u8;
 
-  EpisodeLocal? episodeLocal;
+  EpisodeLocal? episodeWatched;
   EpisodeDownload? episodesDownload;
 
+  String getName(){
+    if(name?.isNotEmpty != true) return "none";
+    String content = name!.substring(name!.indexOf(" ") + 1, name!.length).trim();
+    int? episodeNumber = int.tryParse(content);
+    return episodeNumber?.toString().padLeft(2, '0') ?? content;
+  }
+
   Episode(
-      {this.name, this.slug, this.filename, this.linkEmbed, this.linkM3u8, this.episodeLocal});
+      {this.name, this.slug, this.filename, this.linkEmbed, this.linkM3u8, this.episodeWatched});
 
   Episode.fromJson(Map<String, dynamic> json) {
     name = json['name'];
