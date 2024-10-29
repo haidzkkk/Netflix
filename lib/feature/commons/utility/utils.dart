@@ -4,12 +4,17 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:spotify/feature/commons/utility/color_resource.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
+import 'package:spotify/feature/presentation/blocs/home/home_bloc.dart';
+import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/presentation/screen/overview_movie/overview_screen.dart';
 
 void showToast(String content){
   Fluttertoast.showToast(
@@ -107,6 +112,23 @@ extension BuildContextExt on BuildContext{
         ),
         builder: (context){
           return child;
+        }
+    );
+  }
+
+  Future<void> openOverviewScreen(MovieInfo movie) async{
+    var movieBloc = read<MovieBloc>();
+    if(movieBloc.state.currentMovie?.slug == movie.slug){
+      movieBloc.add(ChangeExpandedMovieEvent(isExpand: true));
+      return;
+    }
+
+    showDraggableBottomSheet(
+        builder: (context, controller){
+          return OverViewScreen(
+            movie: movie,
+            draggableScrollController: controller,
+          );
         }
     );
   }

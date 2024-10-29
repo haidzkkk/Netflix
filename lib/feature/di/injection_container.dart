@@ -7,6 +7,7 @@ import 'package:spotify/feature/commons/hepler/google_service.dart';
 import 'package:spotify/feature/data/repositories/google_repo.dart';
 import 'package:spotify/feature/data/repositories/movie_kk_repo.dart';
 import 'package:spotify/feature/data/repositories/movie_op_repo.dart';
+import 'package:spotify/feature/data/repositories/movie_repo_factory.dart';
 import 'package:spotify/feature/data/repositories/setting_repo.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/main/main_bloc_cubit.dart';
@@ -53,10 +54,10 @@ Future<void> init() async {
 
   ///[Bloc]
   ///
-  sl.registerFactory(() => HomeBloc(repo: sl<MovieKkRepo>()));
+  sl.registerFactory(() => HomeBloc(movieRepoFactory: sl()));
   sl.registerFactory(() => MainBloc(sharedPreferences: sl(), localeHelper: sl(), themeHelper: sl()));
-  sl.registerFactory(() => MovieBloc(kkMovieRepo: sl<MovieKkRepo>(), opMovieRepo: sl<MovieOpRepo>(), downloadRepo: sl<LocalDbRepository>(), historyRepo: sl<LocalDbRepository>()));
-  sl.registerFactory(() => SearchBloc(kkMovieRepo: sl<MovieKkRepo>(), opMovieRepo: sl<MovieOpRepo>()));
+  sl.registerFactory(() => MovieBloc(movieRepoFactory: sl(), downloadRepo: sl<LocalDbRepository>(), historyRepo: sl<LocalDbRepository>()));
+  sl.registerFactory(() => SearchBloc(movieRepoFactory: sl()));
   sl.registerFactory(() => WatchedCubit(localRepo: sl<LocalDbRepository>()));
   sl.registerFactory(() => DownloadCubit(dbRepository: sl<LocalDbRepository>(), fileRepository: sl<FileRepository>()));
   sl.registerFactory(() => SettingCubit(repo: sl(), googleRepo: sl()));
@@ -70,4 +71,6 @@ Future<void> init() async {
   sl.registerFactory(() => SettingRepo(sharedPreferences: sl()));
   sl.registerFactory(() => GoogleRepo(googleService: sl()));
 
+  ///[Factory]
+  sl.registerLazySingleton(() => MovieRepoFactory());
 }

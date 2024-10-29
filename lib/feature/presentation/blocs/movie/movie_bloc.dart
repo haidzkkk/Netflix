@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:better_player/better_player.dart';
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +9,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/context_service.dart';
 import 'package:spotify/feature/commons/contants/app_constants.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/data/api/server_type.dart';
+import 'package:spotify/feature/data/models/data.dart';
 import 'package:spotify/feature/data/models/entity/episode_download.dart';
 import 'package:spotify/feature/data/models/entity/episode_local.dart';
 import 'package:spotify/feature/data/models/entity/movie_local.dart';
@@ -19,7 +21,7 @@ import 'package:spotify/feature/data/models/server_data.dart';
 import 'package:spotify/feature/data/models/status.dart';
 import 'package:spotify/feature/data/repositories/local_db_download_repo_impl.dart';
 import 'package:spotify/feature/data/repositories/local_db_history_repo_impl.dart';
-import 'package:spotify/feature/data/repositories/movie_repo_impl.dart';
+import 'package:spotify/feature/data/repositories/movie_repo_factory.dart';
 import 'package:spotify/feature/di/injection_container.dart';
 import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/custom_control_widget.dart';
@@ -27,13 +29,12 @@ part 'movie_event.dart';
 part 'movie_state.dart';
 
 class MovieBloc extends Bloc<MovieEvent, MovieState> {
-  MovieRepoImpl kkMovieRepo;
-  MovieRepoImpl opMovieRepo;
+  MovieRepoFactory movieRepoFactory;
   SettingCubit? settingCubit;
   LocalDbHistoryRepoImpl historyRepo;
   LocalDbDownloadRepoImpl downloadRepo;
 
-  MovieBloc({required this.kkMovieRepo, required this.opMovieRepo, required this.historyRepo, required this.downloadRepo}) : super(MovieState()) {
+  MovieBloc({required this.movieRepoFactory, required this.historyRepo, required this.downloadRepo}) : super(MovieState()) {
     listenEvent();
   }
 
@@ -70,25 +71,30 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
   Future<void> getMovie(GetInfoMovieEvent event, Emitter<MovieState> emit) async{
     emit(state.copyWith(movie: Status.loading(data: event.movie)));
     MovieLocal? movieDownload = await getMovieDownload(event.movie.sId);
-    var data = await opMovieRepo.getInfoMovie(slugMovie: event.movie.slug ?? "",);
+    List<Data<MovieInfo>> dataRes = await Future.wait(ServerType.values.map((serverType) =>
+        movieRepoFactory.getMovieRepository(serverType)
+          .getInfoMovie(slugMovie: event.movie.slug ?? "",)
+    ));
 
-    if (data.statusCode == 200 || movieDownload != null) {
-      MovieInfo? movieResponse = data.data;
-      movieResponse?.servers = movieResponse.servers?.map((serverData){
-        serverData.episode = serverData.episode?.map((episode) {
-          episode.episodesDownload = movieDownload?.episodesDownload?[
-            EpisodeDownload.getSetupId(movieId: event.movie.sId ?? "", slug: episode.slug ?? "")
-          ];
-          return episode;
-        }).toList();
-        return serverData;
-      }).toList();
-
+    List<Data<MovieInfo>> dataSuccess = dataRes.where((data) => data.statusCode == AppConstants.HTTP_OK && data.data != null).toList();
+    if (dataSuccess.isNotEmpty || movieDownload != null) {
+      MovieInfo? movieResponse = _mergeServerEpisode(dataSuccess);
       var movie = movieResponse ?? movieDownload?.toMovieInfo();
       emit(state.copyWith(movie: Status.success(data: movie)));
     }else{
       emit(state.copyWith(movie: Status.failed(message: "Không thể lấy phim", data: event.movie)));
     }
+  }
+
+  MovieInfo? _mergeServerEpisode(List<Data<MovieInfo>> dataRes){
+    if(dataRes.isEmpty) return null;
+    MovieInfo? movieResponse = dataRes.first.data;
+    for(var i = 1; i < dataRes.length; i++){
+      movieResponse?.servers ??= [];
+      var servers = dataRes[i].data?.servers ?? [];
+      movieResponse?.servers?.addAll(servers);
+    }
+    return movieResponse;
   }
 
   Future<MovieLocal?> getMovieDownload(String? movieId) async{
@@ -108,10 +114,14 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     historyRepo.addMovieToHistory(MovieLocal.fromMovieInfo(currentMovie));
     /// get episode watched from local
     Map<String, EpisodeLocal> episodeWatched = await historyRepo.getAllEpisodeFromMovieHistory(currentMovie.sId ?? "");
+    MovieLocal? movieDownload = await getMovieDownload(event.movie.sId);
 
     currentMovie.servers?.forEach((server){
       server.episode?.forEach((episode){
-        episode.episodeLocal = episodeWatched[episode.slug];
+        episode.episodeWatched = episodeWatched[episode.slug];
+        episode.episodesDownload = movieDownload?.episodesDownload?[
+          EpisodeDownload.getSetupId(movieId: event.movie.sId ?? "", slug: episode.slug ?? "")
+        ];
       });
     });
 
@@ -152,7 +162,6 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       episode: event.episode,
       emit: emit
     );
-    print("Change episode");
   }
 
   initVideoController({
@@ -245,11 +254,11 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
         if (event.event.betterPlayerEventType == BetterPlayerEventType.play) {
           int minSecond = 10;
           var currentEpisode = state.currentEpisode;
-          if(currentEpisode?.episodeLocal != null
-              && (currentEpisode?.episodeLocal?.currentSecond ?? 0) > minSecond
+          if(currentEpisode?.episodeWatched != null
+              && (currentEpisode?.episodeWatched?.currentSecond ?? 0) > minSecond
               && state.isPlay == null
           ){
-            emit(state.copyWith(timeWatchedEpisode: currentEpisode?.episodeLocal?.currentSecond));
+            emit(state.copyWith(timeWatchedEpisode: currentEpisode?.episodeWatched?.currentSecond));
           }
           emit(state.copyWith(isPlay: true));
           listenShowPipEventFromAndroid();
@@ -272,7 +281,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
         lastTime: DateTime.now().millisecondsSinceEpoch,
         currentSecond: state.currentTimeEpisode
     );
-    state.currentEpisode!.episodeLocal = episodeLocal;
+    state.currentEpisode!.episodeWatched = episodeLocal;
     historyRepo.addEpisodeToHistory(episodeLocal);
   }
 

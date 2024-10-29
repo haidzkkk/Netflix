@@ -89,6 +89,7 @@ class CustomControlsWidgetState extends State<CustomControlsWidget> {
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: (){
+                if(viewModel.state.isExpandWatchMovie == false) return;
                 widget.controller.setControlsVisibility(!controllerVisible);
               },
               onDoubleTapDown: (details) async{

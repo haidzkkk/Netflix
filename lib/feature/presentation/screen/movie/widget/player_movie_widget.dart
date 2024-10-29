@@ -36,7 +36,7 @@ class _PlayerMovieWidgetState extends State<PlayerMovieWidget> {
             buildWhen: (previous, current) => previous.isExpandWatchMovie != current.isExpandWatchMovie
               || previous.isPlay != current.isPlay,
             builder: (context, state){
-              viewModel.betterPlayerController?.setControlsEnabled(state.isExpandWatchMovie ? true : false);
+              viewModel.betterPlayerController?.setControlsEnabled(state.isExpandWatchMovie );
               return GestureDetector(
                 onTap: state.isExpandWatchMovie ? null : (){
                   viewModel.add(ChangeExpandedMovieEvent(isExpand: true));
@@ -66,7 +66,7 @@ class _PlayerMovieWidgetState extends State<PlayerMovieWidget> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(state.currentMovie?.name ?? "", style: Style.title2, maxLines: 1, overflow: TextOverflow.ellipsis,),
-                                  Text(state.currentEpisode?.name ?? "", style: Style.body, maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                  Text("Tập ${state.currentEpisode?.getName() ?? ""}", style: Style.body, maxLines: 1, overflow: TextOverflow.ellipsis,),
                                 ],
                               ),
                             ),
