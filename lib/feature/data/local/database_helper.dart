@@ -1,12 +1,12 @@
 
 import 'package:path/path.dart';
 import 'package:spotify/feature/commons/contants/app_constants.dart';
-import 'package:spotify/feature/data/models/db_local/episode_download.dart';
-import 'package:spotify/feature/data/models/db_local/episode_local.dart';
-import 'package:spotify/feature/data/models/db_local/history_local.dart';
+import 'package:spotify/feature/data/models/entity/episode_download.dart';
+import 'package:spotify/feature/data/models/entity/episode_local.dart';
+import 'package:spotify/feature/data/models/entity/history_local.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../models/db_local/movie_local.dart';
+import '../models/entity/movie_local.dart';
 
 class DataBaseHelper{
 
@@ -33,6 +33,7 @@ class DataBaseHelper{
       ${MovieLocalField.movieName} TEXT,
       ${MovieLocalField.moviePoster} TEXT,
       ${MovieLocalField.movieThumb} TEXT,
+      ${MovieLocalField.serverType} TEXT,
       ${MovieLocalField.movieLastTime} INTEGER
       )''');
 
@@ -57,6 +58,7 @@ class DataBaseHelper{
       ${MovieLocalField.movieName} TEXT,
       ${MovieLocalField.moviePoster} TEXT,
       ${MovieLocalField.movieThumb} TEXT,
+      ${MovieLocalField.serverType} TEXT,
       ${MovieLocalField.movieLastTime} INTEGER
       )''');
 

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:spotify/feature/data/models/db_local/movie_status_download.dart';
-import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
+import 'package:spotify/feature/data/models/entity/movie_status_download.dart';
+import 'package:spotify/feature/data/models/episode.dart';
 
 class EpisodeDownloadField{
 

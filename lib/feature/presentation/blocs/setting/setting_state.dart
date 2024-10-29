@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:equatable/equatable.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:spotify/feature/data/models/category_movie.dart';
+import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 
 import '../../../data/models/status.dart';
@@ -17,6 +17,7 @@ class SettingState extends Equatable{
   final bool isShowNotifyWhenDownloadSuccess;
   final Status<drive.File> favouriteFileDrive;
   final StatusEnum syncingFavouriteDriveFile;
+  final bool isConnectNetwork;
 
   SettingState({
     bool? isWatchBackground,
@@ -27,7 +28,9 @@ class SettingState extends Equatable{
     this.currentAccount,
     Status<drive.File>? favouriteFileDrive,
     StatusEnum? syncingFavouriteDriveFile,
+    bool? isConnectNetwork,
   }):
+        isConnectNetwork = isConnectNetwork ?? true,
         isWatchBackground = isWatchBackground ?? true,
         isAutoChangeEpisode = isAutoChangeEpisode ?? true,
         isSuggestEpisodeWatched = isSuggestEpisodeWatched ?? true,
@@ -45,6 +48,7 @@ class SettingState extends Equatable{
     GoogleSignInAccount? currentAccount,
     Status<drive.File>? favouriteFileDrive,
     StatusEnum? syncingFavouriteDriveFile,
+    bool? isConnectNetwork,
   }){
     return SettingState(
       isWatchBackground: isWatchBackground ?? this.isWatchBackground,
@@ -55,6 +59,7 @@ class SettingState extends Equatable{
       currentAccount: currentAccount ?? this.currentAccount,
       favouriteFileDrive: favouriteFileDrive ?? this.favouriteFileDrive,
       syncingFavouriteDriveFile: syncingFavouriteDriveFile ?? this.syncingFavouriteDriveFile,
+      isConnectNetwork: isConnectNetwork ?? this.isConnectNetwork,
     );
   }
 
@@ -69,6 +74,7 @@ class SettingState extends Equatable{
       isShowNotifyWhenDownloadSuccess: isShowNotifyWhenDownloadSuccess,
       favouriteFileDrive: favouriteFileDrive,
       syncingFavouriteDriveFile: syncingFavouriteDriveFile,
+      isConnectNetwork: isConnectNetwork,
       currentAccount: currentAccount,
     );
   }
@@ -84,6 +90,7 @@ class SettingState extends Equatable{
     isShowNotifyWhenDownloadSuccess,
     favouriteFileDrive,
     syncingFavouriteDriveFile,
+    isConnectNetwork,
   ];
 
 }

@@ -1,3 +1,5 @@
+import 'package:spotify/feature/data/api/server_type.dart';
+
 class MovieStatusDownload {
   String? id;
   String? movieId;
@@ -12,6 +14,8 @@ class MovieStatusDownload {
   int? currentSecondTime;
   int? executeProcess;
 
+  ServerType? serverType;
+
   MovieStatusDownload(
       {this.currentSecondTime,
         this.executeProcess,
@@ -24,7 +28,9 @@ class MovieStatusDownload {
         this.id,
         this.status,
         this.totalSecondTime,
-        this.url});
+        this.url,
+        required this.serverType,
+      });
 
   MovieStatusDownload.fromJson(Map<String, dynamic> json) {
     currentSecondTime = json['currentSecondTime'];
@@ -39,6 +45,7 @@ class MovieStatusDownload {
     status = json['status'] != null ? StatusDownload.fromJson(json['status']) : null;
     totalSecondTime = json['totalSecondTime'];
     url = json['url'];
+    serverType = ServerType.getServerType(json['serverType']);
   }
 
   Map<String, dynamic> toJson() {
@@ -57,6 +64,7 @@ class MovieStatusDownload {
     }
     data['totalSecondTime'] = totalSecondTime;
     data['url'] = url;
+    data['serverType'] = serverType?.id;
     return data;
   }
 }

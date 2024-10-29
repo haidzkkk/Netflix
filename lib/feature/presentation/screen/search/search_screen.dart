@@ -5,12 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/data/models/category_movie.dart';
+import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/presentation/blocs/home/home_bloc.dart';
 import 'package:spotify/feature/presentation/blocs/home/home_event.dart';
 import 'package:spotify/feature/presentation/screen/search/widget/search_text_field.dart';
 import 'package:spotify/feature/presentation/screen/widget/custom_refresh.dart';
-import '../../../data/models/response/movie.dart';
 import '../../../data/models/status.dart';
 import '../../blocs/search/search_bloc.dart';
 import '../home_screen/widget/movie_item.dart';
@@ -139,7 +139,7 @@ class _SearchScreenState extends State<SearchScreen>
                                       return const ShimmerWidget(width: 0, height: 0);
                                     }
 
-                                    Movie item = items[index];
+                                    MovieInfo item = items[index];
                                     return Column(
                                       children: [
                                         Flexible(
@@ -150,7 +150,7 @@ class _SearchScreenState extends State<SearchScreen>
                                               context.showDraggableBottomSheet(
                                                 builder: (context, controller){
                                                   return OverViewScreen(
-                                                    movie: item.toMovieInfo(),
+                                                    movie: item,
                                                     draggableScrollController: controller,
                                                   );
                                                 }
@@ -213,7 +213,7 @@ class _SearchScreenState extends State<SearchScreen>
                                           return const ShimmerWidget(width: 0, height: 0);
                                         }
 
-                                        Movie item = items[index];
+                                        MovieInfo item = items[index];
                                         return Column(
                                           children: [
                                             Flexible(
@@ -224,7 +224,7 @@ class _SearchScreenState extends State<SearchScreen>
                                                   context.showDraggableBottomSheet(
                                                       builder: (context, controller){
                                                         return OverViewScreen(
-                                                          movie: item.toMovieInfo(),
+                                                          movie: item,
                                                           draggableScrollController: controller,
                                                         );
                                                       }

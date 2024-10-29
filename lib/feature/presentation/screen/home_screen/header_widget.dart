@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/widget/action_button.dart';
 
 import '../../../../gen/assets.gen.dart';
 import '../../../commons/utility/style_util.dart';
-import '../../../data/models/response/movie.dart';
 import '../overview_movie/overview_screen.dart';
 import '../widget/custom_bottom.dart';
 import '../widget/trailer_widget.dart';
@@ -14,7 +14,7 @@ import '../widget/trailer_widget.dart';
 class HeaderWidget extends StatefulWidget {
   const HeaderWidget({super.key, required this.movie});
 
-  final Movie? movie;
+  final MovieInfo? movie;
 
   @override
   State<HeaderWidget> createState() => _HeaderWidgetState();
@@ -46,7 +46,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
               child: TrailerWidget(
                 // url: "https://www.youtube.com/watch?v=_OKAwz2MsJs",
                 trailerUrl: "",
-                thumbnail: widget.movie?.getPosterUrl ?? "",
+                thumbnail: widget.movie?.posterUrl ?? "",
               ),
             ),
           ),
@@ -133,7 +133,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                           context.showDraggableBottomSheet(
                               builder: (context, controller){
                                 return OverViewScreen(
-                                  movie: widget.movie!.toMovieInfo(),
+                                  movie: widget.movie!,
                                   draggableScrollController: controller,
                                 );
                               }

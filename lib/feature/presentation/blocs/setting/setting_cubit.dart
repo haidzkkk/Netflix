@@ -1,10 +1,14 @@
 
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:spotify/feature/commons/contants/app_constants.dart';
+import 'package:spotify/feature/commons/utility/connect_util.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/data/models/category_movie.dart';
+import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
 import 'package:spotify/feature/data/repositories/google_repo.dart';
 import 'package:spotify/feature/data/repositories/setting_repo.dart';
 import 'package:spotify/feature/presentation/blocs/setting/setting_state.dart';
@@ -15,8 +19,9 @@ import '../../../data/models/status.dart';
 class SettingCubit extends Cubit<SettingState>{
   SettingRepo repo;
   GoogleRepo googleRepo;
-  SettingCubit(this.repo, this.googleRepo): super(SettingState()){
+  SettingCubit({required this.repo, required this.googleRepo}): super(SettingState()){
     getCurrentUser();
+    listenStateConnectNetwork();
   }
 
   Future<void> syncSetting() async{
@@ -149,5 +154,22 @@ class SettingCubit extends Cubit<SettingState>{
   sendActionDragToAndroidWidgetProvider(){
     const MethodChannel(AppConstants.methodChannelWidgetProvider)
         .invokeMethod(AppConstants.invokeMethodDragWidget,);
+  }
+
+  late StreamSubscription streamSubscription;
+  listenStateConnectNetwork(){
+    streamSubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result){
+      bool data = ConnectUtil.checkNetwork(result);
+      if(state.isConnectNetwork != data){
+        emit(state.copyWith(isConnectNetwork: data));
+      }
+    });
+
+  }
+
+  @override
+  Future<void> close() {
+    streamSubscription.cancel();
+    return super.close();
   }
 }

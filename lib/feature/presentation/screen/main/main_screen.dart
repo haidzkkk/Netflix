@@ -8,11 +8,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/commons/utility/connect_util.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/data/models/category_movie.dart';
-import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_state.dart';
 import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
+import 'package:spotify/feature/presentation/blocs/setting/setting_state.dart';
 import 'package:spotify/feature/presentation/screen/download/download_screen.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/home_screen.dart';
 import 'package:spotify/feature/presentation/screen/main/widget/item_bottom_bar.dart';
@@ -39,8 +39,8 @@ class _MainScreenState extends State<MainScreen>{
   late final homeViewModel = context.read<HomeBloc>();
   late final movieViewModel = context.read<MovieBloc>();
   late final downloadViewModel = context.read<DownloadCubit>();
+  late final settingViewModel = context.read<SettingCubit>();
 
-  late StreamSubscription streamSubscription;
 
   List<Widget> screens = [
     const HomeScreen(),
@@ -53,7 +53,6 @@ class _MainScreenState extends State<MainScreen>{
   @override
   void initState() {
     homeViewModel.add(GetAllCategoryMovie());
-    listenNetworkState();
 
     downloadViewModel.checkAndSyncMovieDownloading();
 
@@ -67,13 +66,12 @@ class _MainScreenState extends State<MainScreen>{
   @override
   void dispose() {
     homeViewModel.add(DisposeHomeEvent());
-    streamSubscription.cancel();
-    ok?.cancel();
-    ok = null;
+    backTimer?.cancel();
+    backTimer = null;
     super.dispose();
   }
 
-  Timer? ok;
+  Timer? backTimer;
   bool isDestroyApp = false;
 
   @override
@@ -99,10 +97,10 @@ class _MainScreenState extends State<MainScreen>{
           }else{
             isDestroyApp = true;
             showToast("Nhấn thêm lần nữa để thoát");
-            ok = Timer(const Duration(milliseconds: 1000), (){
+            backTimer = Timer(const Duration(milliseconds: 1000), (){
               isDestroyApp = false;
-              ok?.cancel();
-              ok = null;
+              backTimer?.cancel();
+              backTimer = null;
             });
           }
       },
@@ -200,24 +198,24 @@ class _MainScreenState extends State<MainScreen>{
                   ],
                 ),
               ),
-              BlocConsumer<HomeBloc, HomeState>(
-                listenWhen: (previous, current) => previous.isConnect != current.isConnect,
+              BlocConsumer<SettingCubit, SettingState>(
+                listenWhen: (previous, current) => previous.isConnectNetwork != current.isConnectNetwork,
                 listener: (context, state){
-                  if(first && !state.isConnect){
+                  if(isFirstStateNetwork && !state.isConnectNetwork){
                     homeViewModel.add(ChangePageIndexHomeEvent(3));
                   }
-                  first = false;
+                  isFirstStateNetwork = false;
                 },
-                buildWhen: (previous, current) => previous.isConnect != current.isConnect,
+                buildWhen: (previous, current) => previous.isConnectNetwork != current.isConnectNetwork,
                 builder: (context, state) {
                   return Material(
-                    color: state.isConnect ? Colors.teal : Colors.red,
+                    color: state.isConnectNetwork ? Colors.teal : Colors.red,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 500),
-                      height: state.isConnect ? 0 : 20,
+                      height: state.isConnectNetwork ? 0 : 20,
                       width: double.infinity,
                       alignment: Alignment.center,
-                      child: Text(state.isConnect ? "Đã kết nối mạng" : "Không kết nối mạng"),
+                      child: Text(state.isConnectNetwork ? "Đã kết nối mạng" : "Không kết nối mạng"),
                     ),
                   );
                 }
@@ -228,18 +226,11 @@ class _MainScreenState extends State<MainScreen>{
       ),
     );
   }
-  bool first = true;
-  void listenNetworkState() {
-    streamSubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result){
-      bool data = ConnectUtil.checkNetwork(result);
-      if(homeViewModel.state.isConnect != data){
-        homeViewModel.add(ListenNetworkConnectHomeEvent(data));
-      }
-    });
-  }
+  bool isFirstStateNetwork = true;
+
 
   void checkOpenMovieWidgetProvider() {
-    MovieInfo? data = homeViewModel.state.openMovie?.value.toMovieInfo();
+    MovieInfo? data = homeViewModel.state.openMovie?.value;
     if(data == null) return;
 
     context.showDraggableBottomSheet(

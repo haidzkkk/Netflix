@@ -1,13 +1,13 @@
 
-class BreadCrumb {
+class BreadCrumbDTO {
   String? name;
   String? slug;
   bool? isCurrent;
   int? position;
 
-  BreadCrumb({this.name, this.slug, this.isCurrent, this.position});
+  BreadCrumbDTO({this.name, this.slug, this.isCurrent, this.position});
 
-  BreadCrumb.fromJson(Map<String, dynamic> json) {
+  BreadCrumbDTO.fromJson(Map<String, dynamic> json) {
     name = json['name'];
     slug = json['slug'];
     isCurrent = json['isCurrent'];

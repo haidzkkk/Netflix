@@ -30,7 +30,7 @@ class _DescriptionMovieWidgetState extends State<DescriptionMovieWidget> {
                     buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
                     builder: (context, state){
                       return ImageWidget(
-                        url: state.currentMovie?.getPosterUrl ?? "",
+                        url: state.currentMovie?.posterUrl ?? "",
                         fit: BoxFit.cover,
                       );
                     }
@@ -53,7 +53,7 @@ class _DescriptionMovieWidgetState extends State<DescriptionMovieWidget> {
                                 TextSpan(text: "Category: ",
                                     style: Style.body.copyWith(fontWeight: FontWeight.w700)
                                 ),
-                                TextSpan(text: state.currentMovie?.category?.map((category) => category.name).toList().join(", ") ?? " _ _ ",
+                                TextSpan(text: state.currentMovie?.categories?.map((category) => category.name).toList().join(", ") ?? " _ _ ",
                                     style: Style.body
                                 ),
                               ]
@@ -66,7 +66,7 @@ class _DescriptionMovieWidgetState extends State<DescriptionMovieWidget> {
                                 TextSpan(text: "Country: ",
                                     style: Style.body.copyWith(fontWeight: FontWeight.w700)
                                 ),
-                                TextSpan(text: state.currentMovie?.country?.map((country) => country.name).toList().join(", ") ?? " _ _ ",
+                                TextSpan(text: state.currentMovie?.countries?.map((country) => country.name).toList().join(", ") ?? " _ _ ",
                                     style: Style.body
                                 ),
                               ]

@@ -12,26 +12,23 @@ import 'package:spotify/feature/commons/contants/app_constants.dart';
 import 'package:spotify/feature/commons/list_animation.dart';
 import 'package:spotify/feature/commons/utility/file_util.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/data/local/database_helper.dart';
-import 'package:spotify/feature/data/models/db_local/episode_download.dart';
-import 'package:spotify/feature/data/models/db_local/movie_local.dart';
-import 'package:spotify/feature/data/models/db_local/movie_status_download.dart';
+import 'package:spotify/feature/data/models/entity/episode_download.dart';
+import 'package:spotify/feature/data/models/entity/movie_local.dart';
+import 'package:spotify/feature/data/models/entity/movie_status_download.dart';
+import 'package:spotify/feature/data/models/episode.dart';
 import 'package:spotify/feature/data/models/file/file_movie_episode.dart';
-import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
-import 'package:spotify/feature/data/models/movie_detail/movie_info_response.dart';
-import 'package:spotify/feature/data/models/status.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/data/repositories/file_repo.dart';
-import 'package:spotify/feature/data/repositories/local_db_repository.dart';
-import 'package:spotify/feature/di/InjectionContainer.dart';
+import 'package:spotify/feature/data/repositories/file_repo_impl.dart';
+import 'package:spotify/feature/data/repositories/local_db_download_repo_impl.dart';
 import 'package:spotify/feature/presentation/blocs/download/download_state.dart';
-import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/download/widget/movie_download_item.dart';
 
 class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieLocal>{
-  LocalDbRepository dbRepository;
-  FileRepository fileRepository;
+  LocalDbDownloadRepoImpl dbRepository;
+  FileRepoImpl fileRepository;
 
-  DownloadCubit(this.dbRepository, this.fileRepository)
+  DownloadCubit({required this.dbRepository, required this.fileRepository})
       : super(DownloadState()){
     keyListAnimation = GlobalKey();
   }
@@ -141,6 +138,7 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
       url: "https://flipfit-cdn.akamaized.net/flip_hls/661f570aab9d840019942b80-473e0b/video_h1.m3u8",
       // url: episode.linkM3u8,
       localPath: localPath,
+      serverType: movie.serverType
     );
 
     const MethodChannel(AppConstants.methodChanelDownload)
@@ -177,9 +175,8 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
       emit(state.copyWith(movies: {}, moviesDownloading: []));
     }
 
-    var jsonData = await dbRepository.getMovieDownload();
-    Map<String, MovieLocal> movieDownloaded = Map.fromEntries(jsonData.map((json) {
-      var item = MovieLocal.fromJson(json);
+    List<MovieLocal> listData = await dbRepository.getMovieDownload();
+    Map<String, MovieLocal> movieDownloaded = Map.fromEntries(listData.map((item) {
       return MapEntry(item.movieId ?? "", item);
     }));
 
@@ -221,7 +218,7 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
 
     /// delete episode db
     List<MapEntry<EpisodeDownload?, bool>> resultsDeleteEpisodeDb = await Future.wait(episodesDeleteFilter.map((episode) async{
-      return MapEntry(episode, await dbRepository.deleteEpisodeDownload(episode.id ?? "") != -1) ;
+      return MapEntry(episode, await dbRepository.deleteEpisodeDownload(episode.id ?? "")) ;
     }));
     bool isRemoveEpisodeSuccess = false;
     if(resultsDeleteEpisodeDb.isNotEmpty){
@@ -242,7 +239,7 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
     bool isRemoveMovieDbSuccess = false;
     if(isRemoveMovie){
       /// delete movie db
-      isRemoveMovieDbSuccess = (await dbRepository.deleteMovieAndEpisodeDownload(movieId!)) != -1;
+      isRemoveMovieDbSuccess = await dbRepository.deleteMovieAndEpisodeDownload(movieId!);
 
       /// delete movie file
       await fileRepository.deleteFiles([movieFolder.movie]);
@@ -268,11 +265,11 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
   }
 
   Future<bool> checkAndSyncMovieDownloading() async{
-    var responses = await dbRepository.getEpisodeDownloading();
-    if(responses.isNotEmpty){
+    bool hasData = await dbRepository.checkMovieDownloading();
+    if(hasData){
       syncMovieDownloading();
     }
-    return responses.isNotEmpty;
+    return hasData;
   }
 
   Future<void> syncMovieDownloading() async{
@@ -283,9 +280,9 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
     Map<String, MovieStatusDownload> movieDownloading = Map.fromEntries(state.moviesDownloading.map(
             (e) => MapEntry(e.id ?? "", e)));
 
-    var jsonData = await dbRepository.getMovieDownload();
-    Map<String, MovieLocal> moviesDownloaded = Map.fromEntries(jsonData.map((json) {
-      var item = MovieLocal.fromJson(json);
+
+    List<MovieLocal> listData = await dbRepository.getMovieDownload();
+    Map<String, MovieLocal> moviesDownloaded = Map.fromEntries(listData.map((item) {
       return MapEntry(item.slug ?? "", item); /// slug to async with folder name moive
     }));
 
@@ -325,7 +322,7 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
 
   /// isolate always is static function or topLevel function
   static Future<void> _syncMovieDownloadingInIsolate(List<dynamic> args) async{
-    FileRepository fileRepository = FileRepository();
+    FileRepoImpl fileRepository = FileRepository();
 
     SendPort sendPort = args[0];
     Map<String, MovieLocal> moviesDownloaded = args[1];
@@ -398,7 +395,7 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
       keyListAnimation.currentState?.removeItem(
           removeWhere,
               (context, animation) => MovieDownloadItem(
-                movieLocal: data ?? MovieLocal(),
+                movieLocal: data ?? MovieLocal(serverType: null),
                 animation: animation,
               ),
           duration: const Duration(milliseconds: 300)

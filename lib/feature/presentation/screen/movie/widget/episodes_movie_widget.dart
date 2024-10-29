@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
-import 'package:spotify/feature/data/models/db_local/movie_status_download.dart';
+import 'package:spotify/feature/data/models/entity/movie_status_download.dart';
 import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/chip_banner.dart';
 
@@ -26,7 +26,7 @@ class _EpisodesMovieWidgetState extends State<EpisodesMovieWidget> {
           children: [
             const SizedBox(height: 15,),
             Wrap(
-              children: state.currentMovie?.episodes?.firstOrNull?.episode?.map((episode){
+              children: state.currentMovie?.servers?.firstOrNull?.episode?.map((episode){
                 String name = episode.name ?? "";
                 String content = name.substring(name.indexOf(" ") + 1, name.length);
 

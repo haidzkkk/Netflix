@@ -1,24 +1,23 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/context_service.dart';
 import 'package:spotify/feature/commons/contants/app_constants.dart';
-import 'package:spotify/feature/data/models/category_movie.dart';
-import 'package:spotify/feature/data/models/movie_detail/movie_info.dart';
-import 'package:spotify/feature/data/models/response/movie.dart';
-import 'package:spotify/feature/di/InjectionContainer.dart';
+import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
+import 'package:spotify/feature/data/api/server_type.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
+import 'package:spotify/feature/data/repositories/movie_repo_impl.dart';
+import 'package:spotify/feature/di/injection_container.dart';
 import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
-import '../../../data/repositories/movie_repo.dart';
 import 'home_event.dart';
 import 'home_state.dart';
 
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  MovieRepo repo;
+  MovieRepoImpl repo;
 
   HomeBloc({
     required this.repo
@@ -39,7 +38,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   void listenEvent(){
     on<ChangePageIndexHomeEvent>(changePageIndex);
-    on<ListenNetworkConnectHomeEvent>(listenConnectNetwork);
     on<OpenMovieHomeEvent>(openMovieHomeEvent);
     on<GetAllCategoryMovie>(getAllCategoryMovie);
     on<GetCategoryMovie>(getMovieCategory);
@@ -60,7 +58,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     const MethodChannel(AppConstants.methodChannelOpenMovie).setMethodCallHandler((call) async{
       switch(call.method){
         case AppConstants.openMovieInvokeMethod: {
-          Movie movie = Movie.fromJson(jsonDecode(call.arguments.toString()));
+          MovieInfo movie = MovieInfo.fromJson(jsonDecode(call.arguments.toString()), ServerType.kkPhim);
           if(movie.slug != null) add(OpenMovieHomeEvent(movie));
         }
       }
@@ -71,9 +69,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(state.copyWith(openMovie: MapEntry(DateTime.now().millisecond.toString(), event.movie)));
   }
 
-  void listenConnectNetwork(ListenNetworkConnectHomeEvent event, Emitter<HomeState> emit){
-    emit(state.copyWith(isConnect: event.isConnect));
-  }
   changePageIndex(ChangePageIndexHomeEvent event, Emitter<HomeState> emit) async{
     emit.call(state.copyWithPageIndex(event.pageIndex));
     pageController.animateToPage(event.pageIndex, duration: const Duration(milliseconds: 200), curve: Curves.ease);
@@ -86,13 +81,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   Future<void> getMovieCategory(GetCategoryMovie event, Emitter<HomeState> emit) async{
-      var response = await repo.getMovieCategory(
+      var data = await repo.getMovieCategory(
           pageIndex: 1,
           category: event.categoryMovie
       );
 
-      if (response.statusCode == 200) {
-        List<Movie> listData = event.categoryMovie.itemDataFromJson(response.body).data ?? [];
+      if (data.statusCode == 200) {
+        List<MovieInfo> listData = data.data ?? [];
         emit(state.copyWithMovie(
             category: event.categoryMovie,
             data: listData

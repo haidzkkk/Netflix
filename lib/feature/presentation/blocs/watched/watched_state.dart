@@ -1,6 +1,6 @@
 
 import 'package:equatable/equatable.dart';
-import 'package:spotify/feature/data/models/db_local/movie_local.dart';
+import 'package:spotify/feature/data/models/entity/movie_local.dart';
 
 class WatchedState extends Equatable{
   List<MovieLocal> histories;

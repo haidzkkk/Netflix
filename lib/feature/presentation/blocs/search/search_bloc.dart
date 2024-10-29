@@ -4,18 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/context_service.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/di/InjectionContainer.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
+import 'package:spotify/feature/data/repositories/movie_repo_impl.dart';
+import 'package:spotify/feature/di/injection_container.dart';
 import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
-import '../../../data/models/category_movie.dart';
-import '../../../data/models/response/movie.dart';
+import '../../../data/api/kk_request/category_movie.dart';
 import '../../../data/models/status.dart';
-import '../../../data/repositories/movie_repo.dart';
 part 'search_event.dart';
 part 'search_state.dart';
 
 class SearchBloc extends Cubit<SearchState> {
-  MovieRepo repo;
-  SearchBloc({required this.repo}) : super(SearchState());
+  MovieRepoImpl kkMovieRepo;
+  MovieRepoImpl opMovieRepo;
+  SearchBloc({required this.kkMovieRepo, required this.opMovieRepo}) : super(SearchState());
 
   late TabController tabController;
   SettingCubit? settingCubit;
@@ -55,7 +56,7 @@ class SearchBloc extends Cubit<SearchState> {
   fetchMoviesCategory(CategoryMovie categoryMovie, [bool? refresh]) async{
     if(state.searchMovies[categoryMovie]?.status == StatusEnum.loading) return;
 
-    List<Movie> listMovies = List.from(state.searchMovies[categoryMovie]?.data ?? []);
+    List<MovieInfo> listMovies = List.from(state.searchMovies[categoryMovie]?.data ?? []);
     int pageIndex = refresh == true ? 0 : (state.searchPageIndex[categoryMovie] ?? 0);
 
     emit(state.copyWithSearchMovie(
@@ -63,15 +64,14 @@ class SearchBloc extends Cubit<SearchState> {
       searchMovie: Status.loading(data: listMovies)
     ));
 
-    var response = await repo.getMovieCategory(
+    var data = await kkMovieRepo.getMovieCategory(
         category: categoryMovie,
         pageIndex: pageIndex + 1
     );
 
     if(refresh == true) listMovies.clear();
 
-    if (response.statusCode == 200) {
-      var data = categoryMovie.itemDataFromJson(response.body);
+    if (data.statusCode == 200) {
       listMovies.addAll(data.data ?? []);
 
       emit(
@@ -108,22 +108,18 @@ class SearchBloc extends Cubit<SearchState> {
       searchMovie: Status.loading(data: state.searchMovies[categoryMovie]?.data)
     ));
 
-    var response = await repo.searchMovie(
+    var data = await opMovieRepo.searchMovie(
         keyword: strSearch,
         limit: limit
     );
 
-    if (response.statusCode == 200) {
-      var data = categoryMovie.itemDataFromJson(response.body);
-
-      emit(
-          state.copyWithSearchMovie(
-              categoryMovie: categoryMovie,
-              pageIndex: 1,
-              lastPage: data.isLastPage,
-              searchMovie: Status.success(data: data.data)
-          )
-      );
+    if (data.statusCode == 200) {
+      emit(state.copyWithSearchMovie(
+          categoryMovie: categoryMovie,
+          pageIndex: 1,
+          lastPage: data.isLastPage,
+          searchMovie: Status.success(data: data.data)
+      ));
     }else{
       emit(
           state.copyWithSearchMovie(
@@ -131,7 +127,7 @@ class SearchBloc extends Cubit<SearchState> {
               pageIndex: 1,
               searchMovie: Status.failed(
                   data: const [],
-                  message: response.statusText ?? "Get failed"
+                  message: data.msg ?? "Get failed"
               )
           )
       );

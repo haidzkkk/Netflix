@@ -2,13 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/list_animation.dart';
-import 'package:spotify/feature/data/models/db_local/movie_local.dart';
+import 'package:spotify/feature/data/models/entity/movie_local.dart';
+import 'package:spotify/feature/data/repositories/local_db_history_repo_impl.dart';
 import 'package:spotify/feature/data/repositories/local_db_repository.dart';
 import 'package:spotify/feature/presentation/blocs/watched/watched_state.dart';
 import 'package:spotify/feature/presentation/screen/watched/widget/watched_item.dart';
 
 class WatchedCubit extends Cubit<WatchedState> implements ListAnimation<MovieLocal>{
-  LocalDbRepository localRepo;
+  LocalDbHistoryRepoImpl localRepo;
 
   WatchedCubit({
     required this.localRepo
@@ -35,9 +36,7 @@ class WatchedCubit extends Cubit<WatchedState> implements ListAnimation<MovieLoc
     int listLength = state.histories.length;
 
     var pageIndex = state.pageIndex;
-    var mapJson = await localRepo.getAllMovieHistory(pageIndex: pageIndex);
-    List<MovieLocal> histories = List.from(mapJson.map((json) => MovieLocal.fromJson(json)));
-
+    var histories = await localRepo.getAllMovieHistory(pageIndex: pageIndex);
     var lastPage = state.lastPage;
     if(histories.isNotEmpty){
       pageIndex += 1;
@@ -59,7 +58,7 @@ class WatchedCubit extends Cubit<WatchedState> implements ListAnimation<MovieLoc
 
   Future<bool> deleteMovieHistory(MovieLocal movieHistory) async{
 
-    bool isSuccess = (await localRepo.deleteMovieHistory(movieHistory.id)) != -1;
+    bool isSuccess = (await localRepo.deleteMovieHistory(movieHistory.id));
 
     if(isSuccess){
       int position = state.histories.indexOf(movieHistory);
@@ -94,7 +93,7 @@ class WatchedCubit extends Cubit<WatchedState> implements ListAnimation<MovieLoc
       keyListAnimation.currentState?.removeItem(
         removeWhere,
         (context, animation) => WatchedItem(
-          movieLocal: data ?? MovieLocal(),
+          movieLocal: data ?? MovieLocal(serverType: null),
           animation: animation,
         ),
         duration: const Duration(milliseconds: 300)
