@@ -1,15 +1,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spotify/feature/blocs/search/search_bloc.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
+import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
 import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/data/models/status.dart';
+import 'package:spotify/feature/presentation/screen/home_screen/widget/movie_item.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/shimmer_widget.dart';
-import '../../../commons/utility/utils.dart';
-import '../../../data/api/kk_request/category_movie.dart';
-import '../../blocs/search/search_bloc.dart';
-import '../home_screen/widget/movie_item.dart';
-import '../overview_movie/overview_screen.dart';
 
 class CategoryWidget extends StatefulWidget {
   const CategoryWidget({super.key, required this.categoryMovie});

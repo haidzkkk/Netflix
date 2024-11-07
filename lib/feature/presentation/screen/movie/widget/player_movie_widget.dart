@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/utility/pageutil.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
-import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/widget/custom_better_player.dart';
 import 'package:spotify/feature/presentation/screen/widget/process_indicator/custom_process.dart';
 
@@ -66,7 +66,7 @@ class _PlayerMovieWidgetState extends State<PlayerMovieWidget> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(state.currentMovie?.name ?? "", style: Style.title2, maxLines: 1, overflow: TextOverflow.ellipsis,),
-                                  Text("Tập ${state.currentEpisode?.getName() ?? ""}", style: Style.body, maxLines: 1, overflow: TextOverflow.ellipsis,),
+                                  Text("Tập ${state.currentEpisode?.getNumberName() ?? ""}", style: Style.body, maxLines: 1, overflow: TextOverflow.ellipsis,),
                                 ],
                               ),
                             ),

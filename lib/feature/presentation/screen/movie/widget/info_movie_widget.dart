@@ -5,7 +5,7 @@ import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:flutter/widgets.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
-import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/chip_text.dart';
 
 class InfoMovieWidget extends StatefulWidget {

@@ -3,9 +3,8 @@ import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../commons/utility/locale_util.dart';
-import '../../../commons/utility/theme_ulti.dart';
+import 'package:spotify/feature/commons/utility/locale_util.dart';
+import 'package:spotify/feature/commons/utility/theme_ulti.dart';
 
 part 'main_bloc_state.dart';
 

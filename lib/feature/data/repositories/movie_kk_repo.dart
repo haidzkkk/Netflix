@@ -33,7 +33,7 @@ class MovieKkRepo implements MovieRepoImpl {
   }
 
   @override
-  Future<Data<List<MovieInfo>>> getMovieCategory({
+  Future<Data<List<MovieInfo>>> getMovies({
     required CategoryMovie category,
     required int pageIndex
   }) async {

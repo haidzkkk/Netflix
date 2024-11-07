@@ -6,8 +6,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/repositories/setting_repo.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_state.dart';
+import 'package:spotify/feature/blocs/setting/setting_cubit.dart';
+import 'package:spotify/feature/blocs/setting/setting_state.dart';
 import 'package:spotify/feature/presentation/screen/setting/category_setting_screen.dart';
 import 'package:spotify/feature/presentation/screen/setting/widget/icon_setting.dart';
 

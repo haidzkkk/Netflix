@@ -1,23 +1,20 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spotify/feature/blocs/home/home_bloc.dart';
+import 'package:spotify/feature/blocs/home/home_event.dart';
+import 'package:spotify/feature/blocs/home/home_state.dart';
+import 'package:spotify/feature/blocs/search/search_bloc.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
 import 'package:spotify/feature/data/models/movie_info.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_state.dart';
+import 'package:spotify/feature/blocs/setting/setting_cubit.dart';
+import 'package:spotify/feature/blocs/setting/setting_state.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/header_widget.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/slide_widget.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/widget/movie_item.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/widget/title_widget.dart';
-import 'package:spotify/feature/presentation/screen/overview_movie/overview_screen.dart';
 import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
-import '../../../data/api/kk_request/category_movie.dart';
-import '../../blocs/home/home_bloc.dart';
-import '../../blocs/home/home_event.dart';
-import '../../blocs/home/home_state.dart';
-
-import '../../blocs/search/search_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

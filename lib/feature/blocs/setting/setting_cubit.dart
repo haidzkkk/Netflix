@@ -11,10 +11,10 @@ import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
 import 'package:spotify/feature/data/repositories/google_repo.dart';
 import 'package:spotify/feature/data/repositories/setting_repo.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_state.dart';
+import 'package:spotify/feature/blocs/setting/setting_state.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 
-import '../../../data/models/status.dart';
+import '../../data/models/status.dart';
 
 class SettingCubit extends Cubit<SettingState>{
   SettingRepo repo;

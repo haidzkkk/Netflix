@@ -8,7 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/commons/utility/color_resource.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/widget/process_indicator/custom_process.dart';
 
 class CustomControlsWidget extends StatefulWidget {

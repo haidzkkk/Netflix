@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
+import 'package:spotify/feature/blocs/setting/setting_cubit.dart';
 import 'package:spotify/feature/presentation/screen/setting/widget/icon_setting.dart';
 import 'package:spotify/feature/presentation/screen/widget/overlay_widget.dart';
 

@@ -6,7 +6,6 @@ import android.app.PictureInPictureParams
 import android.content.*
 import android.content.res.Configuration
 import android.os.Build
-import android.util.Log
 import android.util.Rational
 import com.example.spotify.data.model.MovieEpisode
 import com.example.spotify.data.model.Status
@@ -123,12 +122,21 @@ class MainActivity: FlutterActivity() {
                     val movie = Gson().fromJson(call.arguments as String, MovieEpisode::class.java).apply {
                         this.status = Status.Initialization()
                     }
-                    sendActionToDownloadService(data = movie)
-
+                    sendActionToDownloadService(data = movie, action = AppConstants.INVOKE_METHOD_START_SERVICE)
+                    result.success("")
                     return@MethodCallHandler
                 }
                 AppConstants.INVOKE_METHOD_STOP_SERVICE -> {
                     stopService(Intent(this, DownloadService::class.java))
+                    result.success("")
+                    return@MethodCallHandler
+                }
+                AppConstants.INVOKE_METHOD_CANCEL_MOVIE_EPISODE -> {
+                    val movie = Gson().fromJson(call.arguments as String, MovieEpisode::class.java).apply {
+                        this.status = Status.Initialization()
+                    }
+                    sendActionToDownloadService(data = movie, action = AppConstants.INVOKE_METHOD_CANCEL_MOVIE_EPISODE)
+                    result.success("")
                     return@MethodCallHandler
                 }
                 else ->{
@@ -144,10 +152,12 @@ class MainActivity: FlutterActivity() {
                     val categoryJson: String? = call.argument(AppConstants.PROVIDE_MOVIE_CATEGORY)
                     val moviesJson: String? = call.argument(AppConstants.PROVIDE_MOVIE_DATA)
                     if(moviesJson is String) WidgetProvider.updateWidgetProvider(applicationContext, categoryJson, moviesJson)
+                    result.success("")
                     return@MethodCallHandler
                 }
                 AppConstants.INVOKE_METHOD_DRAG_WIDGET -> {
                     WidgetProvider.requestDragWidget(context)
+                    result.success("")
                     return@MethodCallHandler
                 }
                 else ->{
@@ -164,9 +174,9 @@ class MainActivity: FlutterActivity() {
             .invokeMethod(AppConstants.INVOKE_METHOD_OPEN_MOVIE, movieJson)
     }
 
-    private fun sendActionToDownloadService(data: MovieEpisode){
-
+    private fun sendActionToDownloadService(data: MovieEpisode?, action: String?){
         val intent = Intent(this, DownloadService::class.java).apply {
+            setAction(action)
             putExtra(AppConstants.DOWNLOAD_SERVICE_DATA, data)
         }
         startService(intent)

@@ -5,10 +5,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
-import 'package:spotify/feature/presentation/blocs/home/home_bloc.dart';
-import 'package:spotify/feature/presentation/blocs/home/home_event.dart';
-import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/blocs/download/download_cubit.dart';
+import 'package:spotify/feature/blocs/home/home_bloc.dart';
+import 'package:spotify/feature/blocs/home/home_event.dart';
+import 'package:spotify/feature/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/widget/action_button.dart';
 
 class ActionMovieWidget extends StatefulWidget {

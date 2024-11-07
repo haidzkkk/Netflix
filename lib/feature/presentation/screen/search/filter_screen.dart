@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spotify/feature/blocs/search/search_bloc.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_state.dart';
+import 'package:spotify/feature/blocs/setting/setting_cubit.dart';
+import 'package:spotify/feature/blocs/setting/setting_state.dart';
 import 'package:spotify/feature/presentation/screen/search/category_widget.dart';
 import 'package:spotify/feature/presentation/screen/search/search_screen.dart';
 import 'package:spotify/feature/presentation/screen/search/widget/search_text_field.dart';
 import '../../../commons/utility/style_util.dart';
-import '../../blocs/search/search_bloc.dart';
 
 class FilterScreen extends StatefulWidget {
   const FilterScreen({super.key});

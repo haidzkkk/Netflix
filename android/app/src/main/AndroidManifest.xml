@@ -14,7 +14,9 @@
     <application
         android:label="Netflix"
         android:name="${applicationName}"
-        android:icon="@mipmap/app_icon">
+        android:icon="@mipmap/app_icon"
+        android:roundIcon="@mipmap/app_icon"
+        >
 
         <service android:name=".DownloadService"
             android:exported="false"

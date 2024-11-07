@@ -12,7 +12,7 @@ class Episode {
   EpisodeLocal? episodeWatched;
   EpisodeDownload? episodesDownload;
 
-  String getName(){
+  String getNumberName(){
     if(name?.isNotEmpty != true) return "none";
     String content = name!.substring(name!.indexOf(" ") + 1, name!.length).trim();
     int? episodeNumber = int.tryParse(content);

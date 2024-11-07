@@ -23,7 +23,7 @@ import 'package:spotify/feature/data/repositories/local_db_download_repo_impl.da
 import 'package:spotify/feature/data/repositories/local_db_history_repo_impl.dart';
 import 'package:spotify/feature/data/repositories/movie_repo_factory.dart';
 import 'package:spotify/feature/di/injection_container.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
+import 'package:spotify/feature/blocs/setting/setting_cubit.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/custom_control_widget.dart';
 part 'movie_event.dart';
 part 'movie_state.dart';
@@ -108,7 +108,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     saveEpisodePreviousToLocal();
 
     MovieInfo currentMovie = event.movie;
-    Episode? currentEpisode = currentMovie.servers?.firstOrNull?.episode?.firstOrNull;
+    Episode? currentEpisode = currentMovie.servers?.firstOrNull?.episodes?.firstOrNull;
 
     /// set movie watched to local
     historyRepo.addMovieToHistory(MovieLocal.fromMovieInfo(currentMovie));
@@ -117,7 +117,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     MovieLocal? movieDownload = await getMovieDownload(event.movie.sId);
 
     currentMovie.servers?.forEach((server){
-      server.episode?.forEach((episode){
+      server.episodes?.forEach((episode){
         episode.episodeWatched = episodeWatched[episode.slug];
         episode.episodesDownload = movieDownload?.episodesDownload?[
           EpisodeDownload.getSetupId(movieId: event.movie.sId ?? "", slug: episode.slug ?? "")
@@ -209,8 +209,8 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
     betterPlayerController?.setupDataSource(dataSource);
   }
 
-  bool isNextEpisode = false;
   onBetterPlayerEvent(ListenerBetterPlayerEvent event, Emitter<MovieState> emit){
+    printData("event.event: ${event.event.betterPlayerEventType}");
     switch(event.event.betterPlayerEventType){
       case BetterPlayerEventType.progress :{
         /// get current time watch episode
@@ -226,28 +226,30 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
           ));
         }
 
-        /// auto next episode
-        bool ended = totalProcess == currentProcess;
-        if(ended && isNextEpisode == false && settingCubit?.state.isAutoChangeEpisode == true){
-          isNextEpisode = true;
-          Future.delayed(const Duration(milliseconds: 3000), (){
-            List<Episode> listEpisode = state.currentMovie?.servers?.firstOrNull?.episode ?? [];
-            if(listEpisode.isEmpty) return;
-            int currentEpisodePosition = listEpisode.indexWhere((element) => element.slug == state.currentEpisode?.slug,);
-            if(currentEpisodePosition < 0
-                || (currentEpisodePosition + 1) >= listEpisode.length) return;
-            Episode nextEpisode = listEpisode[currentEpisodePosition + 1];
-            add(ChangeEpisodeMovieEvent(episode: nextEpisode));
-          });
+        /// cancel if the auto next episode active
+        if(nextEpisodeTimer != null && nextEpisodeTimer!.isActive){
+          nextEpisodeTimer!.cancel();
+          nextEpisodeTimer = null;
+        }
+
+        break;
+      }
+
+      /// auto next episode
+      case BetterPlayerEventType.finished:{
+        if(settingCubit?.state.isAutoChangeEpisode == true){
+          nextEpisode();
         }
         break;
       }
+
       case BetterPlayerEventType.controlsVisible || BetterPlayerEventType.controlsHiddenEnd:{
         emit(state.copyWith(
           visibleControlsPlayer: event.event.betterPlayerEventType == BetterPlayerEventType.controlsVisible,
         ));
         break;
       }
+
       case BetterPlayerEventType.play || BetterPlayerEventType.pause:{
         /// check when player play
         /// check time watched end show snackBar to watch continue
@@ -271,6 +273,18 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       default:{
       }
     }
+  }
+
+  Timer? nextEpisodeTimer;
+  nextEpisode(){
+    List<Episode> listEpisode = state.currentMovie?.servers?.firstOrNull?.episodes ?? [];
+    if(listEpisode.isEmpty) return;
+    int currentEpisodePosition = listEpisode.indexWhere((element) => element.slug == state.currentEpisode?.slug,);
+    if(currentEpisodePosition < 0 || (currentEpisodePosition + 1) >= listEpisode.length) return;
+    Episode nextEpisode = listEpisode[currentEpisodePosition + 1];
+    nextEpisodeTimer = Timer(const Duration(milliseconds: 3000), (){
+      add(ChangeEpisodeMovieEvent(episode: nextEpisode));
+    });
   }
 
   saveEpisodePreviousToLocal(){
@@ -297,7 +311,7 @@ class MovieBloc extends Bloc<MovieEvent, MovieState> {
       return MapEntry(episodeDownloading.id ?? "", EpisodeDownload.fromWhenDownload(episodeDownloading));
     }));
     for (var serverData in serversData) {
-      serverData.episode?.forEach((episode){
+      serverData.episodes?.forEach((episode){
         String episodeDownloadId = EpisodeDownload.getSetupId(movieId: state.currentMovie?.sId ?? "", slug: episode.slug ?? "");
         EpisodeDownload? episodeDownloading = mapEpisodesDownload[episodeDownloadId];
         if(episodeDownloading != null){

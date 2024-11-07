@@ -10,6 +10,7 @@ class Status<out T> (val status: StatusEnum, val data: T?, val message: String?)
 
         fun <T> Success(data: T?): Status<T> = Status<T>(StatusEnum.SUCCESS, data, null)
 
+        fun <T> Cancel(data: T?, message: String?): Status<T> = Status<T>(StatusEnum.CANCEL, data, message)
         fun <T> Error(data: T?, message: String?): Status<T> = Status<T>(StatusEnum.ERROR, data, message)
     }
 }
@@ -17,6 +18,7 @@ class Status<out T> (val status: StatusEnum, val data: T?, val message: String?)
 enum class StatusEnum: Serializable {
     INITIALIZATION,
     SUCCESS,
+    CANCEL,
     ERROR,
-    LOADING
+    LOADING,
 }

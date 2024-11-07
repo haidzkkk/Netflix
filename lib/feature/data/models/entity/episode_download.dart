@@ -46,6 +46,28 @@ class EpisodeDownload extends Equatable{
     return "${movieId}_$slug";
   }
 
+  String getStatus(){
+    var downloadStr = "";
+    if(executeProcess != null
+        && status == StatusDownload.LOADING
+        && executeProcess! < 100
+        && executeProcess! >= 0
+    ){
+      downloadStr = "($executeProcess%)";
+    }else if(executeProcess != null
+        && status == StatusDownload.INITIALIZATION
+    ){
+      downloadStr = "(Chờ)";
+    }else if(status == StatusDownload.ERROR
+    ){
+      downloadStr = "(Lỗi)";
+    }else if(status == StatusDownload.CANCEL
+    ){
+      downloadStr = "(Hủy)";
+    }
+    return downloadStr;
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': _id,

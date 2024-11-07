@@ -4,10 +4,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/presentation/blocs/home/home_bloc.dart';
-import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
-import 'package:spotify/feature/presentation/blocs/search/search_bloc.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
+import 'package:spotify/feature/blocs/home/home_bloc.dart';
+import 'package:spotify/feature/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/blocs/search/search_bloc.dart';
+import 'package:spotify/feature/blocs/setting/setting_cubit.dart';
 import 'package:spotify/feature/presentation/screen/main/main_screen.dart';
 import 'package:spotify/gen/assets.gen.dart';
 

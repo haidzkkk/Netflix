@@ -16,6 +16,7 @@ class AppConstants {
 
         const val INVOKE_METHOD_START_SERVICE = "startService"
         const val INVOKE_METHOD_STOP_SERVICE = "stopService"
+        const val INVOKE_METHOD_CANCEL_MOVIE_EPISODE = "cancelMovieEpisode"
 
         const val METHOD_CHANNEL_OPEN_MOVIE = "com.example.method_chanel/openMovie"
         const val METHOD_CHANNEL_WIDGET_PROVIDER = "com.example.method_chanel/widgetProvider"

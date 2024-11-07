@@ -5,8 +5,6 @@ import 'dart:io';
 import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/animated_scroll_view.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/contants/app_constants.dart';
 import 'package:spotify/feature/commons/list_animation.dart';
@@ -21,14 +19,18 @@ import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/data/repositories/file_repo.dart';
 import 'package:spotify/feature/data/repositories/file_repo_impl.dart';
 import 'package:spotify/feature/data/repositories/local_db_download_repo_impl.dart';
-import 'package:spotify/feature/presentation/blocs/download/download_state.dart';
+import 'package:spotify/feature/data/repositories/movie_repo_factory.dart';
+import 'package:spotify/feature/blocs/download/download_state.dart';
 import 'package:spotify/feature/presentation/screen/download/widget/movie_download_item.dart';
 
+export 'download_state.dart';
+
 class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieLocal>{
+  MovieRepoFactory movieRepoFactory;
   LocalDbDownloadRepoImpl dbRepository;
   FileRepoImpl fileRepository;
 
-  DownloadCubit({required this.dbRepository, required this.fileRepository})
+  DownloadCubit({required this.movieRepoFactory, required this.dbRepository, required this.fileRepository})
       : super(DownloadState()){
     keyListAnimation = GlobalKey();
   }
@@ -56,11 +58,14 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
       emit(state.copyWith(moviesDownloading: moviesDownloading));
 
       for (var episodeDownload in state.moviesDownloading) {
-        if(episodeDownload.movieId?.isNotEmpty == true && !movies.containsKey(episodeDownload.movieId)){
-          movies[episodeDownload.movieId!] = MovieLocal.fromMovieStatusDownload(episodeDownload);
+        var movieLocal = MovieLocal.fromMovieStatusDownload(episodeDownload);
+        var keyMovie = state.getKeyMapEntryMovies(movieLocal);
+
+        if(episodeDownload.movieId?.isNotEmpty == true && !movies.containsKey(keyMovie)){
+          movies[keyMovie] = movieLocal;
         }
 
-        MovieLocal? movie = movies[episodeDownload.movieId ?? ""];
+        MovieLocal? movie = movies[keyMovie];
         movie?.episodesDownload ??= {};
 
         var movieEpisodeDownload = EpisodeDownload.fromWhenDownload(episodeDownload);
@@ -114,6 +119,7 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
 
     if(movie?.slug?.isNotEmpty != true
       || episode?.slug?.isNotEmpty != true){
+      printData("Không tìm tên, tập phim để lưu vào local");
       return const MapEntry(false, "Không tìm tên, tập phim để lưu vào local");
     }
 
@@ -122,24 +128,25 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
         episodeName: episode!.slug!
     );
 
+    /// fetch movie to get url episode (case item download re download)
+    if(episode.linkM3u8 == null){
+      var movieInfo = await movieRepoFactory.getMovieRepository(movie.serverType)
+          .getInfoMovie(slugMovie: movie.slug!);
+      episode.linkM3u8 = movieInfo.data?.servers?.firstOrNull?.episodes?.firstWhereOrNull((Episode episode){
+        return episode.slug == episode.slug!;
+      })?.linkM3u8;
+    }
+
     if(localPath == null){
+      printData("Chức năng download chỉ hỗ trợ android");
       return const MapEntry(false, "Chức năng download chỉ hỗ trợ android");
     }else if(episode.linkM3u8 == null){
+      printData("Không tìm thấy đường dẫn tải phim");
       return const MapEntry(false, "Không tìm thấy đường dẫn tải phim");
     }
 
-    var movieRequestDownload = MovieStatusDownload(
-      id: EpisodeDownload.getSetupId(movieId: movie.sId ?? "", slug: episode.slug ?? ""),
-      slug: episode.slug,
-      name: episode.name,
-      movieId: movie.sId,
-      movieName: "${movie.name} - ${episode.name}",
-      movieSlug: movie.slug,
-      url: "https://flipfit-cdn.akamaized.net/flip_hls/661f570aab9d840019942b80-473e0b/video_h1.m3u8",
-      // url: episode.linkM3u8,
-      localPath: localPath,
-      serverType: movie.serverType
-    );
+    var movieRequestDownload = MovieStatusDownload
+        .fromMovieEpisode(movie: movie, episode: episode, localPath: localPath);
 
     const MethodChannel(AppConstants.methodChanelDownload)
         .invokeMethod(AppConstants.downloadStartDownload, jsonEncode(movieRequestDownload.toJson()));
@@ -147,8 +154,10 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
     Map<String, MovieLocal> movies = Map.from(state.movies);
     int listLength = movies.length;
 
-    if(movieRequestDownload.movieId?.isNotEmpty == true && !movies.containsKey(movieRequestDownload.movieId)){
-      movies[movieRequestDownload.movieId!] = MovieLocal.fromMovieInfo(movie);
+    var movieLocal = MovieLocal.fromMovieInfo(movie);
+    var movieLocalKeyMap = state.getKeyMapEntryMovies(movieLocal);
+    if(movieRequestDownload.movieId?.isNotEmpty == true && !movies.containsKey(movieLocalKeyMap)){
+      movies[movieLocalKeyMap] = movieLocal;
 
       /// insert item state to list animation widget
       insertAnimationList(keyList: keyListAnimation, fromIndex: listLength, toIndex: movies.length);
@@ -162,13 +171,18 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
     return const MapEntry(true, "");
   }
 
-  stopDownloadEpisode({
+  Future<void> stopDownloadEpisode({
     required MovieInfo movie,
     required Episode episode
-  }) {
-    const MethodChannel(AppConstants.downloadStartDownload)
-        .invokeMethod(AppConstants.downloadStopDownload);
+  }) async{
+    printData("stopDownloadEpisode ${movie.name} ${episode.name}");
+    var movieRequestDownload = MovieStatusDownload
+        .fromMovieEpisode(movie: movie, episode: episode, localPath: "");
+    await const MethodChannel(AppConstants.methodChanelDownload)
+        .invokeMethod(AppConstants.downloadCancelMovieDownload, jsonEncode(movieRequestDownload.toJson()));
   }
+
+
 
   getMoviesDownload({bool? isRefresh}) async{
     if(isRefresh == true){
@@ -177,7 +191,7 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
 
     List<MovieLocal> listData = await dbRepository.getMovieDownload();
     Map<String, MovieLocal> movieDownloaded = Map.fromEntries(listData.map((item) {
-      return MapEntry(item.movieId ?? "", item);
+      return MapEntry(state.getKeyMapEntryMovies(item), item);
     }));
 
     emit(state.copyWith(movies: movieDownloaded));
@@ -205,15 +219,15 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
     ));
   }
 
-  Future<bool> deleteMovieDownload(MovieLocal movieHistory, [List<EpisodeDownload>? episodes]) async{
+  Future<bool> deleteMovieDownload({required MovieLocal movieDelete, List<EpisodeDownload>? episodes}) async{
     Map<String, MovieLocal> moviesState = Map.from(state.movies);
 
-    String? movieIdSlug  = movieHistory.slug;
-    String? movieId  = movieHistory.movieId;
+    String? movieIdSlug  = movieDelete.slug;
+    String? movieId  = movieDelete.movieId;
     if(movieId?.isNotEmpty != true || movieIdSlug?.isNotEmpty != true) return false;
 
     /// list episode must is movie, if list is null means remove all
-    List<EpisodeDownload> episodesDeleteFilter = episodes?.where((e) => e.movieId == movieId).toList() ?? movieHistory.episodesDownload?.values.toList() ?? [];
+    List<EpisodeDownload> episodesDeleteFilter = episodes?.where((e) => e.movieId == movieId).toList() ?? movieDelete.episodesDownload?.values.toList() ?? [];
     bool isRemoveMovie;
 
     /// delete episode db
@@ -248,7 +262,7 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
     if(isRemoveMovieDbSuccess){
       /// delete list animation
       MovieLocal? movieDelete = moviesState.values.toList().firstWhereOrNull((element) => element.movieId == movieId);
-      int position = movieDelete!= null ?  moviesState.values.toList().indexOf(movieDelete) : -1;
+      int position = movieDelete != null ?  moviesState.values.toList().indexOf(movieDelete) : -1;
       if(position != -1){
         removeAnimationList(keyList: keyListAnimation, removeWhere: position, data: movieDelete);
       }
@@ -274,12 +288,11 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
 
   Future<void> syncMovieDownloading() async{
     showToast("Đang đồng bộ download");
-    /// delay for service download emit process the movie downloading
     listenEventFromService();
-    await Future.delayed(const Duration(milliseconds: 1000));
+    await Future.delayed(const Duration(milliseconds: 1000));    /// delay for service download emit the process movie downloading
+
     Map<String, MovieStatusDownload> movieDownloading = Map.fromEntries(state.moviesDownloading.map(
             (e) => MapEntry(e.id ?? "", e)));
-
 
     List<MovieLocal> listData = await dbRepository.getMovieDownload();
     Map<String, MovieLocal> moviesDownloaded = Map.fromEntries(listData.map((item) {
@@ -311,7 +324,6 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
             : false;
         episode.status = validFile ? StatusDownload.SUCCESS : StatusDownload.ERROR;
         await dbRepository.addEpisodeToDownload(episode);
-
       }else if(message is bool && message == true){
         receivePort.close();
         isolate.kill();
@@ -407,4 +419,5 @@ class DownloadCubit extends Cubit<DownloadState> implements ListAnimation<MovieL
       );
     }
   }
+
 }
