@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_slide_show/image_slide_show.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
-import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 import 'package:spotify/feature/presentation/screen/widget/read_more_widget.dart';
 
@@ -20,7 +22,9 @@ class _DescriptionMovieWidgetState extends State<DescriptionMovieWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 15,),
+        const SizedBox(
+          height: 15,
+        ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -28,93 +32,93 @@ class _DescriptionMovieWidgetState extends State<DescriptionMovieWidget> {
                 flex: 2,
                 child: BlocBuilder<MovieBloc, MovieState>(
                     buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
-                    builder: (context, state){
-                      return ImageWidget(
-                        url: state.currentMovie?.posterUrl ?? "",
-                        fit: BoxFit.cover,
+                    builder: (context, state) {
+                      return ImageSlideWidget(
+                        child: ImageWidget(
+                          url: state.currentMovie?.posterUrl ?? "",
+                          fit: BoxFit.cover,
+                        ),
                       );
-                    }
-                )
+                    })),
+            const SizedBox(
+              width: 8,
             ),
-            const SizedBox(width: 8,),
             Expanded(
               flex: 3,
               child: BlocBuilder<MovieBloc, MovieState>(
                   buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
-                  builder: (context, state){
+                  builder: (context, state) {
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         RichText(
-                          text: TextSpan(
-                              children: [
-                                TextSpan(text: "Category: ",
-                                    style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                ),
-                                TextSpan(text: state.currentMovie?.categories?.map((category) => category.name).toList().join(", ") ?? " _ _ ",
-                                    style: Style.body
-                                ),
-                              ]
-                          ),
+                          text: TextSpan(children: [
+                            TextSpan(text: "Category: ", style: Style.body.copyWith(fontWeight: FontWeight.w700)),
+                            TextSpan(
+                                text: state.currentMovie?.categories
+                                        ?.map((category) => category.name)
+                                        .toList()
+                                        .join(", ") ??
+                                    " _ _ ",
+                                style: Style.body),
+                          ]),
                         ),
-                        const SizedBox(height: 5,),
-                        RichText(
-                          text: TextSpan(
-                              children: [
-                                TextSpan(text: "Country: ",
-                                    style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                ),
-                                TextSpan(text: state.currentMovie?.countries?.map((country) => country.name).toList().join(", ") ?? " _ _ ",
-                                    style: Style.body
-                                ),
-                              ]
-                          ),
+                        const SizedBox(
+                          height: 5,
                         ),
-                        const SizedBox(height: 5,),
                         RichText(
-                          text: TextSpan(
-                              children: [
-                                TextSpan(text: "Actor: ",
-                                    style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                ),
-                                TextSpan(text: state.currentMovie?.actor?.join(", ") ?? " _ _ ",
-                                    style: Style.body
-                                ),
-                              ]
-                          ),
+                          text: TextSpan(children: [
+                            TextSpan(text: "Country: ", style: Style.body.copyWith(fontWeight: FontWeight.w700)),
+                            TextSpan(
+                                text:
+                                    state.currentMovie?.countries?.map((country) => country.name).toList().join(", ") ??
+                                        " _ _ ",
+                                style: Style.body),
+                          ]),
                         ),
-                        const SizedBox(height: 5,),
+                        const SizedBox(
+                          height: 5,
+                        ),
                         RichText(
-                          text: TextSpan(
-                              children: [
-                                TextSpan(text: "Director: ",
-                                    style: Style.body.copyWith(fontWeight: FontWeight.w700)
-                                ),
-                                TextSpan(text: state.currentMovie?.director?.join(", ") ?? " _ _ ",
-                                    style: Style.body
-                                ),
-                              ]
-                          ),
+                          text: TextSpan(children: [
+                            TextSpan(text: "Actor: ", style: Style.body.copyWith(fontWeight: FontWeight.w700)),
+                            TextSpan(text: state.currentMovie?.actor?.join(", ") ?? " _ _ ", style: Style.body),
+                          ]),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        RichText(
+                          text: TextSpan(children: [
+                            TextSpan(text: "Director: ", style: Style.body.copyWith(fontWeight: FontWeight.w700)),
+                            TextSpan(text: state.currentMovie?.director?.join(", ") ?? " _ _ ", style: Style.body),
+                          ]),
                         ),
                       ],
                     );
-                  }
-              ),
+                  }),
             ),
-          ],),
-        const SizedBox(height: 5,),
+          ],
+        ),
+        const SizedBox(
+          height: 5,
+        ),
         BlocBuilder<MovieBloc, MovieState>(
             buildWhen: (previous, current) => previous.currentMovie != current.currentMovie,
-            builder: (context, state){
-              if(state.movie.data?.content == null){
-                return const SizedBox(height: 5,);
+            builder: (context, state) {
+              if (state.movie.data?.content == null) {
+                return const SizedBox(
+                  height: 5,
+                );
               }
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 5,),
+                  const SizedBox(
+                    height: 5,
+                  ),
                   Text("Mô tả", style: Style.body.copyWith(fontWeight: FontWeight.w700)),
                   ReadMoreText(
                     "${state.currentMovie?.content ?? " _ _ "}  ",
@@ -123,9 +127,10 @@ class _DescriptionMovieWidgetState extends State<DescriptionMovieWidget> {
                   )
                 ],
               );
-            }
+            }),
+        const SizedBox(
+          height: 20,
         ),
-        const SizedBox(height: 20,),
       ],
     );
   }

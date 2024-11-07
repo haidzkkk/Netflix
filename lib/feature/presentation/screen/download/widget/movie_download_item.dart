@@ -9,8 +9,9 @@ import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/entity/episode_download.dart';
 import 'package:spotify/feature/data/models/entity/movie_local.dart';
 import 'package:spotify/feature/data/models/entity/movie_status_download.dart';
-import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
-import 'package:spotify/feature/presentation/blocs/download/download_state.dart';
+import 'package:spotify/feature/blocs/download/download_cubit.dart';
+import 'package:spotify/feature/blocs/download/download_state.dart';
+import 'package:spotify/feature/presentation/screen/download/widget/movie_download_manager_widget.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/chip_banner.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/chip_text.dart';
 import 'package:spotify/feature/presentation/screen/widget/custom_bottom.dart';
@@ -131,7 +132,7 @@ class _MovieDownloadItemState extends State<MovieDownloadItem> {
                                         children: [
                                           Icon(Icons.delete_outline_outlined, color: Colors.black,),
                                           SizedBox(width: 5,),
-                                          Text("Xóa", style: TextStyle(color: Colors.black),)
+                                          Text("Quản lý tải xuống", style: TextStyle(color: Colors.black),)
                                         ],
                                       ),
                                       onTap: () {
@@ -182,25 +183,9 @@ class _MovieDownloadItemState extends State<MovieDownloadItem> {
                                 ));
                                 break;
                               }
-                              var downloadStr = "";
-                              if(item.executeProcess != null
-                                  && item.status == StatusDownload.LOADING
-                                  && item.executeProcess! < 100
-                                  && item.executeProcess! >= 0
-                              ){
-                                downloadStr = " (${item.executeProcess}%)";
-                              }else if(item.executeProcess != null
-                                  && item.status == StatusDownload.INITIALIZATION
-                              ){
-                                downloadStr = " (Chờ)";
-                              }else if(item.status == StatusDownload.ERROR
-                              ){
-                                downloadStr = " (Lỗi)";
-                              }
-
                               items.add(Padding(
                                 padding: const EdgeInsetsDirectional.all(4),
-                                child: ChipText(child: Text("${item.name}$downloadStr")),
+                                child: ChipText(child: Text("${item.name} ${item.getStatus()}")),
                               ));
                             }
 
@@ -223,75 +208,7 @@ class _MovieDownloadItemState extends State<MovieDownloadItem> {
 
   selectEpisode() async{
     await context.showBottomSheet(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  TextButton(
-                    onPressed: (){
-                      viewModel.selectDeleteEpisodeDownload(
-                        {
-                          for (var element in widget.movieLocal.episodesDownload?.values ?? [])
-                            element as EpisodeDownload : true
-                        },
-                        refresh: true
-                      );
-                    },
-                    child: Text("Chọn tất cả", style: Style.title2,),
-                  ),
-                  BlocBuilder<DownloadCubit, DownloadState>(
-                    buildWhen: (previous, current) => previous.episodeDeleteSelect != current.episodeDeleteSelect,
-                    builder: (context, state) {
-                      bool isSelect = state.episodeDeleteSelect.isNotEmpty;
-                      return TextButton(
-                        onPressed: isSelect ? (){
-                          viewModel.deleteMovieDownload(
-                              widget.movieLocal,
-                              state.episodeDeleteSelect.values.toList()
-                          );
-                          context.back();
-                        } : null,
-                        child: Text("Xóa", style: Style.title2.copyWith(color: isSelect ? Colors.red : Colors.grey, fontWeight: FontWeight.bold),),
-                      );
-                    }
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10,),
-              BlocBuilder<DownloadCubit, DownloadState>(
-                  buildWhen: (previous, current) => previous.episodeDeleteSelect != current.episodeDeleteSelect,
-                builder: (context, state) {
-                  return Wrap(
-                    children: widget.movieLocal.episodesDownload?.values.map((episode){
-                      bool isSelect = state.episodeDeleteSelect[episode.id] != null;
-
-                      return GestureDetector(
-                        onTap: (){
-                          viewModel.selectDeleteEpisodeDownload({episode: !isSelect});
-                        },
-                        child: ChipBanner(
-                          margin: const EdgeInsetsDirectional.all(4),
-                          padding: const EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4),
-                          colors: [
-                            isSelect ? Colors.red.withOpacity(0.5) : Colors.white12
-                          ],
-                          child: Text("${episode.name}", style: Style.body,),
-                        ),
-                      );
-                    }).toList() ?? [],
-                  );
-                }
-              ),
-              const SizedBox(height: 10,),
-            ],
-          ),
-        )
+        child: MovieDownloadManagerWidget(movieLocal: widget.movieLocal,)
     );
     viewModel.selectDeleteEpisodeDownload({}, refresh: true);
   }

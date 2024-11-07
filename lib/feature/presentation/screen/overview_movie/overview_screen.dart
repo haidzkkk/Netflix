@@ -2,24 +2,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:spotify/feature/blocs/home/home_bloc.dart';
+import 'package:spotify/feature/blocs/home/home_state.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
+import 'package:spotify/feature/commons/utility/style_util.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
 import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/data/models/status.dart';
-import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/widget/action_button.dart';
+import 'package:spotify/feature/presentation/screen/home_screen/widget/movie_item.dart';
+import 'package:spotify/feature/presentation/screen/home_screen/widget/title_widget.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/chip_text.dart';
 import 'package:spotify/feature/presentation/screen/widget/custom_bottom.dart';
 import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 import 'package:spotify/feature/presentation/screen/widget/read_more_widget.dart';
 import 'package:spotify/feature/presentation/screen/widget/trailer_widget.dart';
-
-import '../../../commons/utility/style_util.dart';
-import '../../../data/api/kk_request/category_movie.dart';
-import '../../blocs/home/home_bloc.dart';
-import '../../blocs/home/home_state.dart';
-import '../home_screen/widget/movie_item.dart';
-import '../home_screen/widget/title_widget.dart';
 
 class OverViewScreen extends StatefulWidget {
   const OverViewScreen({super.key, required this.movie, required this.draggableScrollController});

@@ -6,33 +6,45 @@ class ServerData {
   static const String SERVER_NAME_LOCAL = "Local";
 
   String? serverName;
-  List<Episode>? episode;
+  List<Episode>? episodes;
 
-  ServerData({this.serverName, this.episode});
+  ServerData({this.serverName, this.episodes}){
 
-  ServerData.fromJson(Map<String, dynamic> json) {
-    serverName = json['server_name'];
-    if (json['server_data'] != null) {
-      episode = <Episode>[];
-      json['server_data'].forEach((v) {
-        episode!.add(Episode.fromJson(v));
-      });
-    }
+    sortEpisode();
   }
 
-  ServerData.fromEpisodeLocal(Map<String, EpisodeDownload>? episodesDownload) {
-    serverName = SERVER_NAME_LOCAL;
-    episode = episodesDownload?.values.toList().map((episodeDownload){
-      return episodeDownload.toEpisode()..episodesDownload = episodeDownload;
-    }).toList();
+  factory ServerData.fromJson(Map<String, dynamic> json) {
+    return ServerData(
+      serverName: json['server_name'],
+      episodes: json['server_data']?.map((v) {
+        return Episode.fromJson(v);
+      }).toList,
+    );
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['server_name'] = serverName;
-    if (episode != null) {
-      data['server_data'] = episode!.map((v) => v.toJson()).toList();
-    }
-    return data;
+  factory ServerData.fromEpisodeLocal(Map<String, EpisodeDownload>? episodesDownload) {
+    return ServerData(
+      serverName: SERVER_NAME_LOCAL,
+      episodes: episodesDownload?.values.toList().map((episodeDownload){
+        return episodeDownload.toEpisode()..episodesDownload = episodeDownload;
+      }).toList(),
+    );
+  }
+
+  void sortEpisode(){
+    // List<Episode> data = episodes ?? [];
+    // for(int i = 1; i < data.length; i++){
+    //   Episode key = data[i];
+    //   int j = i - 1;
+    //
+    //   while(j >= 0 && int.parse(data[j].getNumberName()) > int.parse(key.getNumberName())){
+    //     data[j + 1] = data[j];
+    //     j--;
+    //   }
+    //   data[j + 1] = key;
+    // }
+    episodes?.sort((a, b) {
+      return (int.tryParse(a.getNumberName()) ?? 0).compareTo(int.tryParse(b.getNumberName()) ?? 0);
+    },);
   }
 }

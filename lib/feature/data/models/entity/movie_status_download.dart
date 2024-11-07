@@ -1,4 +1,7 @@
 import 'package:spotify/feature/data/api/server_type.dart';
+import 'package:spotify/feature/data/models/entity/episode_download.dart';
+import 'package:spotify/feature/data/models/episode.dart';
+import 'package:spotify/feature/data/models/movie_info.dart';
 
 class MovieStatusDownload {
   String? id;
@@ -25,14 +28,34 @@ class MovieStatusDownload {
         this.movieName,
         this.movieSlug,
         this.slug,
-        this.id,
         this.status,
         this.totalSecondTime,
         this.url,
         required this.serverType,
-      });
+      }){
+    id = EpisodeDownload.getSetupId(movieId: movieId ?? "", slug: slug ?? "");
+  }
+
+  factory MovieStatusDownload.fromMovieEpisode({
+    required MovieInfo movie,
+    required Episode episode,
+    required String localPath,
+}) {
+    return MovieStatusDownload(
+        slug: episode.slug,
+        name: episode.name,
+        movieId: movie.sId,
+        movieName: "${movie.name} - ${episode.name}",
+        movieSlug: movie.slug,
+        // url: "https://flipfit-cdn.akamaized.net/flip_hls/661f570aab9d840019942b80-473e0b/video_h1.m3u8",
+        url: episode.linkM3u8,
+        localPath: localPath,
+        serverType: movie.serverType
+    );
+  }
 
   MovieStatusDownload.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
     currentSecondTime = json['currentSecondTime'];
     executeProcess = json['executeProcess'];
     localPath = json['localPath'];
@@ -41,7 +64,6 @@ class MovieStatusDownload {
     movieName = json['movieName'];
     movieSlug = json['movieSlug'];
     slug = json['slug'];
-    id = json['id'];
     status = json['status'] != null ? StatusDownload.fromJson(json['status']) : null;
     totalSecondTime = json['totalSecondTime'];
     url = json['url'];
@@ -74,6 +96,7 @@ class StatusDownload {
   static const String SUCCESS = "SUCCESS";
   static const String ERROR = "ERROR";
   static const String LOADING = "LOADING";
+  static const String CANCEL = "CANCEL";
 
   String? data;
   String? status;

@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
+import 'package:spotify/feature/commons/utility/style_util.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/widget/action_button.dart';
-
-import '../../../../gen/assets.gen.dart';
-import '../../../commons/utility/style_util.dart';
-import '../overview_movie/overview_screen.dart';
-import '../widget/custom_bottom.dart';
-import '../widget/trailer_widget.dart';
+import 'package:spotify/feature/presentation/screen/widget/custom_bottom.dart';
+import 'package:spotify/feature/presentation/screen/widget/trailer_widget.dart';
+import 'package:spotify/gen/assets.gen.dart';
 
 class HeaderWidget extends StatefulWidget {
   const HeaderWidget({super.key, required this.movie});

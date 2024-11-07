@@ -4,7 +4,7 @@ import 'package:spotify/feature/data/models/data.dart';
 import 'package:spotify/feature/data/models/movie_info.dart';
 
 abstract class MovieRepoImpl{
-  Future<Data<List<MovieInfo>>> getMovieCategory({
+  Future<Data<List<MovieInfo>>> getMovies({
     required CategoryMovie category,
     required int pageIndex
   });

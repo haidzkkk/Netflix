@@ -5,9 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/feature/commons/utility/date_converter.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
-import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_state.dart';
+import 'package:spotify/feature/blocs/download/download_cubit.dart';
+import 'package:spotify/feature/blocs/setting/setting_cubit.dart';
+import 'package:spotify/feature/blocs/setting/setting_state.dart';
 import 'package:spotify/feature/presentation/screen/setting/widget/icon_setting.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 

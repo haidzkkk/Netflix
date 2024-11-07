@@ -12,8 +12,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:spotify/feature/commons/utility/color_resource.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
 import 'package:spotify/feature/data/models/movie_info.dart';
-import 'package:spotify/feature/presentation/blocs/home/home_bloc.dart';
-import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/blocs/home/home_bloc.dart';
+import 'package:spotify/feature/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/overview_screen.dart';
 
 void showToast(String content){

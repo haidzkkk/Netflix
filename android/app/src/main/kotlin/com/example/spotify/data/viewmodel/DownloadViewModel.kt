@@ -10,6 +10,7 @@ import com.arthenica.mobileffmpeg.FFmpeg
 import com.example.spotify.AppConstants
 import com.example.spotify.data.model.MovieEpisode
 import com.example.spotify.data.model.Status
+import com.example.spotify.data.model.StatusEnum
 import com.google.gson.Gson
 import java.util.*
 import kotlin.collections.ArrayList
@@ -24,22 +25,46 @@ class DownloadViewModel(private val listener: IEventListener) {
     private val moviesWaiting: Queue<MovieEpisode> = LinkedList()
     private var currentMovie: MovieEpisode? = null
 
-    fun setData(applicationContext: Context, movie: MovieEpisode){
-        calculateTimeDownloadMovie(applicationContext, movie)
-        moviesWaiting.add(movie)
+    init {
+        listenDownloadExecuteProcess()
+    }
+
+    fun addData(applicationContext: Context, movie: MovieEpisode){
+        if(currentMovie?.id == movie.id) return
+
+        val movieWaiting: MovieEpisode? = moviesWaiting.firstOrNull { it.id == movie.id }
+        if(movieWaiting == null){
+            movie.totalSecondTime = getTotalTimeUrlMovie(applicationContext, movie.url)
+            moviesWaiting.add(movie)
+        }else if(movieWaiting.status.status != StatusEnum.INITIALIZATION){
+            movieWaiting.status = Status.Initialization()
+        }
+
         if(currentMovie != null) return     /// if downloading -> return
 
         startDownload()
     }
 
-    init {
-        listenDownloadExecuteProcess()
+    fun cancelDownload(movie: MovieEpisode){
+        Log.e("cancelDownload", "${movie.id}")
+        if(movie.id == currentMovie?.id){
+            FFmpeg.cancel()
+        }else{
+            moviesWaiting.forEach {
+                if(it.id == movie.id){
+                    it.status = Status.Cancel("Download has cancel", "")
+                }
+            }
+        }
     }
 
     private fun startDownload(){
         currentMovie = moviesWaiting.poll()
         if(currentMovie == null) {
             listener.onDownloaded()
+            return
+        }else if(currentMovie?.status?.status !=  StatusEnum.INITIALIZATION){
+            startDownload()
             return
         }
 
@@ -56,7 +81,7 @@ class DownloadViewModel(private val listener: IEventListener) {
                 Config.RETURN_CODE_CANCEL -> {
                     listener.onDownload(
                         currentMovie!!.apply {
-                            status = Status.Error("Download canceled", "")
+                            status = Status.Cancel("Download canceled", "")
                         })
                 }
                 else -> {
@@ -70,14 +95,14 @@ class DownloadViewModel(private val listener: IEventListener) {
         }
     }
 
-    private fun calculateTimeDownloadMovie(applicationContext: Context, movieEpisode: MovieEpisode){
-        val url = movieEpisode.url
+    private fun getTotalTimeUrlMovie(applicationContext: Context, url: String?): Int{
         if (url.isNullOrEmpty()) {
-            return
+            return 0
         }
         val mediaPlayer: MediaPlayer = MediaPlayer.create(applicationContext, Uri.parse(url))
-        movieEpisode.totalSecondTime = mediaPlayer.duration
+        val totalTime = mediaPlayer.duration
         mediaPlayer.release()
+        return totalTime
     }
 
     private fun listenDownloadExecuteProcess(){

@@ -5,7 +5,7 @@ import 'package:spotify/feature/commons/list_animation.dart';
 import 'package:spotify/feature/data/models/entity/movie_local.dart';
 import 'package:spotify/feature/data/repositories/local_db_history_repo_impl.dart';
 import 'package:spotify/feature/data/repositories/local_db_repository.dart';
-import 'package:spotify/feature/presentation/blocs/watched/watched_state.dart';
+import 'package:spotify/feature/blocs/watched/watched_state.dart';
 import 'package:spotify/feature/presentation/screen/watched/widget/watched_item.dart';
 
 class WatchedCubit extends Cubit<WatchedState> implements ListAnimation<MovieLocal>{

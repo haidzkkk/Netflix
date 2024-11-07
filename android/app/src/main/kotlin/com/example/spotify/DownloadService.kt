@@ -43,12 +43,17 @@ class DownloadService : Service() {
                             message = currentMovieEpisode.movieName ?: ""
                         )
                     }
+                    StatusEnum.CANCEL -> {
+                        showNotify(
+                            title = currentMovieEpisode.status.data ?: "",
+                            message = currentMovieEpisode.movieName ?: ""
+                        )
+                    }
                     else -> {
                         showNotifyForeground()
                     }
                 }
             }
-
             override fun onDownloaded() {
                 stopSelf()
             }
@@ -61,8 +66,18 @@ class DownloadService : Service() {
         val data = intent?.getSerializableExtra(AppConstants.DOWNLOAD_SERVICE_DATA)
         val movieEpisode: MovieEpisode? = if(data != null) (data as MovieEpisode?) else null
 
-        if(movieEpisode != null){
-            viewMode.setData(applicationContext, movieEpisode)
+        when(intent?.action){
+            AppConstants.INVOKE_METHOD_START_SERVICE -> {
+                if(movieEpisode != null){
+                    viewMode.addData(applicationContext, movieEpisode)
+                }
+            }
+            AppConstants.INVOKE_METHOD_CANCEL_MOVIE_EPISODE -> {
+                if(movieEpisode != null){
+                    viewMode.cancelDownload(movieEpisode)
+                }
+            }
+
         }
         return START_STICKY
     }

@@ -1,30 +1,26 @@
 import 'dart:async';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:spotify/feature/commons/utility/connect_util.dart';
+import 'package:spotify/feature/blocs/home/home_bloc.dart';
+import 'package:spotify/feature/blocs/home/home_event.dart';
+import 'package:spotify/feature/blocs/home/home_state.dart';
+import 'package:spotify/feature/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/movie_info.dart';
-import 'package:spotify/feature/presentation/blocs/download/download_cubit.dart';
-import 'package:spotify/feature/presentation/blocs/download/download_state.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_state.dart';
+import 'package:spotify/feature/blocs/download/download_cubit.dart';
+import 'package:spotify/feature/blocs/setting/setting_cubit.dart';
+import 'package:spotify/feature/blocs/setting/setting_state.dart';
 import 'package:spotify/feature/presentation/screen/download/download_screen.dart';
 import 'package:spotify/feature/presentation/screen/home_screen/home_screen.dart';
 import 'package:spotify/feature/presentation/screen/main/widget/item_bottom_bar.dart';
-import 'package:spotify/feature/presentation/screen/overview_movie/overview_screen.dart';
+import 'package:spotify/feature/presentation/screen/search/filter_screen.dart';
 import 'package:spotify/feature/presentation/screen/setting/more_screen.dart';
 import 'package:spotify/feature/presentation/screen/movie/movie_screen.dart';
 import 'package:spotify/feature/presentation/screen/watched/watched_screen.dart';
-import '../../blocs/home/home_bloc.dart';
-import '../../blocs/home/home_event.dart';
-import '../../blocs/home/home_state.dart';
-import '../../blocs/movie/movie_bloc.dart';
-import '../search/filter_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:spotify/context_service.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
+import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
 import 'package:spotify/feature/data/models/data.dart';
 import 'package:spotify/feature/data/models/movie_info.dart';
+import 'package:spotify/feature/data/models/status.dart';
 import 'package:spotify/feature/data/repositories/movie_repo_factory.dart';
 import 'package:spotify/feature/di/injection_container.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
-import '../../../data/api/kk_request/category_movie.dart';
-import '../../../data/models/status.dart';
+import 'package:spotify/feature/blocs/setting/setting_cubit.dart';
 part 'search_event.dart';
 part 'search_state.dart';
 
@@ -64,7 +64,7 @@ class SearchBloc extends Cubit<SearchState> {
       searchMovie: Status.loading(data: listMovies)
     ));
 
-    var data = await movieRepoFactory.getMovieRepository(categoryMovie.serverType).getMovieCategory(
+    var data = await movieRepoFactory.getMovieRepository(categoryMovie.serverType).getMovies(
         category: categoryMovie,
         pageIndex: pageIndex + 1
     );

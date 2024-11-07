@@ -5,8 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
-
-import '../../../data/models/status.dart';
+import '../../data/models/status.dart';
 
 class SettingState extends Equatable{
   final GoogleSignInAccount? currentAccount;

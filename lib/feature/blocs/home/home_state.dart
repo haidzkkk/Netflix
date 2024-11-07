@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:spotify/feature/data/api/kk_request/category_movie.dart';
 import 'package:spotify/feature/data/models/movie_info.dart';
-import '../../../data/api/kk_request/category_movie.dart';
 
 class HomeState extends Equatable {
   final int currentPageIndex;

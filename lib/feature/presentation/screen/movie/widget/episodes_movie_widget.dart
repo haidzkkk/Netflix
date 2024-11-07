@@ -5,7 +5,7 @@ import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/style_util.dart';
 import 'package:spotify/feature/data/models/entity/movie_status_download.dart';
 import 'package:spotify/feature/data/models/server_data.dart';
-import 'package:spotify/feature/presentation/blocs/movie/movie_bloc.dart';
+import 'package:spotify/feature/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/presentation/screen/overview_movie/widget/chip_banner.dart';
 
 class EpisodesMovieWidget extends StatefulWidget {
@@ -70,7 +70,7 @@ class _EpisodesMovieWidgetState extends State<EpisodesMovieWidget> {
             ),
             Wrap(
               children: state.currentMovie?.servers?.isNotEmpty == true
-                  ? state.currentMovie!.servers![serverIndex].episode!.map((episode){
+                  ? state.currentMovie!.servers![serverIndex].episodes!.map((episode){
 
                 bool isSelect = episode.slug == state.currentEpisode?.slug;
                 bool watched = episode.episodeWatched != null;
@@ -105,7 +105,7 @@ class _EpisodesMovieWidgetState extends State<EpisodesMovieWidget> {
                                 ? const [Colors.white12]
                                 : const [Colors.white38],
                             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-                            child: Text(episode.getName(), style: Style.body.copyWith(
+                            child: Text(episode.getNumberName(), style: Style.body.copyWith(
                               color: isSelect ? Colors.red : null,
                             ),)
                         ),

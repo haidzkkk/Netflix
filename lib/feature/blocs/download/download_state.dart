@@ -30,6 +30,10 @@ class DownloadState extends Equatable{
     );
   }
 
+  String getKeyMapEntryMovies(MovieLocal movie){
+    return movie.movieId ?? "";
+  }
+
   @override
   List<Object?> get props => [movies.hashCode, episodeDeleteSelect, moviesDownloading];
 

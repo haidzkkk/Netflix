@@ -8,7 +8,7 @@ import 'package:spotify/feature/commons/utility/date_converter.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/data/models/entity/movie_local.dart';
-import 'package:spotify/feature/presentation/blocs/watched/watched_cubit.dart';
+import 'package:spotify/feature/blocs/watched/watched_cubit.dart';
 import 'package:spotify/feature/presentation/screen/widget/image_widget.dart';
 
 import '../../../../commons/utility/style_util.dart';

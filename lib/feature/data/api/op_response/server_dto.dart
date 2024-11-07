@@ -36,7 +36,7 @@ class ServerDataDTO {
     }
     return ServerData(
       serverName: serverName,
-      episode: episode?.map((v) => v.toEpisode()).toList(),
+      episodes: episode?.map((v) => v.toEpisode()).toList(),
     );
   }
 }

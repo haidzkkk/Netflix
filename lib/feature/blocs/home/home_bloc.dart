@@ -12,7 +12,7 @@ import 'package:spotify/feature/data/models/movie_info.dart';
 import 'package:spotify/feature/data/repositories/movie_repo_factory.dart';
 import 'package:spotify/feature/data/repositories/movie_repo_impl.dart';
 import 'package:spotify/feature/di/injection_container.dart';
-import 'package:spotify/feature/presentation/blocs/setting/setting_cubit.dart';
+import 'package:spotify/feature/blocs/setting/setting_cubit.dart';
 import 'home_event.dart';
 import 'home_state.dart';
 
@@ -82,7 +82,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   Future<void> getMovieCategory(GetCategoryMovie event, Emitter<HomeState> emit) async{
-      var data = await movieRepoFactory.getMovieRepository(event.categoryMovie.serverType).getMovieCategory(
+      var data = await movieRepoFactory.getMovieRepository(event.categoryMovie.serverType).getMovies(
           pageIndex: 1,
           category: event.categoryMovie
       );

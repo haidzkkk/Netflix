@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:spotify/feature/blocs/movie/movie_bloc.dart';
 import 'package:spotify/feature/commons/utility/pageutil.dart';
 import 'package:spotify/feature/commons/utility/size_extensions.dart';
+import 'package:spotify/feature/commons/utility/style_util.dart';
 import 'package:spotify/feature/commons/utility/utils.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/picture_in_picture_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/player_movie_widget.dart';
@@ -11,8 +13,6 @@ import 'package:spotify/feature/presentation/screen/movie/widget/background_movi
 import 'package:spotify/feature/presentation/screen/movie/widget/description_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/episodes_movie_widget.dart';
 import 'package:spotify/feature/presentation/screen/movie/widget/info_movie_widget.dart';
-import '../../../commons/utility/style_util.dart';
-import '../../blocs/movie/movie_bloc.dart';
 
 class MovieScreen extends StatefulWidget {
   const MovieScreen({super.key});
